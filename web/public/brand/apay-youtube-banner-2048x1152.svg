@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2048 1152" width="2048" height="1152">
+  <defs>
+    <!-- Background Ambient Radial Glow -->
+    <radialGradient id="tvGlow" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#0052FF" stop-opacity="0.22"/>
+      <stop offset="60%" stop-color="#0052FF" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#0052FF" stop-opacity="0"/>
+    </radialGradient>
+    
+    <!-- Safe Area Spotlight -->
+    <radialGradient id="centerSpot" cx="50%" cy="50%" r="40%">
+      <stop offset="0%" stop-color="#0E1428" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#07080B" stop-opacity="0"/>
+    </radialGradient>
+    
+    <linearGradient id="edgeFade" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#181E32" stop-opacity="0"/>
+      <stop offset="30%" stop-color="#181E32" stop-opacity="0.7"/>
+      <stop offset="70%" stop-color="#181E32" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#181E32" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Deep Obsidian TV Background -->
+  <rect width="2048" height="1152" fill="#07080B"/>
+  <rect width="2048" height="1152" fill="url(#tvGlow)"/>
+
+  <!-- TV Outer Grid Elements -->
+  <path d="M0,288 L2048,288 M0,864 L2048,864" stroke="#111420" stroke-width="1.5"/>
+  <path d="M512,0 L512,1152 M1536,0 L1536,1152" stroke="#111420" stroke-width="1.5"/>
+
+  <!-- Desktop Visible Strip Subtle Accent (y: 407 to 745) -->
+  <rect x="0" y="407" width="2048" height="338" fill="url(#centerSpot)"/>
+  <line x1="0" y1="407" x2="2048" y2="407" stroke="url(#edgeFade)" stroke-width="1.5"/>
+  <line x1="0" y1="745" x2="2048" y2="745" stroke="url(#edgeFade)" stroke-width="1.5"/>
+
+  <!-- ================= SAFE AREA CONTENT (x: 420 to 1628, y: 420 to 732) ================= -->
+  
+  <!-- Left Safe Zone: The Infinity Rail Emblem Container -->
+  <g transform="translate(570, 576) scale(0.68)">
+    <rect x="-230" y="-230" width="460" height="460" rx="104" fill="#0C0F1A" stroke="#1C2338" stroke-width="2.5"/>
+    <!-- The Infinity Rail A Symbol -->
+    <path d="M-115,130 L-25,-120 C-15,-150 15,-150 25,-120 L55,-35 L10,-35 L-6,-85 L-70,105 L-115,130 Z" fill="#0052FF"/>
+    <path d="M115,130 L25,-120 C18,-140 0,-140 -5,-125 L-25,-65 L20,-65 L60,50 L-40,50 C-60,50 -75,35 -75,15 C-75,-5 -60,-20 -40,-20 L-10,-20 L-2,-50 L-40,-50 C-75,-50 -105,-20 -105,15 C-105,50 -75,80 -40,80 L70,80 L85,130 Z" fill="#FFFFFF"/>
+  </g>
+
+  <!-- Right Safe Zone: Main Branding & Specs -->
+  <g transform="translate(740, 480)">
+    <!-- Top Pill Badges -->
+    <g transform="translate(0, 0)">
+      <rect x="0" y="0" width="170" height="30" rx="15" fill="#0C132B" stroke="#0052FF" stroke-width="1.5"/>
+      <circle cx="16" cy="15" r="5" fill="#0052FF"/>
+      <text x="28" y="19" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="700" fill="#0052FF" letter-spacing="1.5">BUILT ON BASE L2</text>
+      
+      <rect x="182" y="0" width="130" height="30" rx="15" fill="#0A171C" stroke="#00F0FF" stroke-width="1.5"/>
+      <text x="198" y="19" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="700" fill="#00F0FF" letter-spacing="1">HTTP 402 ENGINE</text>
+    </g>
+
+    <!-- Main Title -->
+    <text x="0" y="78" font-family="system-ui, -apple-system, sans-serif" font-size="56" font-weight="800" fill="#FFFFFF" letter-spacing="-2">A-Pay Protocol</text>
+
+    <!-- Subtitle -->
+    <text x="0" y="116" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="500" fill="#94A3B8">Autonomous Micropayment Layer for AI Agents</text>
+
+    <!-- Key Bullet Spec Row -->
+    <g transform="translate(0, 155)">
+      <text x="0" y="0" font-family="monospace" font-size="14" font-weight="600" fill="#38BDF8">⚡ Sub-15ms Settle</text>
+      <text x="180" y="0" font-family="monospace" font-size="14" font-weight="600" fill="#38BDF8">🤖 Native MCP</text>
+      <text x="320" y="0" font-family="monospace" font-size="14" font-weight="600" fill="#38BDF8">🔒 Non-Custodial</text>
+    </g>
+
+    <!-- Official Protocol Web Identity Footer -->
+    <text x="0" y="195" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#64748B">https://apayprotocol.org  •  apayprotocol.base.eth  •  github.com/apayprotocol</text>
+  </g>
+</svg>
