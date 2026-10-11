@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <radialGradient id="bgGlow" cx="25%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#0052FF" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#0052FF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#07080C"/>
+  <rect width="1200" height="630" fill="url(#bgGlow)"/>
+  
+  <!-- Subtle Grid Lines -->
+  <path d="M0,210 L1200,210 M0,420 L1200,420 M300,0 L300,630 M600,0 L600,630 M900,0 L900,630" stroke="#121624" stroke-width="1" opacity="0.6"/>
+  
+  <!-- Left Side: Big Tech Emblem -->
+  <g transform="translate(240, 315) scale(0.85)">
+    <rect x="-256" y="-256" width="512" height="512" rx="112" fill="#0D0F17" stroke="#1E2232" stroke-width="2"/>
+    <!-- Left Ascender -->
+    <path d="M-115,130 L-25,-120 C-15,-150 15,-150 25,-120 L55,-35 L10,-35 L-6,-85 L-70,105 L-115,130 Z" fill="#0052FF"/>
+    <!-- Right Descender & Loop -->
+    <path d="M115,130 L25,-120 C18,-140 0,-140 -5,-125 L-25,-65 L20,-65 L60,50 L-40,50 C-60,50 -75,35 -75,15 C-75,-5 -60,-20 -40,-20 L-10,-20 L-2,-50 L-40,-50 C-75,-50 -105,-20 -105,15 C-105,50 -75,80 -40,80 L70,80 L85,130 Z" fill="#FFFFFF"/>
+  </g>
+  
+  <!-- Right Side: Clean Modern Typography -->
+  <g transform="translate(520, 220)">
+    <!-- Network Badge -->
+    <rect x="0" y="0" width="180" height="36" rx="18" fill="#0E1428" stroke="#0052FF" stroke-width="1.5"/>
+    <circle cx="20" cy="18" r="6" fill="#0052FF"/>
+    <text x="34" y="23" font-family="system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="14" font-weight="600" fill="#0052FF" letter-spacing="1">BUILT ON BASE L2</text>
+    
+    <!-- Title -->
+    <text x="0" y="95" font-family="system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="64" font-weight="800" fill="#FFFFFF" letter-spacing="-1.5">A-Pay Protocol</text>
+    
+    <!-- Subtitle -->
+    <text x="0" y="150" font-family="system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="24" font-weight="500" fill="#94A3B8">Autonomous HTTP 402 Micropayment Engine</text>
+    
+    <!-- Badges / Features -->
+    <g transform="translate(0, 195)">
+      <text x="0" y="0" font-family="monospace" font-size="16" fill="#38BDF8">⚡ Sub-15ms Latency</text>
+      <text x="210" y="0" font-family="monospace" font-size="16" fill="#38BDF8">🤖 MCP Native</text>
+      <text x="360" y="0" font-family="monospace" font-size="16" fill="#38BDF8">🔒 Non-Custodial</text>
+    </g>
+    
+    <!-- Official Link -->
+    <text x="0" y="255" font-family="system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="18" font-weight="600" fill="#64748B">apayprotocol.org  •  apayprotocol.base.eth</text>
+  </g>
+</svg>
