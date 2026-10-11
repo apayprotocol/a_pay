@@ -1,0 +1,96 @@
+{
+  "serverInfo": {
+    "name": "A-Pay Protocol MCP Server",
+    "version": "0.1.6",
+    "description": "Universal Micropayment & Autonomous Economic Settlement Engine for AI Agents on Base L2."
+  },
+  "authentication": {
+    "required": false
+  },
+  "tools": [
+    {
+      "name": "apay_request",
+      "description": "Probe and automatically pay HTTP 402 crypto micropayments on Base Layer 2 with USDC or $APAY within pre-configured budget limits.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The target endpoint URL"
+          },
+          "method": {
+            "type": "string",
+            "enum": ["GET", "POST", "PUT", "DELETE"],
+            "default": "GET"
+          },
+          "json_body": {
+            "type": "object",
+            "description": "Optional JSON request body"
+          },
+          "headers": {
+            "type": "object",
+            "description": "Optional additional HTTP headers"
+          }
+        },
+        "required": ["url"]
+      }
+    },
+    {
+      "name": "apay_get_wallet_status",
+      "description": "Inspect the agent's active non-custodial wallet address, network, current spending guardrails, and total spent in USDC and $APAY.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "apay_set_budget",
+      "description": "Configure agent safety invariants and spending guardrails. Prevents runaway loops or overcharging.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "max_per_call_usdc": {
+            "type": "number",
+            "description": "Maximum USDC allowance for a single API call"
+          },
+          "daily_budget_usdc": {
+            "type": "number",
+            "description": "Maximum USDC rolling 24-hour spending budget"
+          },
+          "max_per_call_apay": {
+            "type": "number",
+            "description": "Maximum $APAY token allowance for a single API call"
+          },
+          "daily_budget_apay": {
+            "type": "number",
+            "description": "Maximum $APAY token rolling 24-hour spending budget"
+          }
+        }
+      }
+    },
+    {
+      "name": "apay_inspect_endpoint",
+      "description": "Inspect an endpoint to check if it requires an A-Pay micropayment, inspect the exact price quote, currency, and payout receiver without spending any funds.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The URL to probe for HTTP 402 payment requirements"
+          }
+        },
+        "required": ["url"]
+      }
+    },
+    {
+      "name": "apay_get_balance",
+      "description": "Inspect the agent's live on-chain balances on Base Layer 2, including native ETH (for gas), USDC, and $APAY tokens.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  ],
+  "resources": [],
+  "prompts": []
+}

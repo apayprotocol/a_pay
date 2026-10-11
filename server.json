@@ -1,0 +1,74 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.apayprotocol/apay",
+  "title": "A-Pay Protocol",
+  "description": "Universal HTTP 402 Micropayment Protocol & Autonomous Economic Settlement Engine for AI Agents",
+  "version": "0.1.8",
+  "repository": {
+    "url": "https://github.com/apayprotocol/a_pay",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "apay",
+      "version": "0.1.8",
+      "transport": {
+        "type": "stdio"
+      },
+      "packageArguments": [
+        {
+          "type": "positional",
+          "value": "mcp"
+        }
+      ],
+      "environmentVariables": [
+        {
+          "name": "APAY_PRIVATE_KEY",
+          "description": "Agent private key for signing EIP-712 payment authorizations (auto-generates non-custodial session wallet if omitted)",
+          "isRequired": false,
+          "isSecret": true,
+          "format": "string"
+        },
+        {
+          "name": "APAY_NETWORK",
+          "description": "Base network (base-mainnet or base-sepolia)",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string",
+          "default": "base-mainnet"
+        },
+        {
+          "name": "APAY_CURRENCY",
+          "description": "Preferred payment token (USDC, APAY, or DUAL)",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string",
+          "default": "DUAL"
+        },
+        {
+          "name": "APAY_MAX_PER_CALL",
+          "description": "Maximum allowed spend per single HTTP 402 request in USDC (default: 0.05)",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string",
+          "default": "0.05"
+        },
+        {
+          "name": "APAY_DAILY_BUDGET",
+          "description": "Maximum 24-hour spending limit in USDC (default: 2.00)",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string",
+          "default": "2.0"
+        }
+      ]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://apay-network.vercel.app/api/mcp"
+    }
+  ]
+}

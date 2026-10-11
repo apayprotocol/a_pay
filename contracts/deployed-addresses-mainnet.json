@@ -1,0 +1,18 @@
+{
+  "network": "base",
+  "chainId": 8453,
+  "founderAddress": "0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc",
+  "contracts": {
+    "APAYToken": "0x8dd4ff9035c7d4e0bef30aa64fc30d128a4066c3",
+    "APayRouter": "0x71434344beef9c44ff3bc95572beb7bfb8847ec6",
+    "APayRouterV2": "0x452eb7d4e7ccbf76ecf511829880b5fbcb24e854",
+    "EscrowVault": "0xd08c8a337e5339d1c083e06d74a9265956ceea16",
+    "StakingVault": "0x3e35a9e802627a3d9a86d6554e72b1c446e34aaf"
+  },
+  "parameters": {
+    "feeBps": 100,
+    "feePercentage": "1.0%",
+    "tokenSupply": "100,000,000 APAY",
+    "minStakeBond": "500 APAY"
+  }
+}

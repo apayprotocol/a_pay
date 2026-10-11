@@ -1,0 +1,14 @@
+node_modules
+.git
+.venv
+venv
+dist
+build
+.pytest_cache
+.ruff_cache
+.mypy_cache
+__pycache__
+contracts/cache
+contracts/artifacts
+contracts/typechain-types
+target

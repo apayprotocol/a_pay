@@ -1,0 +1,32 @@
+# A-Pay Protocol Robots & LLM Discovery Manifest
+User-agent: *
+Allow: /
+
+# Canonical LLM Directives & Context Files
+# Emerging web standard for AI agents, crawlers & assistants:
+# See: https://apay-network.vercel.app/llms.txt
+# See: https://apay-network.vercel.app/llms-full.txt
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Cursor
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+# Sitemaps and AI Context
+Sitemap: https://apay-network.vercel.app/llms.txt

@@ -1,0 +1,7 @@
+{
+  "name": "@apay/cloudflare-worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A-Pay Protocol Cloudflare Edge Paywall Worker"
+}

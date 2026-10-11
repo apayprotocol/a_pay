@@ -1,0 +1,16 @@
+{
+  "name": "@apay/contracts",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "compile": "node scripts/compile.js",
+    "deploy:local": "node scripts/deploy.js local",
+    "deploy:testnet": "node scripts/deploy.js testnet"
+  },
+  "dependencies": {
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "solc": "0.8.28"
+  }
+}

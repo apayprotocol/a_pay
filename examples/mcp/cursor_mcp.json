@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "apay-agent-wallet": {
+      "command": "uvx",
+      "args": ["apay", "mcp"],
+      "env": {
+        "APAY_NETWORK": "base-mainnet",
+        "APAY_CURRENCY": "DUAL",
+        "APAY_MAX_PER_CALL": "0.05",
+        "APAY_DAILY_BUDGET": "2.0",
+        "APAY_PRIVATE_KEY": "0xYourAgentPrivateKeyHereOrLeaveEmptyForAutoWallet"
+      }
+    }
+  }
+}

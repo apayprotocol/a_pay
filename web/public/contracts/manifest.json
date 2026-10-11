@@ -1,0 +1,167 @@
+{
+  "protocol": "A-Pay Protocol",
+  "generatedAt": "2026-09-28T16:24:33.110Z",
+  "compiler": {
+    "version": "v0.8.28+commit.7893614a",
+    "solcVersion": "0.8.28",
+    "license": "MIT"
+  },
+  "networks": {
+    "mainnet": {
+      "chainId": 8453,
+      "name": "Base Mainnet",
+      "explorerUrl": "https://basescan.org",
+      "verifyUrl": "https://basescan.org/verifyContract",
+      "contracts": {
+        "APAYToken": {
+          "address": "0x8dd4ff9035c7d4e0bef30aa64fc30d128a4066c3",
+          "contractName": "APAYToken",
+          "contractPath": "APAYToken.sol:APAYToken",
+          "compilerVersion": "v0.8.28+commit.7893614a",
+          "optimizationUsed": 1,
+          "runs": 200,
+          "viaIR": true,
+          "constructorArguments": "",
+          "standardJsonFile": "verification/mainnet/APAYToken-standard-input.json",
+          "singleFile": "verification/mainnet/APAYToken.sol",
+          "explorerUrl": "https://basescan.org/address/0x8dd4ff9035c7d4e0bef30aa64fc30d128a4066c3#code",
+          "verifyUrl": "https://basescan.org/verifyContract?a=0x8dd4ff9035c7d4e0bef30aa64fc30d128a4066c3"
+        },
+        "APayRouter": {
+          "address": "0x71434344beef9c44ff3bc95572beb7bfb8847ec6",
+          "contractName": "APayRouter",
+          "contractPath": "APayRouter.sol:APayRouter",
+          "compilerVersion": "v0.8.28+commit.7893614a",
+          "optimizationUsed": 1,
+          "runs": 200,
+          "viaIR": true,
+          "constructorArguments": "0000000000000000000000005ec06f4219c6b44cfe7c91463dd65b7b8e0fbefc0000000000000000000000000000000000000000000000000000000000000064",
+          "standardJsonFile": "verification/mainnet/APayRouter-standard-input.json",
+          "singleFile": "verification/mainnet/APayRouter.sol",
+          "explorerUrl": "https://basescan.org/address/0x71434344beef9c44ff3bc95572beb7bfb8847ec6#code",
+          "verifyUrl": "https://basescan.org/verifyContract?a=0x71434344beef9c44ff3bc95572beb7bfb8847ec6"
+        },
+        "APayRouterV2": {
+          "address": "0x452eb7d4e7ccbf76ecf511829880b5fbcb24e854",
+          "contractName": "APayRouterV2",
+          "contractPath": "APayRouterV2.sol:APayRouterV2",
+          "compilerVersion": "v0.8.28+commit.7893614a",
+          "optimizationUsed": 1,
+          "runs": 200,
+          "viaIR": true,
+          "constructorArguments": "0000000000000000000000005ec06f4219c6b44cfe7c91463dd65b7b8e0fbefc00000000000000000000000000000000000000000000000000000000000000640000000000000000000000008dd4ff9035c7d4e0bef30aa64fc30d128a4066c3",
+          "standardJsonFile": "verification/mainnet/APayRouterV2-standard-input.json",
+          "singleFile": "verification/mainnet/APayRouterV2.sol",
+          "explorerUrl": "https://basescan.org/address/0x452eb7d4e7ccbf76ecf511829880b5fbcb24e854#code",
+          "verifyUrl": "https://basescan.org/verifyContract?a=0x452eb7d4e7ccbf76ecf511829880b5fbcb24e854"
+        },
+        "EscrowVault": {
+          "address": "0xd08c8a337e5339d1c083e06d74a9265956ceea16",
+          "contractName": "EscrowVault",
+          "contractPath": "EscrowVault.sol:EscrowVault",
+          "compilerVersion": "v0.8.28+commit.7893614a",
+          "optimizationUsed": 1,
+          "runs": 200,
+          "viaIR": true,
+          "constructorArguments": "",
+          "standardJsonFile": "verification/mainnet/EscrowVault-standard-input.json",
+          "singleFile": "verification/mainnet/EscrowVault.sol",
+          "explorerUrl": "https://basescan.org/address/0xd08c8a337e5339d1c083e06d74a9265956ceea16#code",
+          "verifyUrl": "https://basescan.org/verifyContract?a=0xd08c8a337e5339d1c083e06d74a9265956ceea16"
+        },
+        "StakingVault": {
+          "address": "0x3e35a9e802627a3d9a86d6554e72b1c446e34aaf",
+          "contractName": "StakingVault",
+          "contractPath": "StakingVault.sol:StakingVault",
+          "compilerVersion": "v0.8.28+commit.7893614a",
+          "optimizationUsed": 1,
+          "runs": 200,
+          "viaIR": true,
+          "constructorArguments": "0000000000000000000000008dd4ff9035c7d4e0bef30aa64fc30d128a4066c30000000000000000000000005ec06f4219c6b44cfe7c91463dd65b7b8e0fbefc",
+          "standardJsonFile": "verification/mainnet/StakingVault-standard-input.json",
+          "singleFile": "verification/mainnet/StakingVault.sol",
+          "explorerUrl": "https://basescan.org/address/0x3e35a9e802627a3d9a86d6554e72b1c446e34aaf#code",
+          "verifyUrl": "https://basescan.org/verifyContract?a=0x3e35a9e802627a3d9a86d6554e72b1c446e34aaf"
+        }
+      }
+    },
+    "sepolia": {
+      "chainId": 84532,
+      "name": "Base Sepolia Testnet",
+      "explorerUrl": "https://sepolia.basescan.org",
+      "verifyUrl": "https://sepolia.basescan.org/verifyContract",
+      "contracts": {
+        "APAYToken": {
+          "address": "0x8dd4ff9035c7d4e0Bef30aa64FC30d128A4066C3",
+          "contractName": "APAYToken",
+          "contractPath": "APAYToken.sol:APAYToken",
+          "compilerVersion": "v0.8.28+commit.7893614a",
+          "optimizationUsed": 1,
+          "runs": 200,
+          "viaIR": false,
+          "constructorArguments": "",
+          "standardJsonFile": "verification/sepolia/APAYToken-standard-input.json",
+          "singleFile": "verification/sepolia/APAYToken.sol",
+          "explorerUrl": "https://sepolia.basescan.org/address/0x8dd4ff9035c7d4e0Bef30aa64FC30d128A4066C3#code",
+          "verifyUrl": "https://sepolia.basescan.org/verifyContract?a=0x8dd4ff9035c7d4e0Bef30aa64FC30d128A4066C3"
+        },
+        "APayRouter": {
+          "address": "0x71434344beEF9C44fF3BC95572bEB7bFB8847ec6",
+          "contractName": "APayRouter",
+          "contractPath": "APayRouter.sol:APayRouter",
+          "compilerVersion": "v0.8.28+commit.7893614a",
+          "optimizationUsed": 1,
+          "runs": 200,
+          "viaIR": false,
+          "constructorArguments": "0000000000000000000000005ec06f4219c6b44cfe7c91463dd65b7b8e0fbefc0000000000000000000000000000000000000000000000000000000000000064",
+          "standardJsonFile": "verification/sepolia/APayRouter-standard-input.json",
+          "singleFile": "verification/sepolia/APayRouter.sol",
+          "explorerUrl": "https://sepolia.basescan.org/address/0x71434344beEF9C44fF3BC95572bEB7bFB8847ec6#code",
+          "verifyUrl": "https://sepolia.basescan.org/verifyContract?a=0x71434344beEF9C44fF3BC95572bEB7bFB8847ec6"
+        },
+        "APayRouterV2": {
+          "address": "0xD08c8A337E5339d1c083E06d74A9265956ceEA16",
+          "contractName": "APayRouterV2",
+          "contractPath": "APayRouterV2.sol:APayRouterV2",
+          "compilerVersion": "v0.8.28+commit.7893614a",
+          "optimizationUsed": 1,
+          "runs": 200,
+          "viaIR": true,
+          "constructorArguments": "0000000000000000000000005ec06f4219c6b44cfe7c91463dd65b7b8e0fbefc00000000000000000000000000000000000000000000000000000000000000640000000000000000000000008dd4ff9035c7d4e0bef30aa64fc30d128a4066c3",
+          "standardJsonFile": "verification/sepolia/APayRouterV2-standard-input.json",
+          "singleFile": "verification/sepolia/APayRouterV2.sol",
+          "explorerUrl": "https://sepolia.basescan.org/address/0xD08c8A337E5339d1c083E06d74A9265956ceEA16#code",
+          "verifyUrl": "https://sepolia.basescan.org/verifyContract?a=0xD08c8A337E5339d1c083E06d74A9265956ceEA16"
+        },
+        "EscrowVault": {
+          "address": "0x3E35a9E802627a3D9A86D6554e72b1C446E34aAF",
+          "contractName": "EscrowVault",
+          "contractPath": "EscrowVault.sol:EscrowVault",
+          "compilerVersion": "v0.8.28+commit.7893614a",
+          "optimizationUsed": 1,
+          "runs": 200,
+          "viaIR": true,
+          "constructorArguments": "",
+          "standardJsonFile": "verification/sepolia/EscrowVault-standard-input.json",
+          "singleFile": "verification/sepolia/EscrowVault.sol",
+          "explorerUrl": "https://sepolia.basescan.org/address/0x3E35a9E802627a3D9A86D6554e72b1C446E34aAF#code",
+          "verifyUrl": "https://sepolia.basescan.org/verifyContract?a=0x3E35a9E802627a3D9A86D6554e72b1C446E34aAF"
+        },
+        "StakingVault": {
+          "address": "0xD2f3F4D97f4a3fdC9d4eEDfB9747BF9D80CF6225",
+          "contractName": "StakingVault",
+          "contractPath": "StakingVault.sol:StakingVault",
+          "compilerVersion": "v0.8.28+commit.7893614a",
+          "optimizationUsed": 1,
+          "runs": 200,
+          "viaIR": true,
+          "constructorArguments": "0000000000000000000000008dd4ff9035c7d4e0bef30aa64fc30d128a4066c30000000000000000000000005ec06f4219c6b44cfe7c91463dd65b7b8e0fbefc",
+          "standardJsonFile": "verification/sepolia/StakingVault-standard-input.json",
+          "singleFile": "verification/sepolia/StakingVault.sol",
+          "explorerUrl": "https://sepolia.basescan.org/address/0xD2f3F4D97f4a3fdC9d4eEDfB9747BF9D80CF6225#code",
+          "verifyUrl": "https://sepolia.basescan.org/verifyContract?a=0xD2f3F4D97f4a3fdC9d4eEDfB9747BF9D80CF6225"
+        }
+      }
+    }
+  }
+}

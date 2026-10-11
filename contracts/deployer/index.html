@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>A-Pay Protocol • 1-Click Base Sepolia Deployer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+    }
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .soft-shadow {
+      box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.02);
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+    .butter-button {
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .butter-button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px -8px rgba(37, 99, 235, 0.3);
+    }
+    .butter-button:active:not(:disabled) {
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body class="min-h-screen py-10 px-4 sm:px-6 flex flex-col items-center justify-center">
+
+  <div class="max-w-3xl w-full space-y-6">
+    <!-- Header -->
+    <div class="text-center space-y-2">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold tracking-wide uppercase">
+        <span class="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
+        Base Sepolia Testnet (ChainID: 84532)
+      </div>
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+        ⚡ A-Pay Protocol Live Deployer
+      </h1>
+      <p class="text-sm sm:text-base text-slate-500 max-w-lg mx-auto">
+        Deploy production smart contracts to Base Sepolia directly through MetaMask. 100% Non-Custodial & Verified.
+      </p>
+    </div>
+
+    <!-- Wallet Connect Card -->
+    <div class="glass-card rounded-3xl p-6 soft-shadow space-y-4">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="space-y-1 text-center sm:text-left">
+          <div class="text-xs uppercase tracking-wider font-semibold text-slate-400">Connected Founder / Deployer Wallet</div>
+          <div id="walletAddress" class="mono text-sm sm:text-base font-semibold text-slate-700">
+            Not connected
+          </div>
+          <div id="walletBalance" class="text-xs text-slate-500 font-mono">
+            Balance: —
+          </div>
+        </div>
+        <button id="connectBtn" onclick="connectWallet()" class="butter-button w-full sm:w-auto px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm shadow-md flex items-center justify-center gap-2 cursor-pointer">
+          🦊 Connect MetaMask
+        </button>
+      </div>
+    </div>
+
+    <!-- Contract Status Grid -->
+    <div class="space-y-4">
+
+      <!-- Contract 1: APAY Token (Already Live) -->
+      <div class="glass-card rounded-3xl p-5 soft-shadow space-y-3">
+        <div class="flex items-start justify-between">
+          <div>
+            <div class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 uppercase tracking-wider mb-1">
+              <span>Pillar 3</span> • Protocol Utility & Value Engine
+            </div>
+            <h2 class="text-lg font-bold text-slate-900">1. $APAY Token (ERC-20)</h2>
+            <p class="text-xs text-slate-500">
+              Fixed Supply: 100,000,000 APAY • Decimals: 18 • Burnable • Base L2
+            </p>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 border border-emerald-300">
+            ✅ Live on Base Sepolia
+          </span>
+        </div>
+        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+          <span class="mono text-slate-600 font-semibold break-all">0x8dd4ff9035c7d4e0Bef30aa64FC30d128A4066C3</span>
+          <a href="https://sepolia.basescan.org/token/0x8dd4ff9035c7d4e0Bef30aa64FC30d128A4066C3" target="_blank" class="text-blue-600 hover:underline font-semibold flex items-center gap-1 shrink-0">
+            View Explorer ↗
+          </a>
+        </div>
+      </div>
+
+      <!-- Contract 2: APayRouter V1 (Already Live) -->
+      <div class="glass-card rounded-3xl p-5 soft-shadow space-y-3">
+        <div class="flex items-start justify-between">
+          <div>
+            <div class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 uppercase tracking-wider mb-1">
+              <span>Pillar 1</span> • Base Settlement Router V1
+            </div>
+            <h2 class="text-lg font-bold text-slate-900">2. APayRouter (V1 Settlement)</h2>
+            <p class="text-xs text-slate-500">
+              EIP-712 Direct Micropayment Clearing • 1.0% Fee Protocol
+            </p>
+          </div>
+          <span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 border border-emerald-300">
+            ✅ Live on Base Sepolia
+          </span>
+        </div>
+        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+          <span class="mono text-slate-600 font-semibold break-all">0x71434344beEF9C44fF3BC95572bEB7bFB8847ec6</span>
+          <a href="https://sepolia.basescan.org/address/0x71434344beEF9C44fF3BC95572bEB7bFB8847ec6" target="_blank" class="text-blue-600 hover:underline font-semibold flex items-center gap-1 shrink-0">
+            View Explorer ↗
+          </a>
+        </div>
+      </div>
+
+      <!-- Contract 3: APayRouterV2 (Target for Mission 1) -->
+      <div class="glass-card rounded-3xl p-5 soft-shadow space-y-4 border-2 border-indigo-200/70">
+        <div class="flex items-start justify-between">
+          <div>
+            <div class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 uppercase tracking-wider mb-1">
+              <span>Pillar 1 & 2</span> • Enterprise Cumulative Router
+            </div>
+            <h2 class="text-lg font-bold text-slate-900">3. APayRouterV2 (Merkle + State Channels)</h2>
+            <p class="text-xs text-slate-500">
+              Cumulative Channel Settle • Merkle Tree Batch Claims • $APAY Tiered Fee Discounts (Up to 80% off)
+            </p>
+          </div>
+          <span id="routerV2Badge" class="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+            Awaiting Deployment
+          </span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5 text-xs">
+          <div class="flex justify-between text-slate-600">
+            <span>Treasury Address:</span>
+            <span id="v2Treasury" class="mono font-semibold text-slate-800">Connect wallet</span>
+          </div>
+          <div class="flex justify-between text-slate-600">
+            <span>Base Protocol Fee:</span>
+            <span class="font-semibold text-slate-800">100 bps (1.00%)</span>
+          </div>
+          <div class="flex justify-between text-slate-600">
+            <span>$APAY Token Link:</span>
+            <span class="mono font-semibold text-indigo-600">0x8dd4...66C3</span>
+          </div>
+        </div>
+
+        <button id="deployRouterV2Btn" onclick="deployRouterV2()" disabled class="butter-button w-full py-3.5 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 cursor-pointer">
+          🚀 Deploy APayRouterV2 to Base Sepolia
+        </button>
+
+        <div id="routerV2Result" style="display: none;" class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs space-y-1.5">
+          <div class="font-bold text-emerald-800 flex items-center gap-1.5">
+            <span>✅ APayRouterV2 Successfully Deployed & Verified!</span>
+          </div>
+          <div class="text-emerald-700">
+            Contract Address: <span id="deployedRouterV2Addr" class="mono font-bold break-all"></span>
+          </div>
+          <div>
+            <a id="routerV2BasescanLink" href="#" target="_blank" class="text-blue-600 hover:underline font-semibold flex items-center gap-1">
+              View on BaseScan Sepolia Explorer ↗
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contract 4: EscrowVault (Target for Mission 1) -->
+      <div class="glass-card rounded-3xl p-5 soft-shadow space-y-4 border-2 border-purple-200/70">
+        <div class="flex items-start justify-between">
+          <div>
+            <div class="inline-flex items-center gap-1.5 text-xs font-bold text-purple-600 uppercase tracking-wider mb-1">
+              <span>Pillar 1</span> • Agent Swarm Session Keys
+            </div>
+            <h2 class="text-lg font-bold text-slate-900">4. EscrowVault (Sub-Agent Delegated Spending)</h2>
+            <p class="text-xs text-slate-500">
+              Non-custodial master deposits • Time-bound daily allowances • Instant revocation guardrails
+            </p>
+          </div>
+          <span id="escrowBadge" class="px-3 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+            Awaiting Deployment
+          </span>
+        </div>
+
+        <button id="deployEscrowBtn" onclick="deployEscrowVault()" disabled class="butter-button w-full py-3.5 px-6 rounded-2xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 cursor-pointer">
+          🛡️ Deploy EscrowVault to Base Sepolia
+        </button>
+
+        <div id="escrowResult" style="display: none;" class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs space-y-1.5">
+          <div class="font-bold text-emerald-800 flex items-center gap-1.5">
+            <span>✅ EscrowVault Successfully Deployed & Verified!</span>
+          </div>
+          <div class="text-emerald-700">
+            Contract Address: <span id="deployedEscrowAddr" class="mono font-bold break-all"></span>
+          </div>
+          <div>
+            <a id="escrowBasescanLink" href="#" target="_blank" class="text-blue-600 hover:underline font-semibold flex items-center gap-1">
+              View on BaseScan Sepolia Explorer ↗
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contract 5: StakingVault (Target for Mission 3) -->
+      <div class="glass-card rounded-3xl p-5 soft-shadow space-y-4 border-2 border-emerald-200/70">
+        <div class="flex items-start justify-between">
+          <div>
+            <div class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 uppercase tracking-wider mb-1">
+              <span>Pillar 3</span> • Agent Collateral & Slashing
+            </div>
+            <h2 class="text-lg font-bold text-slate-900">5. StakingVault (Anti-Spam & Slash Engine)</h2>
+            <p class="text-xs text-slate-500">
+              500 $APAY Minimum Bond • 24h Unbonding Cooldown • 50% Challenger Bounty + 50% Deflationary Burn
+            </p>
+          </div>
+          <span id="stakingBadge" class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            Awaiting Deployment
+          </span>
+        </div>
+
+        <button id="deployStakingBtn" onclick="deployStakingVault()" disabled class="butter-button w-full py-3.5 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-sm shadow-md flex items-center justify-center gap-2 cursor-pointer">
+          🛡️ Deploy StakingVault to Base Sepolia
+        </button>
+
+        <div id="stakingResult" style="display: none;" class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs space-y-1.5">
+          <div class="font-bold text-emerald-800 flex items-center gap-1.5">
+            <span>✅ StakingVault Successfully Deployed & Verified!</span>
+          </div>
+          <div class="text-emerald-700">
+            Contract Address: <span id="deployedStakingAddr" class="mono font-bold break-all"></span>
+          </div>
+          <div>
+            <a id="stakingBasescanLink" href="#" target="_blank" class="text-blue-600 hover:underline font-semibold flex items-center gap-1">
+              View on BaseScan Sepolia Explorer ↗
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Live Console Output -->
+    <div class="rounded-3xl bg-slate-900 text-slate-200 p-5 shadow-inner space-y-2">
+      <div class="flex items-center justify-between text-xs font-semibold text-slate-400 border-b border-slate-800 pb-2">
+        <span class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          Live Deployer & Sync Console
+        </span>
+        <button onclick="clearLogs()" class="hover:text-white cursor-pointer">Clear</button>
+      </div>
+      <div id="logs" class="mono text-xs max-h-48 overflow-y-auto space-y-1 text-slate-300">
+        <div>[System Ready] Connect MetaMask with Founder Wallet 0x5eC0...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let provider = null;
+    let signer = null;
+    let userAddress = null;
+
+    const APAY_TOKEN_ADDRESS = '0x8dd4ff9035c7d4e0Bef30aa64FC30d128A4066C3';
+    const APAY_ROUTER_ADDRESS = '0x71434344beEF9C44fF3BC95572bEB7bFB8847ec6';
+    let routerV2Address = null;
+    let escrowVaultAddress = null;
+    let stakingVaultAddress = null;
+
+    const BASE_SEPOLIA_CHAIN_ID = '0x14a34'; // 84532 in hex
+
+    function log(msg) {
+      const logsDiv = document.getElementById('logs');
+      const entry = document.createElement('div');
+      const time = new Date().toLocaleTimeString();
+      entry.textContent = `[${time}] ${msg}`;
+      logsDiv.appendChild(entry);
+      logsDiv.scrollTop = logsDiv.scrollHeight;
+    }
+
+    function clearLogs() {
+      document.getElementById('logs').innerHTML = '';
+    }
+
+    async function checkCurrentStatus() {
+      try {
+        const resp = await fetch('/api/status');
+        const data = await resp.json();
+        if (data.contracts?.APayRouterV2 && data.contracts.APayRouterV2 !== '0x3B6a8b1F474A53d6741b016B64aF17aC01E35d67') {
+          routerV2Address = data.contracts.APayRouterV2;
+          document.getElementById('deployedRouterV2Addr').textContent = routerV2Address;
+          document.getElementById('routerV2BasescanLink').href = `https://sepolia.basescan.org/address/${routerV2Address}`;
+          document.getElementById('routerV2Result').style.display = 'block';
+          document.getElementById('routerV2Badge').textContent = '✅ Deployed';
+          document.getElementById('routerV2Badge').className = 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 border border-emerald-300';
+          const btn = document.getElementById('deployRouterV2Btn');
+          btn.textContent = '✅ APayRouterV2 Already Deployed';
+          btn.classList.replace('bg-indigo-600', 'bg-emerald-600');
+          btn.disabled = true;
+        }
+        if (data.contracts?.EscrowVault && data.contracts.EscrowVault !== '0x89e81bFe2eF52c38DEc24FE3c7c2518f97eB3D5D') {
+          escrowVaultAddress = data.contracts.EscrowVault;
+          document.getElementById('deployedEscrowAddr').textContent = escrowVaultAddress;
+          document.getElementById('escrowBasescanLink').href = `https://sepolia.basescan.org/address/${escrowVaultAddress}`;
+          document.getElementById('escrowResult').style.display = 'block';
+          document.getElementById('escrowBadge').textContent = '✅ Deployed';
+          document.getElementById('escrowBadge').className = 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 border border-emerald-300';
+          const btn = document.getElementById('deployEscrowBtn');
+          btn.textContent = '✅ EscrowVault Already Deployed';
+          btn.classList.replace('bg-purple-600', 'bg-emerald-600');
+          btn.disabled = true;
+        }
+        if (data.contracts?.StakingVault && data.contracts.StakingVault !== '0x89e81bFe2eF52c38DEc24FE3c7c2518f97eB3D5D') {
+          stakingVaultAddress = data.contracts.StakingVault;
+          document.getElementById('deployedStakingAddr').textContent = stakingVaultAddress;
+          document.getElementById('stakingBasescanLink').href = `https://sepolia.basescan.org/address/${stakingVaultAddress}`;
+          document.getElementById('stakingResult').style.display = 'block';
+          document.getElementById('stakingBadge').textContent = '✅ Deployed';
+          document.getElementById('stakingBadge').className = 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 border border-emerald-300';
+          const btn = document.getElementById('deployStakingBtn');
+          btn.textContent = '✅ StakingVault Already Deployed';
+          btn.classList.replace('bg-emerald-600', 'bg-emerald-700');
+          btn.disabled = true;
+        }
+      } catch (e) {
+        console.warn('Status check failed:', e);
+      }
+    }
+
+    async function connectWallet() {
+      if (!window.ethereum) {
+        alert('MetaMask not detected! Please open in a Web3 browser with MetaMask.');
+        return;
+      }
+
+      try {
+        log('Connecting to MetaMask...');
+        provider = new ethers.BrowserProvider(window.ethereum);
+        
+        const accounts = await provider.send('eth_requestAccounts', []);
+        userAddress = accounts[0];
+        
+        const network = await provider.getNetwork();
+        log(`Connected chain: ${network.chainId}`);
+
+        if (network.chainId !== 84532n) {
+          log('Switching network to Base Sepolia (84532)...');
+          try {
+            await window.ethereum.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: BASE_SEPOLIA_CHAIN_ID }],
+            });
+          } catch (switchError) {
+            if (switchError.code === 4902) {
+              await window.ethereum.request({
+                method: 'wallet_addEthereumChain',
+                params: [{
+                  chainId: BASE_SEPOLIA_CHAIN_ID,
+                  chainName: 'Base Sepolia Testnet',
+                  nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+                  rpcUrls: ['https://base-sepolia-rpc.publicnode.com'],
+                  blockExplorerUrls: ['https://sepolia.basescan.org'],
+                }],
+              });
+            } else {
+              throw switchError;
+            }
+          }
+        }
+
+        signer = await provider.getSigner();
+        const balance = await provider.getBalance(userAddress);
+        const ethBal = ethers.formatEther(balance);
+
+        document.getElementById('walletAddress').textContent = `${userAddress.slice(0, 8)}...${userAddress.slice(-6)}`;
+        document.getElementById('walletBalance').textContent = `Gas Balance: ${Number(ethBal).toFixed(6)} Sepolia ETH`;
+        document.getElementById('v2Treasury').textContent = `${userAddress.slice(0, 10)}...${userAddress.slice(-8)}`;
+        
+        const connectBtn = document.getElementById('connectBtn');
+        connectBtn.textContent = '✅ Wallet Connected';
+        connectBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+        connectBtn.classList.add('bg-slate-200', 'text-slate-700', 'cursor-default');
+
+        if (!routerV2Address) {
+          document.getElementById('deployRouterV2Btn').disabled = false;
+        }
+        if (!escrowVaultAddress) {
+          document.getElementById('deployEscrowBtn').disabled = false;
+        }
+        if (!stakingVaultAddress) {
+          document.getElementById('deployStakingBtn').disabled = false;
+        }
+
+        log(`Wallet connected: ${userAddress} with ${Number(ethBal).toFixed(6)} ETH`);
+      } catch (err) {
+        log(`Error: ${err.message}`);
+        console.error(err);
+      }
+    }
+
+    async function deployRouterV2() {
+      if (!signer) {
+        alert('Please connect MetaMask first!');
+        return;
+      }
+
+      const btn = document.getElementById('deployRouterV2Btn');
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Confirming in MetaMask...';
+      log('Fetching APayRouterV2 compiled bytecode artifact...');
+
+      try {
+        const resp = await fetch('/artifacts/APayRouterV2.json');
+        const artifact = await resp.json();
+
+        log('Initializing APayRouterV2 ContractFactory...');
+        const factory = new ethers.ContractFactory(artifact.abi, artifact.bytecode, signer);
+
+        log(`Broadcasting deployment: Treasury=${userAddress}, Fee=100 bps, APAY=${APAY_TOKEN_ADDRESS}`);
+        const contract = await factory.deploy(userAddress, 100, APAY_TOKEN_ADDRESS);
+
+        log(`Transaction submitted! Hash: ${contract.deploymentTransaction().hash}`);
+        log('Waiting for block confirmation on Base Sepolia (~2 seconds)...');
+
+        await contract.waitForDeployment();
+        routerV2Address = await contract.getAddress();
+
+        log(`🎉 APayRouterV2 deployed at: ${routerV2Address}`);
+
+        document.getElementById('deployedRouterV2Addr').textContent = routerV2Address;
+        document.getElementById('routerV2BasescanLink').href = `https://sepolia.basescan.org/address/${routerV2Address}`;
+        document.getElementById('routerV2Result').style.display = 'block';
+        document.getElementById('routerV2Badge').textContent = '✅ Live on Base Sepolia';
+        document.getElementById('routerV2Badge').className = 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 border border-emerald-300';
+
+        btn.textContent = '✅ APayRouterV2 Deployed';
+        btn.classList.replace('bg-indigo-600', 'bg-emerald-600');
+
+        await saveDeployment();
+      } catch (err) {
+        log(`RouterV2 deployment failed: ${err.message}`);
+        alert('RouterV2 deployment failed: ' + err.message);
+        btn.disabled = false;
+        btn.innerHTML = '🚀 Deploy APayRouterV2 to Base Sepolia';
+      }
+    }
+
+    async function deployEscrowVault() {
+      if (!signer) {
+        alert('Please connect MetaMask first!');
+        return;
+      }
+
+      const btn = document.getElementById('deployEscrowBtn');
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Confirming in MetaMask...';
+      log('Fetching EscrowVault compiled bytecode artifact...');
+
+      try {
+        const resp = await fetch('/artifacts/EscrowVault.json');
+        const artifact = await resp.json();
+
+        log('Initializing EscrowVault ContractFactory...');
+        const factory = new ethers.ContractFactory(artifact.abi, artifact.bytecode, signer);
+
+        log('Broadcasting EscrowVault deployment to Base Sepolia...');
+        const contract = await factory.deploy();
+
+        log(`Transaction submitted! Hash: ${contract.deploymentTransaction().hash}`);
+        log('Waiting for block confirmation on Base Sepolia (~2 seconds)...');
+
+        await contract.waitForDeployment();
+        escrowVaultAddress = await contract.getAddress();
+
+        log(`🎉 EscrowVault deployed at: ${escrowVaultAddress}`);
+
+        document.getElementById('deployedEscrowAddr').textContent = escrowVaultAddress;
+        document.getElementById('escrowBasescanLink').href = `https://sepolia.basescan.org/address/${escrowVaultAddress}`;
+        document.getElementById('escrowResult').style.display = 'block';
+        document.getElementById('escrowBadge').textContent = '✅ Live on Base Sepolia';
+        document.getElementById('escrowBadge').className = 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 border border-emerald-300';
+
+        btn.textContent = '✅ EscrowVault Deployed';
+        btn.classList.replace('bg-purple-600', 'bg-emerald-600');
+
+        await saveDeployment();
+      } catch (err) {
+        log(`EscrowVault deployment failed: ${err.message}`);
+        alert('EscrowVault deployment failed: ' + err.message);
+        btn.disabled = false;
+        btn.innerHTML = '🛡️ Deploy EscrowVault to Base Sepolia';
+      }
+    }
+
+    async function deployStakingVault() {
+      if (!signer) {
+        alert('Please connect MetaMask first!');
+        return;
+      }
+
+      const btn = document.getElementById('deployStakingBtn');
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Confirming in MetaMask...';
+      log('Fetching StakingVault compiled bytecode artifact...');
+
+      try {
+        const resp = await fetch('/artifacts/StakingVault.json');
+        const artifact = await resp.json();
+
+        log('Initializing StakingVault ContractFactory...');
+        const factory = new ethers.ContractFactory(artifact.abi, artifact.bytecode, signer);
+
+        log(`Broadcasting StakingVault deployment: APAY=${APAY_TOKEN_ADDRESS}, Arbiter=${userAddress}`);
+        const contract = await factory.deploy(APAY_TOKEN_ADDRESS, userAddress);
+
+        log(`Transaction submitted! Hash: ${contract.deploymentTransaction().hash}`);
+        log('Waiting for block confirmation on Base Sepolia (~2 seconds)...');
+
+        await contract.waitForDeployment();
+        stakingVaultAddress = await contract.getAddress();
+
+        log(`🎉 StakingVault deployed at: ${stakingVaultAddress}`);
+
+        document.getElementById('deployedStakingAddr').textContent = stakingVaultAddress;
+        document.getElementById('stakingBasescanLink').href = `https://sepolia.basescan.org/address/${stakingVaultAddress}`;
+        document.getElementById('stakingResult').style.display = 'block';
+        document.getElementById('stakingBadge').textContent = '✅ Live on Base Sepolia';
+        document.getElementById('stakingBadge').className = 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 border border-emerald-300';
+
+        btn.textContent = '✅ StakingVault Deployed';
+        btn.classList.replace('bg-emerald-600', 'bg-emerald-700');
+
+        await saveDeployment();
+      } catch (err) {
+        log(`StakingVault deployment failed: ${err.message}`);
+        alert('StakingVault deployment failed: ' + err.message);
+        btn.disabled = false;
+        btn.innerHTML = '🛡️ Deploy StakingVault to Base Sepolia';
+      }
+    }
+
+    async function saveDeployment() {
+      log('Syncing on-chain addresses across all codebase modules...');
+      try {
+        const res = await fetch('/api/save-deployment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            APAYToken: APAY_TOKEN_ADDRESS,
+            APayRouter: APAY_ROUTER_ADDRESS,
+            APayRouterV2: routerV2Address,
+            EscrowVault: escrowVaultAddress,
+            StakingVault: stakingVaultAddress,
+            founderAddress: userAddress,
+          }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          log(`✅ Successfully synced addresses across ${data.updatedFiles.length} files in repository!`);
+        }
+      } catch (err) {
+        log(`⚠️ Address auto-sync failed: ${err.message}`);
+      }
+    }
+
+    window.addEventListener('load', () => {
+      checkCurrentStatus();
+      if (window.ethereum && window.ethereum.selectedAddress) {
+        connectWallet();
+      }
+    });
+  </script>
+</body>
+</html>

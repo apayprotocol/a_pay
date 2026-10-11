@@ -1,0 +1,49 @@
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: apay-gateway
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - TARGET_URL=http://mock-upstream:3000
+      - RECEIVER_WALLET=0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc
+      - PRICE_USDC=0.001
+      - CURRENCY=USDC
+      - NETWORK=base
+      - PORT=8080
+      - HOST=0.0.0.0
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+      - mock-upstream
+
+  redis:
+    image: redis:7-alpine
+    container_name: apay-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  mock-upstream:
+    image: python:3.13-slim
+    container_name: apay-mock-upstream
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ./scripts/mock_upstream.py:/app/scripts/mock_upstream.py:ro
+    command: python scripts/mock_upstream.py
+    environment:
+      - UPSTREAM_PORT=3000
+
+  # Optional Cloudflare Tunnel container
+  # Run with: CLOUDFLARE_TUNNEL_TOKEN=<token> docker compose --profile tunnel up
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: apay-cloudflared-tunnel
+    restart: unless-stopped
+    profiles:
+      - tunnel
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN:-}

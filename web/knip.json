@@ -1,0 +1,24 @@
+{
+  "$schema": "https://unpkg.com/knip@5/overview.json",
+  "next": {
+    "entry": [
+      "next.config.{js,ts,cjs,mjs}",
+      "src/app/**/*.{js,ts,jsx,tsx}",
+      "src/pages/**/*.{js,ts,jsx,tsx}"
+    ]
+  },
+  "entry": [
+    "scripts/**/*.{js,mjs,ts}",
+    "src/checkout/checkout.ts"
+  ],
+  "ignore": [
+    "public/**"
+  ],
+  "ignoreDependencies": [
+    "@react-three/drei",
+    "@react-three/fiber",
+    "clsx",
+    "framer-motion",
+    "tailwind-merge"
+  ]
+}

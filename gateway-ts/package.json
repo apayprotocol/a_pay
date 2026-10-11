@@ -1,0 +1,58 @@
+{
+  "name": "apay-gateway",
+  "version": "0.1.2",
+  "description": "Ultra-lightweight HTTP 402 Paywall Middleware for Hono, Express, and Edge APIs",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      },
+      "./middleware": {
+        "types": "./dist/middleware.d.ts",
+        "import": "./dist/middleware.js"
+      },
+      "./client": {
+        "types": "./dist/client.d.ts",
+        "import": "./dist/client.js"
+      },
+      "./ai-sdk": {
+        "types": "./dist/integrations/ai-sdk.d.ts",
+        "import": "./dist/integrations/ai-sdk.js"
+      }
+    },
+
+    "scripts": {
+      "build": "tsc",
+      "test": "node --test test/*.test.mjs"
+    },
+  "license": "MIT",
+  "author": "A-Pay Protocol Core Swarm <core@apay.network>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neuralaisofficial-lang/a_pay.git",
+    "directory": "gateway-ts"
+  },
+  "keywords": [
+    "http-402",
+    "micropayments",
+    "ai-agents",
+    "paywall",
+    "base-l2",
+    "express",
+    "hono",
+    "m2m"
+  ],
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "dependencies": {
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}

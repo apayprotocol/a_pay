@@ -1,0 +1,53 @@
+# Smithery Configuration File
+# Learn more: https://smithery.ai/docs/config
+
+startCommand:
+  type: stdio
+  config:
+    command: uvx
+    args:
+      - apay
+      - mcp
+    env:
+      APAY_NETWORK: "base-mainnet"
+      APAY_CURRENCY: "DUAL"
+      APAY_MAX_PER_CALL: "0.05"
+      APAY_DAILY_BUDGET: "2.0"
+
+configSchema:
+  type: object
+  properties:
+    APAY_NETWORK:
+      type: string
+      enum:
+        - "base-mainnet"
+        - "base-sepolia"
+      default: "base-mainnet"
+      description: "Target Base Layer 2 settlement network"
+    APAY_PRIVATE_KEY:
+      type: string
+      description: "Optional persistent EVM private key. If omitted, a non-custodial ephemeral session wallet is generated automatically."
+    APAY_CURRENCY:
+      type: string
+      enum:
+        - "DUAL"
+        - "USDC"
+        - "APAY"
+      default: "DUAL"
+      description: "Accepted settlement currency rails (USDC, APAY, or DUAL)"
+    APAY_MAX_PER_CALL:
+      type: number
+      default: 0.05
+      description: "Maximum spending allowance per individual HTTP 402 API call in USDC"
+    APAY_DAILY_BUDGET:
+      type: number
+      default: 2.0
+      description: "Rolling 24-hour spending guardrail limit in USDC"
+    APAY_MAX_PER_CALL_APAY:
+      type: number
+      default: 10.0
+      description: "Maximum spending allowance per individual API call in $APAY tokens"
+    APAY_DAILY_BUDGET_APAY:
+      type: number
+      default: 100.0
+      description: "Rolling 24-hour spending guardrail limit in $APAY tokens"

@@ -1,0 +1,14 @@
+{
+  "name": "my-apay-express-service",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "apay-gateway": "^0.1.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0"
+  }
+}

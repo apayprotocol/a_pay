@@ -1,0 +1,46 @@
+{
+  "name": "a_pay-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Universal Micropayment & Economic Protocol for Autonomous AI Agents",
+  "workspaces": [
+    "web"
+  ],
+  "scripts": {
+
+    "ready": "npm run check:py && npm run typecheck:py && npm run test:py && npm run test:gateway && npm run test:cli && npm run test:wp && npm run typecheck:web && npm run lint:web && npm run knip:web && npm run audit:contracts && npm run build:all && npm run test:real && npm run test:web:e2e",
+    "check:py": "uv run ruff check src/ tests/ && uv run ruff format --check src/ tests/",
+    "format:py": "uv run ruff format src/ tests/ && uv run ruff check --fix src/ tests/",
+    "typecheck:py": "uv run mypy src/ tests/",
+    "test:py": "uv run pytest tests/",
+    "test:gateway": "npm --prefix gateway-ts run test",
+    "test:cli": "node --test packages/create-apay-app/test/*.test.mjs",
+    "test:wp": "node scripts/test_wordpress_plugin.mjs",
+    "test:web:e2e": "node scripts/test_web_e2e.mjs",
+    "typecheck:web": "npm --prefix web run typecheck",
+    "lint:web": "npm --prefix web run lint",
+    "format:web": "npm --prefix web run format",
+    "knip:web": "npm --prefix web run knip",
+    "build": "npm run build:web",
+    "start": "npm --prefix web run start",
+    "build:gateway": "npm --prefix gateway-ts run build",
+    "build:web": "npm --prefix web run build",
+    "build:py": "uv build",
+    "build:wp": "node scripts/package_wordpress_plugin.mjs",
+    "build:all": "npm run build:gateway && npm run build:web && npm run build:py && npm run build:wp",
+    "test:real": "uv run python scripts/demo_real_world.py",
+    "audit:onchain": "node scripts/audit_live_contracts.mjs",
+    "audit:contracts": "node scripts/verify_ecosystem_contracts.mjs",
+    "deploy:base": "node contracts/scripts/deploy.js --network base",
+    "deploy:sepolia": "node contracts/scripts/deploy.js --network sepolia",
+    "contracts:verify:generate": "node contracts/scripts/generate-verification-json.js",
+    "contracts:verify:mainnet": "node contracts/scripts/verify-basescan.js --network base",
+    "contracts:verify:sepolia": "node contracts/scripts/verify-basescan.js --network sepolia",
+    "contracts:verify": "node contracts/scripts/generate-verification-json.js && node contracts/scripts/verify-basescan.js",
+    "verify": "uv run apay verify",
+    "git:save": "node scripts/git_save.mjs",
+    "git:save:all": "node scripts/git_save.mjs"
+  }
+}
+
+

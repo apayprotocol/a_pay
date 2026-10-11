@@ -1,0 +1,33 @@
+{
+  "name": "create-apay-app",
+  "version": "0.1.0",
+  "description": "Initialize a monetized AI Agent API or Paywall app with A-Pay in 60 seconds",
+  "type": "module",
+  "bin": {
+    "create-apay-app": "./bin/index.js"
+  },
+  "keywords": [
+    "create-apay-app",
+    "http-402",
+    "ai-agents",
+    "micropayments",
+    "base-l2",
+    "paywall",
+    "starter",
+    "nextjs",
+    "fastapi",
+    "express"
+  ],
+  "author": "A-Pay Protocol Core Swarm <core@apay.network>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/apayprotocol/a_pay.git",
+    "directory": "packages/create-apay-app"
+  },
+  "files": [
+    "bin",
+    "templates",
+    "README.md"
+  ]
+}

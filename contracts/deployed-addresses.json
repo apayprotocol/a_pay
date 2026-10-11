@@ -1,0 +1,18 @@
+{
+  "network": "baseSepolia",
+  "chainId": 84532,
+  "founderAddress": "0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc",
+  "contracts": {
+    "APAYToken": "0x8dd4ff9035c7d4e0Bef30aa64FC30d128A4066C3",
+    "APayRouter": "0x71434344beEF9C44fF3BC95572bEB7bFB8847ec6",
+    "APayRouterV2": "0xD08c8A337E5339d1c083E06d74A9265956ceEA16",
+    "EscrowVault": "0x3E35a9E802627a3D9A86D6554e72b1C446E34aAF",
+    "StakingVault": "0xD2f3F4D97f4a3fdC9d4eEDfB9747BF9D80CF6225"
+  },
+  "parameters": {
+    "feeBps": 100,
+    "feePercentage": "1.0%",
+    "tokenSupply": "100,000,000 APAY",
+    "minStakeBond": "500 APAY"
+  }
+}

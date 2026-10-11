@@ -1,0 +1,22 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "APayRouter.sol": {
+      "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.28;\n\n/**\n * @title APayRouter\n * @notice Ultra-lightweight settlement router for AI Agent micropayments.\n * @dev Enforces 1.0% (or configurable) protocol fee and atomic batch settlements.\n */\ninterface IERC20Minimal {\n    function transferFrom(address from, address to, uint256 amount) external returns (bool);\n}\n\ncontract APayRouter {\n    address public immutable owner;\n    address public treasury;\n    uint256 public feeBps; // 100 bps = 1.0%\n    uint256 public constant MAX_BPS = 10000;\n\n    event PaymentSettled(\n        address indexed payer,\n        address indexed receiver,\n        address indexed token,\n        uint256 totalAmount,\n        uint256 feeAmount,\n        string nonce\n    );\n\n    event TreasuryUpdated(address indexed newTreasury);\n    event FeeUpdated(uint256 newFeeBps);\n\n    error Unauthorized();\n    error InvalidFee();\n    error TransferFailed();\n    error ArrayLengthMismatch();\n\n    modifier onlyOwner() {\n        if (msg.sender != owner) revert Unauthorized();\n        _;\n    }\n\n    constructor(address _treasury, uint256 _initialFeeBps) {\n        if (_initialFeeBps > 500) revert InvalidFee(); // Max 5% safety cap\n        owner = msg.sender;\n        treasury = _treasury;\n        feeBps = _initialFeeBps; // e.g. 100 = 1%\n    }\n\n    /**\n     * @notice Settle a single micro-payment from agent to merchant.\n     * @param token Address of ERC20 token (e.g. USDC).\n     * @param payer Address of the agent / budget vault.\n     * @param receiver Address of the API / service provider.\n     * @param amount Total amount in token base units.\n     * @param nonce Replay prevention identifier.\n     */\n    function settle(\n        address token,\n        address payer,\n        address receiver,\n        uint256 amount,\n        string calldata nonce\n    ) external {\n        uint256 fee = (amount * feeBps) / MAX_BPS;\n        uint256 netAmount = amount - fee;\n\n        if (fee > 0) {\n            if (!IERC20Minimal(token).transferFrom(payer, treasury, fee)) revert TransferFailed();\n        }\n        if (!IERC20Minimal(token).transferFrom(payer, receiver, netAmount)) revert TransferFailed();\n\n        emit PaymentSettled(payer, receiver, token, amount, fee, nonce);\n    }\n\n    /**\n     * @notice Settle a batch of micro-payments atomically in a single transaction.\n     * @param token Address of ERC20 token (e.g. USDC or APAY).\n     * @param payers Array of payer addresses.\n     * @param receivers Array of receiver/merchant addresses.\n     * @param amounts Array of amounts in base units.\n     * @param nonces Array of replay prevention nonces.\n     */\n    function batchSettle(\n        address token,\n        address[] calldata payers,\n        address[] calldata receivers,\n        uint256[] calldata amounts,\n        string[] calldata nonces\n    ) external {\n        uint256 length = payers.length;\n        if (\n            length != receivers.length ||\n            length != amounts.length ||\n            length != nonces.length\n        ) revert ArrayLengthMismatch();\n\n        for (uint256 i = 0; i < length; i++) {\n            uint256 amount = amounts[i];\n            uint256 fee = (amount * feeBps) / MAX_BPS;\n            uint256 netAmount = amount - fee;\n\n            if (fee > 0) {\n                if (!IERC20Minimal(token).transferFrom(payers[i], treasury, fee)) revert TransferFailed();\n            }\n            if (!IERC20Minimal(token).transferFrom(payers[i], receivers[i], netAmount)) revert TransferFailed();\n\n            emit PaymentSettled(payers[i], receivers[i], token, amount, fee, nonces[i]);\n        }\n    }\n\n    function setTreasury(address _newTreasury) external onlyOwner {\n        treasury = _newTreasury;\n        emit TreasuryUpdated(_newTreasury);\n    }\n\n    function setFeeBps(uint256 _newFeeBps) external onlyOwner {\n        if (_newFeeBps > 500) revert InvalidFee();\n        feeBps = _newFeeBps;\n        emit FeeUpdated(_newFeeBps);\n    }\n}\n"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "*"
+        ]
+      }
+    },
+    "viaIR": true
+  }
+}

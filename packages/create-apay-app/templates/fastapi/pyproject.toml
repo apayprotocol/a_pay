@@ -1,0 +1,14 @@
+[project]
+name = "my-monetized-agent"
+version = "0.1.0"
+description = "A-Pay Monetized AI Agent Service"
+requires-python = ">=3.10"
+dependencies = [
+    "apay>=0.1.8",
+    "fastapi>=0.115.0",
+    "uvicorn>=0.30.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

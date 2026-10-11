@@ -1,0 +1,25 @@
+name = "apay-cloudflare-paywall"
+main = "worker.js"
+compatibility_date = "2024-09-01"
+
+# Environment Variables configured at Cloudflare Edge
+[vars]
+# Your Ethereum / Base wallet address where AI micropayments will be deposited
+RECEIVER_WALLET = "0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc"
+
+# Price per request in USDC (e.g. 0.001 USDC = 1/10th of a cent)
+PRICE_USDC = "0.001"
+
+# Settlement Currency (USDC)
+CURRENCY = "USDC"
+
+# Settlement Rail: "base" (Mainnet) or "base-sepolia" (Testnet)
+NETWORK = "base"
+
+# Set to "true" to only challenge AI scrapers (human browsers browse 100% free)
+MONETIZE_AI_ONLY = "true"
+
+# Optional Cloudflare KV Binding for Distributed Nonce Replay Defense
+# [[kv_namespaces]]
+# binding = "APAY_NONCE_KV"
+# id = "your-kv-namespace-id"

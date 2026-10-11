@@ -1,0 +1,59 @@
+# Virtual Environment
+.venv/
+env/
+venv/
+
+# Python cache & artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Node & Next.js
+node_modules
+**/node_modules
+.next/
+out/
+
+# IDE & OS
+.DS_Store
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Environment & Secrets (Anti-Leak Guardrail)
+.env
+.env.*
+!.env.example
+*.env
+*.pem
+*.key
+*.cert
+secrets/
+
+# Internal Collaboration & Private Core Files (Never Public)
+AGENTS.md
+.aum/
+.aum*
+.aum_identity.md
+neural_ais
+RULEBOOK.md
+CONTINUITY.md
+*reddit*
+apay_before_after_reddit.jpg
+apay_claude_gemini_reddit.jpg
+web/public/*reddit*
+
+# Vercel Project Metadata
+.vercel/
+**/.vercel/
+
+.vercel
+.env*
