@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1640 624" width="1640" height="624">
+  <defs>
+    <!-- Deep Ambient Blue Glow -->
+    <radialGradient id="coreGlow" cx="50%" cy="45%" r="60%">
+      <stop offset="0%" stop-color="#0052FF" stop-opacity="0.26"/>
+      <stop offset="100%" stop-color="#0052FF" stop-opacity="0"/>
+    </radialGradient>
+    
+    <!-- Secondary Cyan Electric Accent -->
+    <radialGradient id="cyanGlow" cx="75%" cy="40%" r="35%">
+      <stop offset="0%" stop-color="#00F0FF" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#00F0FF" stop-opacity="0"/>
+    </radialGradient>
+    
+    <!-- Subtle Grid Fade -->
+    <linearGradient id="gridFade" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#181E30" stop-opacity="0"/>
+      <stop offset="20%" stop-color="#181E30" stop-opacity="0.6"/>
+      <stop offset="80%" stop-color="#181E30" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#181E30" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Deep Obsidian Titanium Background -->
+  <rect width="1640" height="624" fill="#07080C"/>
+  <rect width="1640" height="624" fill="url(#coreGlow)"/>
+  <rect width="1640" height="624" fill="url(#cyanGlow)"/>
+
+  <!-- High-Tech Blueprint Network Lines -->
+  <path d="M0,156 L1640,156 M0,312 L1640,312 M0,468 L1640,468" stroke="url(#gridFade)" stroke-width="1"/>
+  <path d="M410,0 L410,624 M820,0 L820,624 M1230,0 L1230,624" stroke="url(#gridFade)" stroke-width="1"/>
+
+  <!-- Subtle Perspective Floor Grid -->
+  <path d="M200,624 L500,468 M600,624 L750,468 M1040,624 L890,468 M1440,624 L1140,468" stroke="#121626" stroke-width="1" opacity="0.5"/>
+
+  <!-- Right Side: Iconic 3D Emblem Container -->
+  <g transform="translate(1260, 312) scale(0.95)">
+    <rect x="-220" y="-220" width="440" height="440" rx="96" fill="#0B0E17" stroke="#1C2336" stroke-width="2"/>
+    <!-- The Infinity Rail A Symbol -->
+    <path d="M-115,130 L-25,-120 C-15,-150 15,-150 25,-120 L55,-35 L10,-35 L-6,-85 L-70,105 L-115,130 Z" fill="#0052FF"/>
+    <path d="M115,130 L25,-120 C18,-140 0,-140 -5,-125 L-25,-65 L20,-65 L60,50 L-40,50 C-60,50 -75,35 -75,15 C-75,-5 -60,-20 -40,-20 L-10,-20 L-2,-50 L-40,-50 C-75,-50 -105,-20 -105,15 C-105,50 -75,80 -40,80 L70,80 L85,130 Z" fill="#FFFFFF"/>
+  </g>
+
+  <!-- Left Side: Clean Corporate Identity & Protocol Headline -->
+  <g transform="translate(140, 185)">
+    <!-- Base L2 Ecosystem Pill Badge -->
+    <rect x="0" y="0" width="190" height="36" rx="18" fill="#0C132B" stroke="#0052FF" stroke-width="1.5"/>
+    <circle cx="20" cy="18" r="6" fill="#0052FF"/>
+    <text x="36" y="23" font-family="system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="13" font-weight="700" fill="#0052FF" letter-spacing="1.5">BUILT ON BASE L2</text>
+    
+    <!-- Verified Security Tag -->
+    <rect x="205" y="0" width="135" height="36" rx="18" fill="#0D191D" stroke="#00F0FF" stroke-width="1.5"/>
+    <text x="225" y="23" font-family="system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="13" font-weight="700" fill="#00F0FF" letter-spacing="1">HTTP 402 LIVE</text>
+
+    <!-- Main Title -->
+    <text x="0" y="105" font-family="system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="70" font-weight="800" fill="#FFFFFF" letter-spacing="-2.5">A-Pay Protocol</text>
+
+    <!-- Subtitle -->
+    <text x="0" y="156" font-family="system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="24" font-weight="500" fill="#94A3B8">Universal Autonomous Micropayment Layer for AI Agents</text>
+
+    <!-- Core Metrics / Capabilities -->
+    <g transform="translate(0, 215)">
+      <text x="0" y="0" font-family="monospace" font-size="17" font-weight="600" fill="#38BDF8">⚡ Sub-15ms Settle</text>
+      <text x="230" y="0" font-family="monospace" font-size="17" font-weight="600" fill="#38BDF8">🤖 Native MCP Engine</text>
+      <text x="470" y="0" font-family="monospace" font-size="17" font-weight="600" fill="#38BDF8">🔒 Non-Custodial Escrow</text>
+    </g>
+
+    <!-- Official Protocol Web Identity Footer -->
+    <text x="0" y="275" font-family="system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="17" font-weight="600" fill="#64748B">https://apayprotocol.org  •  apayprotocol.base.eth  •  github.com/apayprotocol</text>
+  </g>
+</svg>
