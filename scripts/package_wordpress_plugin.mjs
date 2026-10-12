@@ -2,6 +2,7 @@
 import { execSync } from 'child_process';
 import crypto from 'crypto';
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -11,7 +12,7 @@ const ROOT_DIR = path.resolve(__dirname, '..');
 
 const WP_PLUGIN_DIR = path.join(ROOT_DIR, 'packages', 'wordpress-plugin');
 const PUBLIC_DOWNLOADS_DIR = path.join(ROOT_DIR, 'web', 'public', 'downloads');
-const USER_DOWNLOADS_DIR = path.join('/home/sagar', 'Downloads');
+const USER_DOWNLOADS_DIR = path.join(os.homedir(), 'Downloads');
 const DIST_DIR = path.join(WP_PLUGIN_DIR, 'dist');
 
 const CANONICAL_SLUG = 'apay-web3-ai-paywall';

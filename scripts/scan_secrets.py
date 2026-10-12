@@ -58,7 +58,9 @@ EXCLUDE_FILES = {
     ".env.local",
 }
 
-for root, dirs, files in os.walk("/home/sagar/a_pay"):
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
+for root, dirs, files in os.walk(ROOT_DIR):
     dirs[:] = [d for d in dirs if d not in EXCLUDE_DIRS]
     for f in files:
         if f in EXCLUDE_FILES:
@@ -76,7 +78,7 @@ for root, dirs, files in os.walk("/home/sagar/a_pay"):
                                 val_lower = val.lower()
                                 if any(w in val_lower for w in WHITELIST_SNIPPETS):
                                     continue
-                                relpath = os.path.relpath(filepath, "/home/sagar/a_pay")
+                                relpath = os.path.relpath(filepath, ROOT_DIR)
                                 findings.append({
                                     "file": relpath,
                                     "line": line_no,

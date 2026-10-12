@@ -63,6 +63,6 @@ npx -y smithery mcp add apayprotocol/apay
 
 ## 3. Official Anthropic MCP Registry
 * **Registry URL**: [https://registry.modelcontextprotocol.io](https://registry.modelcontextprotocol.io)
-* **Manifest**: [`server.json`](file:///home/sagar/a_pay/server.json)
+* **Manifest**: [`server.json`](https://github.com/apayprotocol/a_pay/blob/main/server.json)
 * **Validation Status**: `✅ server.json is valid`
 * **Namespace**: `io.github.apayprotocol/apay`

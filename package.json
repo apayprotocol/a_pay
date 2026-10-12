@@ -25,7 +25,7 @@
     "start": "npm --prefix web run start",
     "build:gateway": "npm --prefix gateway-ts run build",
     "build:web": "npm --prefix web run build",
-    "build:py": "uv build",
+    "build:py": "uv build --offline || uv build",
     "build:wp": "node scripts/package_wordpress_plugin.mjs",
     "build:all": "npm run build:gateway && npm run build:web && npm run build:py && npm run build:wp",
     "test:real": "uv run python scripts/demo_real_world.py",
