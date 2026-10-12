@@ -19,6 +19,7 @@ export interface CommunityReply {
   likes: number;
   likedBy: string[];
   isSolution?: boolean;
+  images?: string[];
 }
 
 export interface CommunityThread {
@@ -37,6 +38,7 @@ export interface CommunityThread {
   replies: CommunityReply[];
   solved?: boolean;
   network?: string;
+  images?: string[];
 }
 
 const COMMUNITY_CACHE_FILE = path.join('/tmp', 'apay_community.json');
@@ -185,6 +187,79 @@ Human visitors and Googlebot pass through 100% free with zero impact on SEO!`,
       },
     ],
   },
+  {
+    id: 'thread_v1_2_release',
+    title:
+      '🚀 Protocol v1.2 Live: Canonical Domain apayprotocol.org, Concept 3 Logo & Mobile Parity',
+    content:
+      'A-Pay Protocol v1.2 is officially live! We have unified our infrastructure under the canonical domain https://apayprotocol.org with Cloudflare Anycast edge routing, Basename apayprotocol.base.eth, Concept 3 vector emblem, and responsive dual-platform design. All smart contracts (APayRouter, EscrowVault, StakingVault) are verified on Base Mainnet and Sepolia with zero credential exposure.',
+    authorWallet: FOUNDER_WALLET,
+    authorName: 'A-Pay Core Team',
+    isFounder: true,
+    category: 'General',
+    createdAt: Date.now() - 3600000 * 3,
+    updatedAt: Date.now() - 3600000 * 1,
+    likes: 24,
+    likedBy: ['0x1', '0x2', '0x3', '0x4', '0x5'],
+    repliesCount: 1,
+    solved: true,
+    network: 'all',
+    replies: [
+      {
+        id: 'reply_v1_2_release_1',
+        threadId: 'thread_v1_2_release',
+        authorWallet: FOUNDER_WALLET,
+        authorName: 'A-Pay Core Team',
+        isFounder: true,
+        content: `### 📋 What's New in v1.2:
+- **Canonical Web Domain**: https://apayprotocol.org with Universal Edge SSL & anti-DDoS.
+- **Official Basename**: \`apayprotocol.base.eth\` on Base L2.
+- **Concept 3 Brand Emblem**: Precision-engineered geometric gold shield mark.
+- **Mobile Touch Parity**: Full viewport & touch compatibility for both desktop web and mobile apps.
+- **Interactive Community Issue Reporter**: Developers can now attach up to 3 screenshots directly when reporting issues!`,
+        createdAt: Date.now() - 3600000 * 1,
+        likes: 18,
+        likedBy: ['0x1', '0x2', '0x3'],
+        isSolution: true,
+      },
+    ],
+  },
+  {
+    id: 'thread_screenshot_upload',
+    title:
+      '📸 How to attach screenshots (Max 3) when reporting HTTP 402 or Gateway integration issues',
+    content:
+      'Developers can now attach up to 3 screenshots directly when reporting issues in the Community Support Hub. Attach terminal stack traces, Network tab headers (showing the 402 challenge), or UI paywall states for instant debugging by core engineers.',
+    authorWallet: FOUNDER_WALLET,
+    authorName: 'A-Pay Core Team',
+    isFounder: true,
+    category: 'Bug & Issues',
+    createdAt: Date.now() - 3600000 * 2,
+    updatedAt: Date.now() - 3600000 * 1,
+    likes: 11,
+    likedBy: ['0x1', '0x2'],
+    repliesCount: 1,
+    solved: true,
+    network: 'all',
+    replies: [
+      {
+        id: 'reply_screenshot_upload_1',
+        threadId: 'thread_screenshot_upload',
+        authorWallet: FOUNDER_WALLET,
+        authorName: 'A-Pay Core Team',
+        isFounder: true,
+        content: `When reporting an issue:
+1. Click **Ask Question / Post Issue**.
+2. Click the screenshot dropzone or press **Ctrl+V / Cmd+V** to paste directly from your clipboard!
+3. Up to 3 screenshots are compressed client-side and saved with your post.
+4. Click any attached screenshot in the thread to view it in full-resolution lightbox!`,
+        createdAt: Date.now() - 3600000 * 1,
+        likes: 8,
+        likedBy: ['0x1', '0x2'],
+        isSolution: true,
+      },
+    ],
+  },
 ];
 
 // In-memory registry for fast reads
@@ -200,18 +275,21 @@ function hydrateLocalDisk(): void {
           for (const thread of data) {
             localMemoryThreads.set(thread.id, thread);
           }
-          return;
         }
       }
-      // Populate initial seeds if empty
-      for (const thread of INITIAL_SEEDED_THREADS) {
+    }
+    // Always merge canonical seeded threads if not already present
+    for (const thread of INITIAL_SEEDED_THREADS) {
+      if (!localMemoryThreads.has(thread.id)) {
         localMemoryThreads.set(thread.id, thread);
       }
     }
   } catch {
     // Non-blocking fallback
     for (const thread of INITIAL_SEEDED_THREADS) {
-      localMemoryThreads.set(thread.id, thread);
+      if (!localMemoryThreads.has(thread.id)) {
+        localMemoryThreads.set(thread.id, thread);
+      }
     }
   }
 }
@@ -318,6 +396,7 @@ class DistributedCommunityStore {
     authorName?: string;
     category: CommunityCategory;
     network?: string;
+    images?: string[];
   }): Promise<CommunityThread> {
     hydrateLocalDisk();
     await this.loadFromRedis();
@@ -340,6 +419,7 @@ class DistributedCommunityStore {
       replies: [],
       solved: false,
       network: params.network || 'all',
+      images: params.images && params.images.length > 0 ? params.images.slice(0, 3) : undefined,
     };
 
     localMemoryThreads.set(newThread.id, newThread);
@@ -355,6 +435,7 @@ class DistributedCommunityStore {
     authorWallet: string;
     authorName?: string;
     isSolution?: boolean;
+    images?: string[];
   }): Promise<CommunityReply | null> {
     hydrateLocalDisk();
     await this.loadFromRedis();
@@ -375,6 +456,7 @@ class DistributedCommunityStore {
       likes: 0,
       likedBy: [],
       isSolution: params.isSolution || isFounder,
+      images: params.images && params.images.length > 0 ? params.images.slice(0, 3) : undefined,
     };
 
     thread.replies.push(reply);

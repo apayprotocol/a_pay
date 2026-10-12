@@ -453,6 +453,69 @@ async function main() {
     assert(data.likes >= 1, 'Expected likes >= 1');
   });
 
+  await runStep('POST /api/community creates thread with up to 3 attached screenshots', async () => {
+    const sampleImage1 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+    const sampleImage2 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+    const sampleImage3 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPj/HwADBwGAi3oGtwAAAABJRU5ErkJggg==';
+
+    const res = await fetch(`${BASE_URL}/api/community`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'create_thread',
+        title: 'Developer Bug Report with 3 Screenshot Attachments',
+        category: 'Bug & Issues',
+        content: 'Investigating HTTP 402 challenge header replay verification with attached terminal logs and Network inspector screenshots.',
+        author: '0x000000000000000000000000000000000000e2e3',
+        network: 'base-sepolia',
+        images: [sampleImage1, sampleImage2, sampleImage3],
+      }),
+    });
+    assert(res.status === 201, `Expected status 201, got ${res.status}`);
+    const data = await res.json();
+    assert(data.success === true, 'Expected success === true');
+    assert(data.thread && data.thread.id, 'Expected returned thread with id');
+    assert(Array.isArray(data.thread.images), 'Expected images array');
+    assert(data.thread.images.length === 3, 'Expected exactly 3 attached screenshots');
+  });
+
+  await runStep('POST /api/community rejects thread with more than 3 screenshots with 400 Bad Request', async () => {
+    const sampleImage = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+    const res = await fetch(`${BASE_URL}/api/community`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'create_thread',
+        title: 'Test Exceeding Screenshot Limit Rejection',
+        category: 'Bug & Issues',
+        content: 'This thread attempts to attach 4 screenshots, which should strictly fail with 400 Bad Request.',
+        author: '0x000000000000000000000000000000000000e2e4',
+        images: [sampleImage, sampleImage, sampleImage, sampleImage],
+      }),
+    });
+    assert(res.status === 400, `Expected status 400, got ${res.status}`);
+    const data = await res.json();
+    assert(data.error && data.error.includes('Maximum 3 screenshots allowed'), 'Expected 3 screenshots limit error message');
+  });
+
+  await runStep('POST /api/community rejects invalid image format with 400 Bad Request', async () => {
+    const res = await fetch(`${BASE_URL}/api/community`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'create_thread',
+        title: 'Test Invalid Image Format Rejection',
+        category: 'Bug & Issues',
+        content: 'This thread attempts to attach an invalid non-image string.',
+        author: '0x000000000000000000000000000000000000e2e5',
+        images: ['javascript:alert(1)'],
+      }),
+    });
+    assert(res.status === 400, `Expected status 400, got ${res.status}`);
+    const data = await res.json();
+    assert(data.error && data.error.includes('not a valid format'), 'Expected invalid format error message');
+  });
+
   // =====================================================================
   // 10. AI AGENT & LLM DISCOVERY STANDARDS (/llms.txt & /robots.txt)
   // =====================================================================

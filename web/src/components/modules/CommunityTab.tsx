@@ -8,7 +8,10 @@ import {
   Clock,
   Code2,
   ExternalLink,
+  Image as ImageIcon,
+  Maximize2,
   MessageSquare,
+  Paperclip,
   PlusCircle,
   RefreshCw,
   Search,
@@ -17,10 +20,11 @@ import {
   Sparkles,
   Tag,
   ThumbsUp,
+  UploadCloud,
   X,
 } from 'lucide-react';
 import type React from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { NetworkId } from '@/config/contracts';
 import type { CommunityCategory, CommunityReply, CommunityThread } from '@/lib/community-store';
 
@@ -65,6 +69,65 @@ function truncateAddress(addr: string): string {
   return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 }
 
+/**
+ * Optimizes and resizes user uploaded screenshot client-side into a compact data URL.
+ * Shrinks multi-megabyte screenshots to ~150-250KB WebP/JPEG for lightning fast uploads.
+ */
+async function processImageFile(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    if (!file.type.startsWith('image/')) {
+      return reject(new Error('Selected file is not an image format.'));
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      return reject(new Error('Image file exceeds maximum allowable size (10MB).'));
+    }
+
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Failed to read image file.'));
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string;
+      if (!dataUrl) return reject(new Error('Empty image file.'));
+
+      if (file.type === 'image/svg+xml' || file.type === 'image/gif') {
+        return resolve(dataUrl);
+      }
+
+      const img = new Image();
+      img.onerror = () => resolve(dataUrl);
+      img.onload = () => {
+        const MAX_DIM = 1600;
+        let { width, height } = img;
+        if (width > MAX_DIM || height > MAX_DIM) {
+          if (width > height) {
+            height = Math.round((height * MAX_DIM) / width);
+            width = MAX_DIM;
+          } else {
+            width = Math.round((width * MAX_DIM) / height);
+            height = MAX_DIM;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return resolve(dataUrl);
+
+        ctx.drawImage(img, 0, 0, width, height);
+        try {
+          const webp = canvas.toDataURL('image/webp', 0.85);
+          if (webp.startsWith('data:image/webp')) {
+            return resolve(webp);
+          }
+        } catch {}
+        const jpeg = canvas.toDataURL('image/jpeg', 0.85);
+        resolve(jpeg);
+      };
+      img.src = dataUrl;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 export function CommunityTab({
   walletAddress,
   isFounder = false,
@@ -85,6 +148,13 @@ export function CommunityTab({
   const [newContent, setNewContent] = useState('');
   const [isSubmittingThread, setIsSubmittingThread] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+
+  // Screenshots attachment state (Max 3)
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const [isProcessingImages, setIsProcessingImages] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
+  const [activeLightboxImage, setActiveLightboxImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Reply inputs keyed by threadId
   const [replyInputs, setReplyInputs] = useState<Record<string, string>>({});
@@ -183,6 +253,77 @@ export function CommunityTab({
     }
   };
 
+  // Lightbox keyboard listener (Esc to close)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && activeLightboxImage) {
+        setActiveLightboxImage(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeLightboxImage]);
+
+  // Image Selection Handler (Max 3)
+  const handleFilesSelected = async (files: FileList | File[]) => {
+    setImageError(null);
+    const fileArray = Array.from(files);
+    const availableSlots = 3 - selectedImages.length;
+    if (availableSlots <= 0) {
+      setImageError('Maximum 3 screenshots allowed per thread.');
+      return;
+    }
+
+    const filesToProcess = fileArray.slice(0, availableSlots);
+    if (fileArray.length > availableSlots) {
+      setImageError(
+        `Only up to 3 screenshots can be attached. Added ${availableSlots} of ${fileArray.length} selected.`,
+      );
+    }
+
+    setIsProcessingImages(true);
+    try {
+      const processed: string[] = [];
+      for (const file of filesToProcess) {
+        if (!file.type.startsWith('image/')) {
+          setImageError(`File "${file.name}" is not an image.`);
+          continue;
+        }
+        const url = await processImageFile(file);
+        processed.push(url);
+      }
+      setSelectedImages((prev) => [...prev, ...processed].slice(0, 3));
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error processing image.';
+      setImageError(msg);
+    } finally {
+      setIsProcessingImages(false);
+    }
+  };
+
+  // Clipboard Paste Handler (Ctrl+V / Cmd+V for screenshots)
+  const handlePaste = (e: React.ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    const pastedFiles: File[] = [];
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.kind === 'file' && item.type.startsWith('image/')) {
+        const file = item.getAsFile();
+        if (file) pastedFiles.push(file);
+      }
+    }
+    if (pastedFiles.length > 0) {
+      e.preventDefault();
+      handleFilesSelected(pastedFiles);
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setSelectedImages((prev) => prev.filter((_, i) => i !== index));
+    setImageError(null);
+  };
+
   // Submit new thread
   const handleCreateThread = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -212,12 +353,15 @@ export function CommunityTab({
           authorWallet: effectiveWallet,
           authorName: isFounder ? 'A-Pay Founder' : undefined,
           network: activeNetwork,
+          images: selectedImages.length > 0 ? selectedImages : undefined,
         }),
       });
 
       if (res.ok) {
         setNewTitle('');
         setNewContent('');
+        setSelectedImages([]);
+        setImageError(null);
         setIsModalOpen(false);
         await loadThreads();
       } else {
@@ -272,6 +416,15 @@ export function CommunityTab({
     () => threads.reduce((acc, t) => acc + (t.repliesCount || 0), 0),
     [threads],
   );
+
+  // Category counts
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = { All: threads.length };
+    for (const t of threads) {
+      counts[t.category] = (counts[t.category] || 0) + 1;
+    }
+    return counts;
+  }, [threads]);
 
   return (
     <div className="space-y-6 animate-fadeIn pb-12">
@@ -356,19 +509,28 @@ export function CommunityTab({
           />
         </div>
 
-        {/* Category Pills */}
+        {/* Category Pills with Live Counts */}
         <div className="flex flex-wrap items-center gap-2 pt-1">
           {CATEGORIES.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-mono font-medium transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-mono font-medium transition-all cursor-pointer inline-flex items-center gap-1.5 ${
                 selectedCategory === cat
                   ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
                   : 'bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400'
               }`}
             >
-              {cat}
+              <span>{cat}</span>
+              <span
+                className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                  selectedCategory === cat
+                    ? 'bg-white/20 text-white'
+                    : 'bg-slate-200/80 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                }`}
+              >
+                {categoryCounts[cat] ?? 0}
+              </span>
             </button>
           ))}
         </div>
@@ -461,6 +623,51 @@ export function CommunityTab({
                   <div className="text-xs text-slate-600 dark:text-slate-300 whitespace-pre-wrap leading-relaxed font-sans">
                     {thread.content}
                   </div>
+
+                  {/* Attached Screenshots Gallery (Max 3) */}
+                  {thread.images && thread.images.length > 0 && (
+                    <div className="pt-2">
+                      <div className="flex items-center gap-1.5 text-[11px] font-mono font-semibold text-slate-500 dark:text-slate-400 mb-2">
+                        <ImageIcon className="w-3.5 h-3.5 text-blue-600 dark:text-sky-400" />
+                        <span>
+                          Attached Screenshots ({thread.images.length}/3) — Click to enlarge:
+                        </span>
+                      </div>
+                      <div
+                        className={`grid gap-2.5 sm:gap-3 ${
+                          thread.images.length === 1
+                            ? 'grid-cols-1 sm:max-w-md'
+                            : thread.images.length === 2
+                              ? 'grid-cols-2'
+                              : 'grid-cols-3'
+                        }`}
+                      >
+                        {thread.images.map((imgUrl, imgIdx) => (
+                          <div
+                            key={`${thread.id}-img-${imgIdx}`}
+                            onClick={() => setActiveLightboxImage(imgUrl)}
+                            className="group relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 aspect-video cursor-pointer hover:border-blue-500/60 transition-all shadow-sm"
+                          >
+                            <img
+                              src={imgUrl}
+                              alt={`Screenshot ${imgIdx + 1} for ${thread.title}`}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              loading="lazy"
+                            />
+                            <div className="absolute inset-0 bg-slate-950/0 group-hover:bg-slate-950/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-900/90 text-white text-[10px] font-mono font-medium backdrop-blur-sm shadow-md">
+                                <Maximize2 className="w-3 h-3" />
+                                <span>Enlarge</span>
+                              </span>
+                            </div>
+                            <span className="absolute bottom-1.5 left-1.5 px-2 py-0.5 rounded-lg bg-slate-900/75 text-white text-[9px] font-mono backdrop-blur-xs">
+                              SS #{imgIdx + 1}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Actions: Likes & Expand Replies */}
@@ -632,7 +839,11 @@ export function CommunityTab({
               </div>
             )}
 
-            <form onSubmit={handleCreateThread} className="space-y-4 font-mono text-xs">
+            <form
+              onSubmit={handleCreateThread}
+              onPaste={handlePaste}
+              className="space-y-4 font-mono text-xs"
+            >
               <div className="space-y-1.5">
                 <label className="text-slate-700 dark:text-slate-300 font-semibold block">
                   Category:
@@ -686,6 +897,116 @@ export function CommunityTab({
                 />
               </div>
 
+              {/* Screenshots Attachment Section (Max 3) */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-slate-700 dark:text-slate-300">
+                  <label className="font-semibold flex items-center gap-1.5">
+                    <Paperclip className="w-3.5 h-3.5 text-blue-600 dark:text-sky-400" />
+                    <span>Attach Screenshots / Error Logs (Optional, Max 3):</span>
+                  </label>
+                  <span
+                    className={`text-[11px] font-mono px-2 py-0.5 rounded-full ${
+                      selectedImages.length >= 3
+                        ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold'
+                        : 'text-slate-400 bg-slate-100 dark:bg-slate-800'
+                    }`}
+                  >
+                    {selectedImages.length} / 3 screenshots
+                  </span>
+                </div>
+
+                {imageError && (
+                  <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[11px] font-mono flex items-center gap-1.5">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{imageError}</span>
+                  </div>
+                )}
+
+                {/* Hidden File Input */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/gif"
+                  multiple
+                  onChange={(e) => {
+                    if (e.target.files) {
+                      handleFilesSelected(e.target.files);
+                      e.target.value = '';
+                    }
+                  }}
+                  className="hidden"
+                />
+
+                {/* Dropzone & Browse button */}
+                {selectedImages.length < 3 && (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      if (e.dataTransfer.files) {
+                        handleFilesSelected(e.dataTransfer.files);
+                      }
+                    }}
+                    className="p-4 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-sky-400 bg-slate-50/60 dark:bg-slate-900/40 text-center cursor-pointer transition-all group"
+                  >
+                    <div className="flex flex-col items-center gap-1.5">
+                      <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-sky-400 group-hover:scale-110 transition-transform">
+                        <UploadCloud className="w-5 h-5" />
+                      </div>
+                      <div className="text-xs text-slate-700 dark:text-slate-200 font-medium">
+                        <span className="text-blue-600 dark:text-sky-400 font-bold underline">
+                          Click to upload
+                        </span>{' '}
+                        or drag & drop screenshot
+                      </div>
+                      <div className="text-[10px] text-slate-400">
+                        PNG, JPG, WebP, GIF (Max 3 • Paste via Ctrl+V supported)
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {isProcessingImages && (
+                  <div className="p-2 text-center text-xs font-mono text-blue-600 dark:text-sky-400 flex items-center justify-center gap-2">
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Processing and optimizing screenshot...</span>
+                  </div>
+                )}
+
+                {/* Attached Thumbnails Preview */}
+                {selectedImages.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2.5 pt-1">
+                    {selectedImages.map((img, idx) => (
+                      <div
+                        key={`modal-ss-${idx}`}
+                        className="relative group rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 aspect-video bg-slate-100 dark:bg-slate-900 shadow-sm"
+                      >
+                        <img
+                          src={img}
+                          alt={`Attached screenshot ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveImage(idx);
+                          }}
+                          className="absolute top-1 right-1 p-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white shadow-md transition-colors cursor-pointer"
+                          title="Remove screenshot"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                        <span className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded-md bg-slate-950/75 text-white text-[9px] font-mono">
+                          SS #{idx + 1}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div className="p-3 rounded-xl bg-blue-50/60 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-900/60 text-[11px] text-slate-600 dark:text-slate-400 space-y-1">
                 <div className="font-bold text-blue-600 dark:text-sky-400 flex items-center gap-1">
                   <ShieldCheck className="w-3 h-3" />
@@ -725,13 +1046,64 @@ export function CommunityTab({
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmittingThread}
+                  disabled={isSubmittingThread || isProcessingImages}
                   className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold transition-colors cursor-pointer"
                 >
                   {isSubmittingThread ? 'Posting...' : 'Publish Question'}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Screenshot Lightbox Modal Viewer */}
+      {activeLightboxImage && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md animate-fadeIn"
+          onClick={() => setActiveLightboxImage(null)}
+        >
+          <div
+            className="relative max-w-5xl w-full max-h-[92vh] flex flex-col items-center bg-slate-900/95 border border-slate-800 rounded-3xl p-3 sm:p-4 shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Lightbox Topbar */}
+            <div className="w-full flex items-center justify-between pb-3 px-2 border-b border-slate-800 text-xs font-mono text-slate-300">
+              <div className="flex items-center gap-2">
+                <ImageIcon className="w-4 h-4 text-sky-400" />
+                <span className="font-semibold text-white">Screenshot Full View</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <a
+                  href={activeLightboxImage}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs transition-colors"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Open Full Size</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setActiveLightboxImage(null)}
+                  className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  title="Close (Esc)"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Lightbox Image Body */}
+            <div className="w-full flex-1 overflow-auto flex items-center justify-center p-2 sm:p-4">
+              <img
+                src={activeLightboxImage}
+                alt="Enlarged screenshot"
+                className="max-h-[75vh] w-auto max-w-full object-contain rounded-xl shadow-lg border border-slate-800"
+              />
+            </div>
           </div>
         </div>
       )}

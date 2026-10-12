@@ -29,6 +29,9 @@
       "complexity": {
         "noExcessiveCognitiveComplexity": "off"
       },
+      "performance": {
+        "noImgElement": "off"
+      },
       "a11y": {
         "recommended": false
       },

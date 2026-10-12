@@ -9,6 +9,52 @@ function sanitize(str: string): string {
   return str.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '').trim();
 }
 
+const MAX_IMAGES = 3;
+const MAX_IMAGE_SIZE_CHARS = 2.5 * 1024 * 1024; // ~2.5MB chars limit per image
+const ALLOWED_IMAGE_DATA_REGEX =
+  /^data:image\/(png|jpeg|jpg|webp|gif|svg\+xml);base64,[A-Za-z0-9+/=]+$/;
+const ALLOWED_HTTPS_URL_REGEX = /^https:\/\/[^\s$.?#].[^\s]*$/i;
+
+function validateAndSanitizeImages(imagesRaw: unknown): {
+  valid: boolean;
+  error?: string;
+  images?: string[];
+} {
+  if (!imagesRaw || (Array.isArray(imagesRaw) && imagesRaw.length === 0)) {
+    return { valid: true, images: undefined };
+  }
+  if (!Array.isArray(imagesRaw)) {
+    return { valid: false, error: 'Images must be provided as an array.' };
+  }
+  if (imagesRaw.length > MAX_IMAGES) {
+    return { valid: false, error: `Maximum ${MAX_IMAGES} screenshots allowed per post.` };
+  }
+
+  const cleanImages: string[] = [];
+  for (let i = 0; i < imagesRaw.length; i++) {
+    const item = imagesRaw[i];
+    if (typeof item !== 'string') {
+      return { valid: false, error: `Screenshot #${i + 1} must be a valid image string.` };
+    }
+    const trimmed = item.trim();
+    if (trimmed.length > MAX_IMAGE_SIZE_CHARS) {
+      return {
+        valid: false,
+        error: `Screenshot #${i + 1} exceeds maximum allowable size (2MB limit).`,
+      };
+    }
+    if (!ALLOWED_IMAGE_DATA_REGEX.test(trimmed) && !ALLOWED_HTTPS_URL_REGEX.test(trimmed)) {
+      return {
+        valid: false,
+        error: `Screenshot #${i + 1} is not a valid format. Only PNG, JPEG, WebP, GIF data URLs or secure HTTPS image links are allowed.`,
+      };
+    }
+    cleanImages.push(trimmed);
+  }
+
+  return { valid: true, images: cleanImages };
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -25,13 +71,20 @@ export async function GET(request: Request) {
       limit,
     });
 
-    return NextResponse.json({
-      success: true,
-      count: threads.length,
-      storageEngine: communityStore.storageEngine,
-      threads,
-      timestamp: Date.now(),
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        count: threads.length,
+        storageEngine: communityStore.storageEngine,
+        threads,
+        timestamp: Date.now(),
+      },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
+        },
+      },
+    );
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     return NextResponse.json(
@@ -94,12 +147,18 @@ export async function POST(request: Request) {
         );
       }
 
+      const replyImagesValidation = validateAndSanitizeImages(body.images);
+      if (!replyImagesValidation.valid) {
+        return NextResponse.json({ error: replyImagesValidation.error }, { status: 400 });
+      }
+
       const reply = await communityStore.addReply({
         threadId,
         content: cleanContent,
         authorWallet,
         authorName: authorName ? sanitize(authorName) : undefined,
         isSolution,
+        images: replyImagesValidation.images,
       });
 
       if (!reply) {
@@ -159,6 +218,11 @@ export async function POST(request: Request) {
       ? category
       : 'General';
 
+    const imagesValidation = validateAndSanitizeImages(body.images);
+    if (!imagesValidation.valid) {
+      return NextResponse.json({ error: imagesValidation.error }, { status: 400 });
+    }
+
     const thread = await communityStore.createThread({
       title: cleanTitle,
       content: cleanContent,
@@ -166,6 +230,7 @@ export async function POST(request: Request) {
       authorName: authorName ? sanitize(authorName) : undefined,
       category: resolvedCategory,
       network: network || 'all',
+      images: imagesValidation.images,
     });
 
     return NextResponse.json(
