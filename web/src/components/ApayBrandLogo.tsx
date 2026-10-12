@@ -37,7 +37,7 @@ export function ApayBrandLogo({
       : sizeMap[size] || sizeMap.md;
 
   return (
-    <div className={`inline-flex items-center gap-3 select-none ${className}`}>
+    <div className={`inline-flex items-center gap-2 sm:gap-3 select-none ${className}`}>
       {/* Animated Brand Mark Container */}
       <div
         className={`relative ${currentSize.container} shrink-0 bg-[#07080B] border border-slate-800/80 p-1 flex items-center justify-center transition-all duration-300 group cursor-pointer overflow-hidden ${
@@ -115,23 +115,23 @@ export function ApayBrandLogo({
 
       {/* Typography Wordmark if requested */}
       {withText && (
-        <div className="flex flex-col">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col min-w-0">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <span
-              className={`font-spatial font-black text-slate-900 dark:text-white tracking-wider ${currentSize.textClass}`}
+              className={`font-spatial font-black text-slate-900 dark:text-white tracking-wider truncate ${currentSize.textClass}`}
             >
               A-PAY
             </span>
-            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-sky-400 border border-blue-500/20 font-bold uppercase tracking-wider">
+            <span className="hidden xs:inline text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-sky-400 border border-blue-500/20 font-bold uppercase tracking-wider shrink-0">
               M2M
             </span>
           </div>
           {subtitle ? (
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono tracking-tight">
+            <span className="hidden sm:inline text-[10px] text-slate-500 dark:text-slate-400 font-mono tracking-tight truncate">
               {subtitle}
             </span>
           ) : (
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono tracking-tight">
+            <span className="hidden sm:inline text-[10px] text-slate-500 dark:text-slate-400 font-mono tracking-tight truncate">
               Base L2 Settlement
             </span>
           )}

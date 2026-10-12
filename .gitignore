@@ -57,3 +57,4 @@ web/public/*reddit*
 
 .vercel
 .env*
+social-studio/

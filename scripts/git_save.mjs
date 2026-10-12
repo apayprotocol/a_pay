@@ -176,9 +176,9 @@ for (const pattern of sensitivePatterns) {
   }
 }
 
-// 5. Commit
+// 5. Commit (Authorized for Vercel Hobby Production Deployment)
 run('git config user.name "A-Pay Protocol"');
-run('git config user.email "contact@apayprotocol.org"');
+run('git config user.email "neural.ais.official@gmail.com"');
 
 const customMsg = process.argv.slice(2).join(' ').trim();
 const commitMsg = customMsg

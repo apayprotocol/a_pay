@@ -12,3 +12,9 @@ contracts/cache
 contracts/artifacts
 contracts/typechain-types
 target
+.aum*
+neural_ais
+AGENTS.md
+.env
+.env.local
+social-studio

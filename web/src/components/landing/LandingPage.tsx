@@ -127,16 +127,16 @@ export function LandingPage({
     : null;
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground transition-colors duration-300 selection:bg-blue-500/20 selection:text-blue-500">
+    <div className="min-h-screen flex flex-col bg-background text-foreground transition-colors duration-300 selection:bg-blue-500/20 selection:text-blue-500 w-full max-w-[100vw] overflow-x-hidden">
       {/* ========================================================================= */}
       {/* 1. DUAL-TIER GLOBAL HEADER ARCHITECTURE */}
       {/* ========================================================================= */}
       <header className="sticky top-0 z-40 w-full backdrop-blur-2xl transition-all duration-300">
         {/* Tier 1: Main Global Brand & Action Bar */}
         <div className="w-full border-b border-slate-200/80 dark:border-slate-800/80 bg-white/90 dark:bg-slate-950/90 shadow-xs">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-4">
             {/* Left: Brand Logo & Protocol Status */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               <ApayBrandLogo size="md" withText subtitle="M2M & H2M Protocol" />
               <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[10px] font-mono font-medium">
                 <span className="relative flex h-1.5 w-1.5">
@@ -148,7 +148,7 @@ export function LandingPage({
             </div>
 
             {/* Right: Network Selector, Theme Toggle, Console & Wallet CTAs */}
-            <div className="flex items-center gap-1.5 sm:gap-3">
+            <div className="flex items-center gap-1 sm:gap-3 shrink-0">
               {/* Network Pill Indicator */}
               <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-800 text-[11px] font-mono bg-slate-100/70 dark:bg-slate-900/70 text-slate-600 dark:text-slate-300">
                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
@@ -198,9 +198,9 @@ export function LandingPage({
         </div>
 
         {/* Tier 2: Dedicated Sub-Header Navigation Bar */}
-        <div className="w-full border-b border-slate-200/80 dark:border-slate-800/80 bg-slate-50/95 dark:bg-slate-950/90 shadow-sm backdrop-blur-md relative z-30 overflow-visible">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative overflow-visible">
-            <div className="flex items-center justify-between gap-2 py-1.5 relative overflow-visible">
+        <div className="w-full border-b border-slate-200/80 dark:border-slate-800/80 bg-slate-50/95 dark:bg-slate-950/90 shadow-sm backdrop-blur-md relative z-30">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 relative">
+            <div className="flex items-center justify-between gap-2 py-1.5 relative min-w-0 max-w-full">
               {/* Left: The 3 Pillars Dropdown & Sub-Nodes Flyout (Unclipped) */}
               <div
                 className="relative shrink-0 overflow-visible"
@@ -329,7 +329,7 @@ export function LandingPage({
               <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 shrink-0 mx-1 hidden sm:block" />
 
               {/* Right: Remaining Nav Links (Can scroll on small mobile screens without clipping the dropdown) */}
-              <nav className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar py-0.5 shrink-0">
+              <nav className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar py-0.5 min-w-0 flex-1 justify-end">
                 <Link
                   href="/blog"
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-slate-900 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-all shrink-0"
