@@ -649,6 +649,9 @@ async function main() {
         price: '4.0 $APAY / $0.001 USDC',
         network: 'base-sepolia',
         version: '0.1.8',
+        name: 'Publisher Test API',
+        category: 'FINANCE',
+        description: 'E2E verified publishing endpoint',
       }),
     });
     assert(regRes.status === 200, `Expected status 200, got ${regRes.status}`);
@@ -659,6 +662,13 @@ async function main() {
     assert(discoData.success === true, 'Expected success === true');
     const found = discoData.services.some((s) => s.targetDomain.includes('e2e-publisher-test.ai'));
     assert(found === true, 'Newly registered paywall must be discovered by autonomous AI agents');
+    const topService = discoData.services[0];
+    assert(
+      topService.targetDomain.includes('e2e-publisher-test.ai'),
+      'Newly registered dynamic service must appear at top of directory',
+    );
+    assert(topService.name === 'Publisher Test API', 'Expected registered custom name');
+    assert(topService.category === 'FINANCE', 'Expected registered custom category');
   });
 
   // =====================================================================

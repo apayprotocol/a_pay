@@ -13,25 +13,41 @@ from .relayer import ClaimJournal, SettlementRelayer
 from .wallet import AgentWallet
 
 
-def _register_heartbeat(wallet: str, target: str, price: float, network: str, currency: str = "USDC") -> None:
+def _register_heartbeat(
+    wallet: str,
+    target: str,
+    price: float,
+    network: str,
+    currency: str = "USDC",
+    name: str | None = None,
+    category: str = "DEVTOOLS",
+    description: str | None = None,
+) -> None:
     """Non-blocking recurring background heartbeat to A-Pay Protocol Registry.
     Sends initial heartbeat and refreshes every 4 minutes (TTL=10m)
     as long as the gateway server process remains active.
     """
 
     def _worker():
+        clean_name = name or f"{target.replace('http://', '').replace('https://', '').split('/')[0]} M2M API"
+        clean_desc = (
+            description or f"HTTP 402 Paywalled M2M microservice protected via A-Pay Gateway ({__version__})."
+        )
         payload = {
             "wallet": wallet,
             "targetDomain": target,
             "price": f"{price} {currency.upper()}",
             "network": network,
             "version": __version__,
+            "name": clean_name,
+            "category": category,
+            "description": clean_desc,
         }
         while True:
             try:
                 with httpx.Client(timeout=4.0) as client:
                     client.post(
-                        "https://apay-network.vercel.app/api/registry",
+                        "https://apayprotocol.org/api/registry",
                         json=payload,
                     )
             except Exception:
@@ -96,6 +112,22 @@ def main() -> None:
     envvar="REDIS_URL",
     help="Optional Redis URL for distributed nonce store (redis://...)",
 )
+@click.option(
+    "--domain",
+    "-d",
+    default=None,
+    help="Public domain/URL to advertise in the Global Protocol Registry (e.g. https://api.mycompany.com)",
+)
+@click.option(
+    "--name",
+    default=None,
+    help="Service name for Global Protocol Registry (e.g. My Data Feed)",
+)
+@click.option(
+    "--category",
+    default="DEVTOOLS",
+    help="Service category: AI_INFERENCE, FINANCE, SCRAPING, CRYPTO, DEVTOOLS, DATA_FEEDS",
+)
 def protect(
     target: str,
     price: float,
@@ -106,6 +138,9 @@ def protect(
     network: str,
     price_apay: float | None = None,
     redis_url: str | None = None,
+    domain: str | None = None,
+    name: str | None = None,
+    category: str = "DEVTOOLS",
 ) -> None:
     """🛡️ Protect ANY website or API with an instant 1-command HTTP 402 Paywall."""
     curr_upper = currency.upper()
@@ -115,6 +150,8 @@ def protect(
     click.echo(click.style("⚡ A-PAY GATEWAY IS ACTIVE", fg="green", bold=True))
     click.echo(click.style("==================================================", fg="cyan", bold=True))
     click.echo(f"  Target URL       : {target}")
+    if domain:
+        click.echo(f"  Public Directory : {domain}")
     if curr_upper == "DUAL":
         click.echo(f"  Paywall Price    : {price} USDC / {resolved_apay_price} $APAY (DUAL)")
     else:
@@ -127,7 +164,16 @@ def protect(
     click.echo(click.style("\nIncoming AI bots will be challenged with HTTP 402 unless paid.\n", fg="yellow"))
 
     # Non-blocking registration ping to Protocol Registry
-    _register_heartbeat(wallet=wallet, target=target, price=price, network=network, currency=curr_upper)
+    public_target = domain or target
+    _register_heartbeat(
+        wallet=wallet,
+        target=public_target,
+        price=price,
+        network=network,
+        currency=curr_upper,
+        name=name,
+        category=category,
+    )
 
     nonce_store = None
     if redis_url:

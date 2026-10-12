@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { wallet, targetDomain, price, network, version } = body;
+    const { wallet, targetDomain, price, network, version, name, category, description } = body;
 
     if (!wallet || typeof wallet !== 'string') {
       return NextResponse.json({ error: 'Missing or invalid "wallet" parameter' }, { status: 400 });
@@ -43,10 +43,19 @@ export async function POST(request: Request) {
       targetDomain: sanitizedDomain,
       price: price || existing?.price || '0.001 USDC',
       network: network || existing?.network || 'base',
-      version: version || existing?.version || '0.1.5',
+      version: version || existing?.version || '0.1.8',
       firstSeen: existing ? existing.firstSeen : now,
       lastHeartbeat: now,
       status: 'online',
+      name:
+        name ||
+        existing?.name ||
+        `${sanitizedDomain.replace(/^https?:\/\//, '').split('/')[0]} M2M API`,
+      category: category || existing?.category || 'DEVTOOLS',
+      description:
+        description ||
+        existing?.description ||
+        `HTTP 402 Paywalled M2M microservice registered via A-Pay Gateway (${version || existing?.version || '0.1.8'}).`,
     };
 
     await registryStore.saveMerchant(record);
@@ -272,21 +281,23 @@ export async function GET(request: Request) {
         .filter((m) => m.status === 'online')
         .map((m) => ({
           id: m.id,
-          name: m.targetDomain.replace(/^https?:\/\//, '').split('/')[0] + ' M2M API',
+          name: m.name || `${m.targetDomain.replace(/^https?:\/\//, '').split('/')[0]} M2M API`,
           provider: m.wallet ? `${m.wallet.slice(0, 6)}...${m.wallet.slice(-4)}` : 'Gateway Node',
           targetDomain: m.targetDomain,
           wallet: m.wallet,
           price: m.price,
           network: m.network || 'base',
           version: m.version,
-          category: 'DEVTOOLS',
-          description: `HTTP 402 Paywalled M2M microservice registered via A-Pay Gateway (${m.version}).`,
-          latencyMs: 50,
+          category: m.category || 'DEVTOOLS',
+          description:
+            m.description ||
+            `HTTP 402 Paywalled M2M microservice registered via A-Pay Gateway (${m.version}).`,
+          latencyMs: 42,
           uptimePct: 99.9,
           bonded: true,
           isBonded: true,
           status: m.status,
-          tags: ['M2M', 'Gateway', 'EIP-712'],
+          tags: ['M2M', 'Live Merchant', 'EIP-712'],
           samplePayload: {
             endpoint: m.targetDomain,
             status: 'verified_claim',
@@ -296,20 +307,10 @@ export async function GET(request: Request) {
         }));
 
       // Combined unique by canonical targetDomain (excluding tombstoned / deleted services)
+      // Live registered merchant services from developers take precedence at top of directory
       const tombstones = await registryStore.getTombstones();
       const seenDomains = new Set<string>();
       const combined: EndpointItem[] = [];
-
-      for (const c of curatedEndpoints) {
-        const key = canonicalizeDomain(c.targetDomain).toLowerCase();
-        if (!tombstones.has(key) && !seenDomains.has(key)) {
-          seenDomains.add(key);
-          combined.push({
-            ...c,
-            targetDomain: canonicalizeDomain(c.targetDomain),
-          });
-        }
-      }
 
       for (const d of dynamicServices) {
         const key = canonicalizeDomain(d.targetDomain).toLowerCase();
@@ -318,6 +319,17 @@ export async function GET(request: Request) {
           combined.push({
             ...d,
             targetDomain: canonicalizeDomain(d.targetDomain),
+          });
+        }
+      }
+
+      for (const c of curatedEndpoints) {
+        const key = canonicalizeDomain(c.targetDomain).toLowerCase();
+        if (!tombstones.has(key) && !seenDomains.has(key)) {
+          seenDomains.add(key);
+          combined.push({
+            ...c,
+            targetDomain: canonicalizeDomain(c.targetDomain),
           });
         }
       }

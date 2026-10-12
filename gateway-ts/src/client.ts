@@ -264,7 +264,7 @@ export interface DiscoveredService {
  * Discovers active public paid APIs on the A-Pay Protocol network.
  */
 export async function discoverServices(
-  registryUrl: string = 'https://apay-network.vercel.app/api/registry',
+  registryUrl: string = 'https://apayprotocol.org/api/registry',
   options?: { timeoutMs?: number }
 ): Promise<DiscoveredService[]> {
   const timeoutMs = options?.timeoutMs ?? 5000;

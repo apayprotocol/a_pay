@@ -93,9 +93,7 @@ export function PlaygroundTab({
   const contracts = getNetworkContracts(activeNetwork);
 
   // Agent Session State
-  const [sessionAgentAddress, setSessionAgentAddress] = useState<string>(
-    '0x79A85DCDd967E0bb03Aba1069B12c4851C570a0C',
-  );
+  const [sessionAgentAddress, setSessionAgentAddress] = useState<string | null>(null);
   const [sessionBudgetApay, setSessionBudgetApay] = useState<number>(10.0);
   const [totalSpentUsd, setTotalSpentUsd] = useState<number>(0.0);
   const [paidCallsCount, setPaidCallsCount] = useState<number>(0);
@@ -218,6 +216,7 @@ export function PlaygroundTab({
   };
 
   const handleResetSession = () => {
+    setSessionAgentAddress(null);
     setSessionBudgetApay(10.0);
     setTotalSpentUsd(0.0);
     setPaidCallsCount(0);
@@ -289,24 +288,36 @@ export function PlaygroundTab({
               <Cpu className="w-3.5 h-3.5 text-purple-400" />
               Agent Sub-Wallet
             </span>
-            <span className="font-mono text-[10px] text-emerald-500 font-semibold">Active</span>
+            <span
+              className={`font-mono text-[10px] font-semibold ${sessionAgentAddress ? 'text-emerald-500' : 'text-blue-400'}`}
+            >
+              {sessionAgentAddress ? 'Active' : 'Ephemeral Ready'}
+            </span>
           </div>
           <div className="flex items-center justify-between gap-2 mt-2">
             <span className="font-mono text-xs text-slate-800 dark:text-slate-200 truncate">
-              {sessionAgentAddress.slice(0, 6)}...{sessionAgentAddress.slice(-4)}
-            </span>
-            <button
-              type="button"
-              onClick={() => copyToClipboard(sessionAgentAddress, 'agent_wallet')}
-              className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
-              title="Copy Agent Wallet Address"
-            >
-              {copiedId === 'agent_wallet' ? (
-                <Check className="w-3.5 h-3.5 text-emerald-500" />
+              {sessionAgentAddress ? (
+                `${sessionAgentAddress.slice(0, 6)}...${sessionAgentAddress.slice(-4)}`
               ) : (
-                <Copy className="w-3.5 h-3.5" />
+                <span className="text-slate-400 dark:text-slate-500 italic">
+                  Generated on prompt
+                </span>
               )}
-            </button>
+            </span>
+            {sessionAgentAddress && (
+              <button
+                type="button"
+                onClick={() => copyToClipboard(sessionAgentAddress, 'agent_wallet')}
+                className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                title="Copy Agent Wallet Address"
+              >
+                {copiedId === 'agent_wallet' ? (
+                  <Check className="w-3.5 h-3.5 text-emerald-500" />
+                ) : (
+                  <Copy className="w-3.5 h-3.5" />
+                )}
+              </button>
+            )}
           </div>
           <p className="text-[10px] text-slate-400 mt-1 font-mono">
             Ephemeral EIP-712 signer (In-Memory)

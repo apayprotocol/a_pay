@@ -56,10 +56,8 @@ export function StakingTab({
   const [loadingDisputes, setLoadingDisputes] = useState(false);
 
   // Dispute form state
-  const [targetAgent, setTargetAgent] = useState('0x79A85DCDd967E0bb03Aba1069B12c4851C570a0C');
-  const [challengerAddress, setChallengerAddress] = useState(
-    walletAddress || '0x8742017B7b3EA4F8AC08BC71f89A099b47B4334E',
-  );
+  const [targetAgent, setTargetAgent] = useState('');
+  const [challengerAddress, setChallengerAddress] = useState(walletAddress || '');
   const [disputeCategory, setDisputeCategory] = useState<
     'CORRUPTED_PAYLOAD' | 'SLA_TIMEOUT' | 'INVALID_SIGNATURE' | 'DOUBLE_SPEND' | 'MALFORMED_SPEC'
   >('CORRUPTED_PAYLOAD');

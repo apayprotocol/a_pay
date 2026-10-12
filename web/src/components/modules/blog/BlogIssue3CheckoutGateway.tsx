@@ -755,7 +755,7 @@ export function BlogIssue3CheckoutGateway({
             Try It Yourself: Test the Live A-Pay Checkout Engine Right Now
           </h2>
           <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-            Choose a mock product below and trigger the authentic A-Pay Checkout Modal to experience
+            Choose a demo product below and trigger the authentic A-Pay Checkout Modal to experience
             how fast and seamless human Web3 payments are on Base L2.
           </p>
         </div>

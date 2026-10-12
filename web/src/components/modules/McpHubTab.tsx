@@ -542,9 +542,7 @@ export function McpHubTab({
                     <p className="text-purple-300">X-APay-Multi-Rail: Supported</p>
                   </>
                 )}
-                <p>
-                  X-APay-Receiver: {walletAddress || '0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc'}
-                </p>
+                <p>X-APay-Receiver: {walletAddress || '0xYourReceiverWalletAddress...'}</p>
                 <p>X-APay-Nonce: c2b849e7-4029-4fb2-80ea-98da2b34a10e</p>
                 <p>X-APay-Scheme: eip712</p>
               </div>

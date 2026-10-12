@@ -11,6 +11,9 @@ export interface MerchantRecord {
   firstSeen: number;
   lastHeartbeat: number;
   status: 'online' | 'idle';
+  name?: string;
+  category?: string;
+  description?: string;
 }
 
 const REGISTRY_CACHE_FILE = path.join('/tmp', 'apay_registry.json');

@@ -9,7 +9,7 @@ from typing import Any
 
 import httpx
 
-DEFAULT_REGISTRY_URL = "https://apay-network.vercel.app/api/registry"
+DEFAULT_REGISTRY_URL = "https://apayprotocol.org/api/registry"
 
 
 def discover_services(

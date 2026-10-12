@@ -1030,6 +1030,9 @@ RewriteRule ^(.*)$ /apay-gate.php [L]
           price: displayPrice,
           network: networkFlag,
           version: '0.1.8',
+          name: `${cleanName} (${platform.toUpperCase()})`,
+          category: platform === 'wordpress' ? 'SCRAPING' : 'DEVTOOLS',
+          description: `HTTP 402 Paywalled ${platform.toUpperCase()} endpoint created via A-Pay Web Console.`,
         }),
       });
       setPublishStatus(
