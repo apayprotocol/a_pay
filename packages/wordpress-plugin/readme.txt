@@ -27,10 +27,10 @@ Universal HTTP 402 Web3 AI paywall for WordPress. Monetize GPTBot, ClaudeBot, an
 
 This plugin interacts with external decentralized infrastructure and protocols to facilitate autonomous payments:
 
-1. **A-Pay Protocol Portal & Telemetry (`https://apay-network.vercel.app`)**:
+1. **A-Pay Protocol Portal & Telemetry (`https://apayprotocol.org`)**:
    * **Purpose**: Provides developer protocol documentation, health probes, token contract verification, and EIP-712 scheme metadata.
-   * **Terms of Service**: https://apay-network.vercel.app
-   * **Privacy Policy**: https://apay-network.vercel.app
+   * **Terms of Service**: https://apayprotocol.org
+   * **Privacy Policy**: https://apayprotocol.org
 
 2. **Base Layer 2 Decentralized Network (`https://mainnet.base.org` / `https://sepolia.base.org`)**:
    * **Purpose**: Used for on-chain cryptographic transaction verification and router contract settlement (`0x71434344beEF9C44fF3BC95572bEB7bFB8847ec6`).

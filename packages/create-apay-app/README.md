@@ -45,4 +45,4 @@ npx create-apay-app my-agent --template express --receiver 0xYourWalletAddress -
 ---
 
 ## 📄 License
-MIT © [A-Pay Protocol](https://apay-network.vercel.app)
+MIT © [A-Pay Protocol](https://apayprotocol.org)

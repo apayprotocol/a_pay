@@ -68,7 +68,7 @@
   "remotes": [
     {
       "type": "streamable-http",
-      "url": "https://apay-network.vercel.app/api/mcp"
+      "url": "https://apayprotocol.org/api/mcp"
     }
   ]
 }

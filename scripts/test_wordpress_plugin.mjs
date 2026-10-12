@@ -64,7 +64,7 @@ test('Short description is under 150 characters (Hard WP limit)', () => {
 
 test('3rd Party Service Disclosures are declared (Base RPC & APay Portal)', () => {
   assert(readmeContent.includes('== 3rd Party Service Disclosure =='), 'Missing 3rd party disclosure');
-  assert(readmeContent.includes('https://apay-network.vercel.app'), 'Missing APay Portal URL');
+  assert(readmeContent.includes('https://apayprotocol.org') || readmeContent.includes('https://apay-network.vercel.app'), 'Missing APay Portal URL');
   assert(readmeContent.includes('https://mainnet.base.org'), 'Missing Base RPC URL');
 });
 

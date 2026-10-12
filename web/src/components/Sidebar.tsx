@@ -18,6 +18,7 @@ import {
   Zap,
 } from 'lucide-react';
 import React from 'react';
+import { ApayBrandLogo } from '@/components/ApayBrandLogo';
 import { getNetworkContracts, type NetworkId } from '@/config/contracts';
 
 interface SidebarProps {
@@ -155,25 +156,7 @@ export function Sidebar({
           }}
           title="Return to Public Homepage"
         >
-          <div className="relative w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 via-sky-500 to-indigo-600 p-[1.5px] shadow-lg shadow-blue-500/25 group-hover:shadow-blue-500/40 transition-shadow">
-            <div className="w-full h-full rounded-2xl bg-slate-950 flex items-center justify-center">
-              <Zap className="w-5 h-5 text-sky-400 fill-sky-400/20 animate-pulse" />
-            </div>
-            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-slate-950" />
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="font-spatial text-xl font-black tracking-tight text-white">
-                A-PAY
-              </span>
-              <span className="text-[9px] px-1.5 py-0.5 rounded-full font-mono font-bold bg-blue-500/20 text-sky-300 border border-blue-400/30">
-                M2M
-              </span>
-            </div>
-            <div className="text-[10px] text-slate-400 font-mono tracking-tight">
-              Base L2 Settlement
-            </div>
-          </div>
+          <ApayBrandLogo size="md" withText subtitle="Base L2 Settlement" />
         </div>
 
         {/* Mobile Close Button */}
@@ -302,15 +285,15 @@ export function Sidebar({
               <ExternalLink className="w-2.5 h-2.5" />
             </a>
             <a
-              href="mailto:neural.ais.official@gmail.com"
+              href="mailto:contact@apayprotocol.org"
               className="text-slate-400 hover:text-sky-300 flex items-center gap-1 transition-colors"
-              title="Official Contact: neural.ais.official@gmail.com"
+              title="Official Contact: contact@apayprotocol.org"
             >
               <span>Contact</span>
               <ExternalLink className="w-2.5 h-2.5" />
             </a>
             <a
-              href="https://github.com/neuralaisofficial-lang/a_pay"
+              href="https://github.com/apayprotocol/a_pay"
               target="_blank"
               rel="noopener noreferrer"
               className="text-slate-400 hover:text-sky-300 flex items-center gap-1 transition-colors"

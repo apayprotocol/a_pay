@@ -801,7 +801,7 @@ wallet = AgentWallet.from_private_key(
 
 # 2. Autonomous HTTP session automatically intercepts HTTP 402 & signs cryptographic challenge
 session = APaySession(wallet)
-response = session.get("https://gateway.apay.network/p/your-service")
+response = session.get("https://gateway.apayprotocol.org/p/your-service")
 print(response.json())`
       : budgetCurrency === 'APAY'
         ? `${osImport}from apay import APaySession, AgentWallet
@@ -816,7 +816,7 @@ wallet = AgentWallet.from_private_key(
 
 # 2. Autonomous HTTP session automatically intercepts HTTP 402 & signs cryptographic challenge
 session = APaySession(wallet)
-response = session.get("https://gateway.apay.network/p/your-service")
+response = session.get("https://gateway.apayprotocol.org/p/your-service")
 print(response.json())`
         : `${osImport}from apay import APaySession, AgentWallet
 
@@ -830,7 +830,7 @@ wallet = AgentWallet.from_private_key(
 
 # 2. Autonomous HTTP session automatically intercepts HTTP 402 & signs cryptographic challenge
 session = APaySession(wallet)
-response = session.get("https://gateway.apay.network/p/your-service")
+response = session.get("https://gateway.apayprotocol.org/p/your-service")
 print(response.json())`;
 
   return (

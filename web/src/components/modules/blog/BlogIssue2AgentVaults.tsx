@@ -95,7 +95,7 @@ export function BlogIssue2AgentVaults({
   const handleShareOnX = () => {
     if (typeof window !== 'undefined') {
       const tweetText = encodeURIComponent(
-        'Why do AI agents fail to collaborate? Security fears & data leaks.\n\n🛡️ The Gatekeeper Paradigm: Gemini AI orders complex code at the gate, pays $0.01 via Agent Vaults, Claude AI cooks in isolation & delivers.\n\nZero prompt leak. Zero credit card. Read the @APayNetwork deep dive:',
+        'Why do AI agents fail to collaborate? Security fears & data leaks.\n\n🛡️ The Gatekeeper Paradigm: Gemini AI orders complex code at the gate, pays $0.01 via Agent Vaults, Claude AI cooks in isolation & delivers.\n\nZero prompt leak. Zero credit card. Read the @APayProtocol deep dive:',
       );
       const url = encodeURIComponent(window.location.href);
       window.open(

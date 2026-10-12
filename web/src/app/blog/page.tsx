@@ -3,6 +3,7 @@
 import { ArrowLeft, ArrowRight, BookOpen, ExternalLink, Sparkles, Zap } from 'lucide-react';
 import Link from 'next/link';
 import React, { useState } from 'react';
+import { ApayBrandLogo } from '@/components/ApayBrandLogo';
 import { BlogTab } from '@/components/modules/BlogTab';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import type { NetworkId } from '@/config/contracts';
@@ -30,16 +31,18 @@ export default function BlogPage() {
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Console</span>
+              <span className="hidden sm:inline">Back to Protocol</span>
+              <span className="sm:hidden">Back</span>
             </Link>
 
             <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 hidden sm:block" />
 
             <div className="flex items-center gap-2">
-              <span className="font-spatial font-bold text-slate-900 dark:text-white text-sm sm:text-base">
+              <ApayBrandLogo size="sm" />
+              <span className="font-spatial font-bold text-slate-900 dark:text-white text-xs sm:text-base">
                 A-PAY RESEARCH
               </span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-sky-400 font-mono font-medium border border-blue-500/20">
+              <span className="hidden xs:inline text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-sky-400 font-mono font-medium border border-blue-500/20">
                 Editorial Hub
               </span>
             </div>

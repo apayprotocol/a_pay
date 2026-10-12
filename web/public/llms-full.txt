@@ -1,5 +1,5 @@
 # A-Pay Protocol: Full Technical Specification & LLM Knowledge Base
-> Canonical URI: https://apay-network.vercel.app/llms-full.txt
+> Canonical URI: https://apayprotocol.org/llms-full.txt
 > Protocol Version: 0.1.8
 > Network Target: Base L2 (Mainnet: 8453 | Sepolia: 84532)
 
@@ -191,5 +191,8 @@ export async function handleRequest(req: Request) {
 - `StakingVault`: `0xD2f3F4D97f4a3fdC9d4eEDfB9747BF9D80CF6225`
 
 ---
-Official Inquiries & Support: neural.ais.official@gmail.com
+Official Inquiries & Support: contact@apayprotocol.org | founder@apayprotocol.org
+Official GitHub: https://github.com/apayprotocol/a_pay
+Official Domain: https://apayprotocol.org
+Official Basename: apayprotocol.base.eth
 Copyright (c) 2026 A-Pay Protocol Foundation. Released under MIT License.

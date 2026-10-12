@@ -16,6 +16,7 @@ import {
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { APay, type PaymentReceipt } from '@/checkout/checkout';
+import { ApayBrandLogo } from '@/components/ApayBrandLogo';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { NETWORKS, type NetworkId } from '@/config/contracts';
 
@@ -213,21 +214,23 @@ export default function CheckoutDemoPage() {
       {/* Header */}
       <header className="border-b border-slate-200/80 dark:border-slate-800/80 bg-white/70 dark:bg-slate-950/70 backdrop-blur-xl sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             <Link
               href="/"
               className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-sky-400 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Back to Dashboard</span>
+              <span className="hidden sm:inline">Back to Dashboard</span>
+              <span className="sm:hidden">Back</span>
             </Link>
             <div className="h-4 w-px bg-slate-200 dark:bg-slate-800" />
             <div className="flex items-center gap-2">
-              <span className="font-spatial font-bold text-sm tracking-tight text-slate-900 dark:text-white">
+              <ApayBrandLogo size="sm" />
+              <span className="font-spatial font-bold text-xs sm:text-sm tracking-tight text-slate-900 dark:text-white">
                 DEMO MERCHANT STORE
               </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-sky-300 font-bold">
-                Pillar 2 Checkout
+              <span className="hidden xs:inline text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-sky-300 font-bold">
+                Pillar 3 Checkout
               </span>
             </div>
           </div>

@@ -1112,7 +1112,7 @@ export function BlogIssue3CheckoutGateway({
                 onClick={() =>
                   copyCode(
                     `<!-- 1. Include A-Pay Checkout Widget (< 50KB bundle) -->
-<script src="https://apay.network/checkout.js"></script>
+<script src="https://apayprotocol.org/checkout.js"></script>
 
 <!-- 2. Attach payment trigger to any button or link -->
 <button onclick="launchAPayCheckout()" class="btn-buy">
@@ -1148,7 +1148,7 @@ export function BlogIssue3CheckoutGateway({
               </button>
               <pre className="text-slate-300 leading-relaxed">
                 <code>{`<!-- 1. Include A-Pay Checkout Widget (< 50KB bundle) -->
-<script src="https://apay.network/checkout.js"></script>
+<script src="https://apayprotocol.org/checkout.js"></script>
 
 <!-- 2. Attach payment trigger to any button or link -->
 <button onclick="launchAPayCheckout()" class="btn-buy">

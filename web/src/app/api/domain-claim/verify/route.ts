@@ -148,7 +148,7 @@ export async function POST(request: Request) {
             const res = await fetch(targetUrl, {
               method: 'GET',
               headers: {
-                'User-Agent': 'A-Pay-Protocol-Domain-Verifier/0.1.2 (+https://apay.network)',
+                'User-Agent': 'A-Pay-Protocol-Domain-Verifier/0.1.2 (+https://apayprotocol.org)',
                 Accept: 'text/plain, application/json',
               },
               signal: controller.signal,

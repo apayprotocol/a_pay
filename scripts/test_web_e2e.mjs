@@ -208,7 +208,7 @@ async function main() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         wallet: testWallet,
-        targetDomain: 'https://e2e-test-merchant.apay.network/api',
+        targetDomain: 'https://e2e-test-merchant.apayprotocol.org/api',
         price: '0.002 USDC',
         network: 'base-sepolia',
         version: '0.1.8',

@@ -80,7 +80,7 @@ export function BlogIssue1Paywalls({
   const handleShareOnX = () => {
     if (typeof window !== 'undefined') {
       const tweetText = encodeURIComponent(
-        'AI bots & crawlers hit websites 50k+ times a month, waking up databases and running up cloud bills with zero ad views.\n\n⚡ HTTP 402 fixes this: humans browse 100% free, AI bots pay micro-cents.\n\nRead the @APayNetwork deep dive:',
+        'AI bots & crawlers hit websites 50k+ times a month, waking up databases and running up cloud bills with zero ad views.\n\n⚡ HTTP 402 fixes this: humans browse 100% free, AI bots pay micro-cents.\n\nRead the @APayProtocol deep dive:',
       );
       const url = encodeURIComponent(window.location.href);
       window.open(

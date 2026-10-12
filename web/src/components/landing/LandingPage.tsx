@@ -50,6 +50,7 @@ import Link from 'next/link';
 import React, { useState } from 'react';
 import { APay } from '@/checkout/checkout';
 import { CoinCanvas } from '@/components/3d/CoinCanvas';
+import { ApayBrandLogo } from '@/components/ApayBrandLogo';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { getNetworkContracts, NETWORKS, type NetworkId } from '@/config/contracts';
 
@@ -136,28 +137,18 @@ export function LandingPage({
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
             {/* Left: Brand Logo & Protocol Status */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-400 text-white flex items-center justify-center font-bold text-lg shadow-lg shadow-blue-500/25 shrink-0">
-                <Zap className="w-5 h-5 fill-white" />
-              </div>
-              <div className="flex items-center gap-2.5">
-                <span className="font-spatial font-black text-slate-900 dark:text-white tracking-wider text-lg sm:text-xl">
-                  A-PAY
+              <ApayBrandLogo size="md" withText subtitle="M2M & H2M Protocol" />
+              <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[10px] font-mono font-medium">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
                 </span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-sky-400 border border-blue-500/20 font-bold uppercase tracking-wider">
-                  M2M & H2M Protocol
-                </span>
-                <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[10px] font-mono font-medium">
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
-                  </span>
-                  <span>Base L2 ({contracts.chain.chainId}) • RFC-2068</span>
-                </div>
+                <span>Base L2 ({contracts.chain.chainId}) • RFC-2068</span>
               </div>
             </div>
 
             {/* Right: Network Selector, Theme Toggle, Console & Wallet CTAs */}
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-3">
               {/* Network Pill Indicator */}
               <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-800 text-[11px] font-mono bg-slate-100/70 dark:bg-slate-900/70 text-slate-600 dark:text-slate-300">
                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
@@ -174,14 +165,15 @@ export function LandingPage({
                 <button
                   type="button"
                   onClick={() => onEnterConsole('overview')}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-600/25 transition-all cursor-pointer active:scale-95"
+                  className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-600/25 transition-all cursor-pointer active:scale-95 shrink-0"
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>Launch Console ({shortAddr})</span>
+                  <span className="hidden sm:inline">Launch Console ({shortAddr})</span>
+                  <span className="sm:hidden">Console</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               ) : (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2">
                   <button
                     type="button"
                     onClick={() => onEnterConsole('overview')}
@@ -192,11 +184,12 @@ export function LandingPage({
                   <button
                     type="button"
                     onClick={onConnectWallet}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-600/25 transition-all cursor-pointer active:scale-95"
+                    className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-600/25 transition-all cursor-pointer active:scale-95 shrink-0"
                   >
-                    <Wallet className="w-4 h-4" />
-                    <span>Connect Wallet</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
+                    <Wallet className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                    <span className="hidden xs:inline">Connect Wallet</span>
+                    <span className="xs:hidden">Connect</span>
+                    <ArrowRight className="w-3.5 h-3.5 shrink-0 hidden xs:inline" />
                   </button>
                 </div>
               )}
@@ -1235,11 +1228,12 @@ export function LandingPage({
             </div>
             <div className="flex flex-wrap items-center gap-3 font-mono text-[11px]">
               <a
-                href="mailto:neural.ais.official@gmail.com"
+                href="mailto:contact@apayprotocol.org"
                 className="text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1.5 font-medium transition-colors"
+                title="Official Support: contact@apayprotocol.org"
               >
                 <Mail className="w-3.5 h-3.5" />
-                <span>neural.ais.official@gmail.com</span>
+                <span>contact@apayprotocol.org</span>
               </a>
               <span className="hidden sm:inline text-slate-400">•</span>
               <span>Non-Custodial Architecture • 100M Fixed Token Cap • Audited Solidity</span>

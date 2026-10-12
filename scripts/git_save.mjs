@@ -177,8 +177,8 @@ for (const pattern of sensitivePatterns) {
 }
 
 // 5. Commit
-run('git config user.name "A"');
-run('git config user.email "neural.ais.official@gmail.com"');
+run('git config user.name "A-Pay Protocol"');
+run('git config user.email "contact@apayprotocol.org"');
 
 const customMsg = process.argv.slice(2).join(' ').trim();
 const commitMsg = customMsg

@@ -33,7 +33,7 @@ def test_discover_services_success():
     }
 
     with patch("httpx.Client.get", return_value=mock_resp):
-        services = discover_services("https://fake-registry.apay.network/api/registry")
+        services = discover_services("https://fake-registry.apayprotocol.org/api/registry")
         assert len(services) == 2
         assert services[0]["targetDomain"] == "https://api.marketintel.ai"
         assert services[1]["price"] == "0.001 USDC"
@@ -41,5 +41,5 @@ def test_discover_services_success():
 
 def test_discover_services_graceful_failure():
     with patch("httpx.Client.get", side_effect=Exception("Connection refused")):
-        services = discover_services("https://fake-offline-registry.apay.network/api/registry")
+        services = discover_services("https://fake-offline-registry.apayprotocol.org/api/registry")
         assert services == []

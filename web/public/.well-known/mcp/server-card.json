@@ -1,7 +1,7 @@
 {
   "serverInfo": {
     "name": "A-Pay Protocol MCP Server",
-    "version": "0.1.6",
+    "version": "0.1.8",
     "description": "Universal Micropayment & Autonomous Economic Settlement Engine for AI Agents on Base L2."
   },
   "authentication": {

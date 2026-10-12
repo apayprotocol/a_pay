@@ -29,10 +29,10 @@
       "test": "node --test test/*.test.mjs"
     },
   "license": "MIT",
-  "author": "A-Pay Protocol Core Swarm <core@apay.network>",
+  "author": "A-Pay Protocol Core Team <contact@apayprotocol.org>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/neuralaisofficial-lang/a_pay.git",
+    "url": "git+https://github.com/apayprotocol/a_pay.git",
     "directory": "gateway-ts"
   },
   "keywords": [

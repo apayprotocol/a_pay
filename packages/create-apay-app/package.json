@@ -18,7 +18,7 @@
     "fastapi",
     "express"
   ],
-  "author": "A-Pay Protocol Core Swarm <core@apay.network>",
+  "author": "A-Pay Protocol Core Team <contact@apayprotocol.org>",
   "license": "MIT",
   "repository": {
     "type": "git",

@@ -63,7 +63,7 @@ export default function Home() {
       </div>
 
       {/* Embedded A-Pay Checkout Widget */}
-      <script src="https://apay-network.vercel.app/v1.js" async></script>
+      <script src="https://apayprotocol.org/v1.js" async></script>
     </main>
   );
 }

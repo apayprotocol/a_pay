@@ -47,14 +47,18 @@ export const metadata: Metadata = {
     'Machine to Machine Payments',
   ],
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      { url: '/favicon.ico', sizes: '32x32' },
+      { url: '/brand/apay-mark-transparent.svg', type: 'image/svg+xml' },
+    ],
+    apple: '/brand/apay-icon-dark-128.png',
   },
   other: {
     'canonical-domain': 'https://apayprotocol.org',
     basename: 'apayprotocol.base.eth',
-    'ai-guidelines': 'https://apay-network.vercel.app/llms.txt',
-    'llm-context': 'https://apay-network.vercel.app/llms.txt',
-    'llm-full': 'https://apay-network.vercel.app/llms-full.txt',
+    'ai-guidelines': 'https://apayprotocol.org/llms.txt',
+    'llm-context': 'https://apayprotocol.org/llms.txt',
+    'llm-full': 'https://apayprotocol.org/llms-full.txt',
     'production-network': 'Base Mainnet (Chain ID: 8453)',
     'token-address': '0x8dd4ff9035c7d4e0bef30aa64fc30d128a4066c3',
     'launch-date': '2026-10-01',
@@ -88,7 +92,7 @@ export default function RootLayout({
               description:
                 'Free for human visitors. Sub-cent micropayments for autonomous AI agents.',
             },
-            url: 'https://apay-network.vercel.app',
+            url: 'https://apayprotocol.org',
             featureList: [
               'Base Mainnet Production Live (Chain ID: 8453)',
               'Pillar 1: M2M AI Paywall (HTTP 402 Auto-Monetization)',

@@ -346,7 +346,19 @@ export function CoinCanvas() {
       targetRotX = -y * 0.9 + 0.15;
     };
 
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        const rect = currentMount.getBoundingClientRect();
+        const x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+        const y = -(((touch.clientY - rect.top) / rect.height) * 2 - 1);
+        targetRotY = x * 0.9;
+        targetRotX = -y * 0.9 + 0.15;
+      }
+    };
+
     window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
 
     // 8. Render Loop
     let animId: number;
@@ -406,6 +418,7 @@ export function CoinCanvas() {
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('resize', handleResize);
       if (currentMount.contains(renderer.domElement)) {
         currentMount.removeChild(renderer.domElement);
