@@ -432,6 +432,17 @@ export function LandingPage({
                   <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
                   <span>Public Launch: October 1, 2026</span>
                 </div>
+                <a
+                  href={contracts.basename.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/30 text-blue-700 dark:text-sky-300 text-xs font-mono font-bold shadow-xs hover:bg-blue-500/20 hover:border-blue-500/50 transition-all cursor-pointer group"
+                  title="Official Verified Basename on Base L2"
+                >
+                  <span className="w-2 h-2 rounded-full bg-blue-500 group-hover:scale-125 transition-transform" />
+                  <span>{contracts.basename.name}</span>
+                  <ExternalLink className="w-3 h-3 text-blue-500/70 group-hover:text-blue-500 transition-colors" />
+                </a>
               </div>
 
               {/* Master Heading */}
@@ -1146,7 +1157,7 @@ export function LandingPage({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font-mono text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-mono text-xs">
             <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1.5 shadow-xs">
               <div className="text-slate-500 text-[11px]">ESCROW VAULT (SESSION ESCROWS)</div>
               <div className="font-bold text-slate-900 dark:text-white truncate">
@@ -1193,6 +1204,35 @@ export function LandingPage({
                 <span>View on BaseScan</span>
                 <ExternalLink className="w-3 h-3" />
               </a>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1.5 shadow-xs">
+              <div className="text-slate-500 text-[11px]">OFFICIAL BASENAME (BASE L2 ENS)</div>
+              <div className="font-bold text-blue-600 dark:text-sky-400 truncate flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
+                <span>{contracts.basename.name}</span>
+              </div>
+              <div className="flex items-center gap-3 pt-0.5">
+                <a
+                  href={contracts.basename.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 dark:text-sky-400 text-[11px] flex items-center gap-1 hover:underline"
+                >
+                  <span>Base Profile</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+                <span className="text-slate-300 dark:text-slate-700">•</span>
+                <a
+                  href={contracts.basename.explorerUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-slate-500 hover:text-slate-900 dark:hover:text-slate-200 text-[11px] flex items-center gap-1 hover:underline"
+                >
+                  <span>Lookup</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
             </div>
           </div>
         </div>

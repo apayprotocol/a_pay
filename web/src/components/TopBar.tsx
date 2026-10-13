@@ -4,6 +4,7 @@ import {
   Briefcase,
   ChevronDown,
   Crown,
+  ExternalLink,
   Globe,
   Home,
   LogOut,
@@ -16,7 +17,7 @@ import {
 import React, { useEffect, useRef, useState } from 'react';
 import { ApayBrandLogo } from '@/components/ApayBrandLogo';
 import { NETWORKS, type NetworkId } from '@/config/contracts';
-import { addApayTokenToWallet, ensureNetwork } from '@/services/blockchain';
+import { addApayTokenToWallet, ensureNetwork, getBasename } from '@/services/blockchain';
 import { ThemeToggle } from './ThemeToggle';
 
 interface TopBarProps {
@@ -58,11 +59,34 @@ export function TopBar({
   onNavigateToLanding,
 }: TopBarProps) {
   const [isNetworkDropdownOpen, setIsNetworkDropdownOpen] = useState(false);
+  const [resolvedBasename, setResolvedBasename] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const shortAddr = walletAddress
     ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
     : null;
+
+  useEffect(() => {
+    let isCancelled = false;
+    if (!walletAddress) {
+      setResolvedBasename(null);
+      return;
+    }
+
+    getBasename(walletAddress, activeNetwork)
+      .then((name) => {
+        if (!isCancelled) {
+          setResolvedBasename(name);
+        }
+      })
+      .catch(() => {
+        if (!isCancelled) setResolvedBasename(null);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [walletAddress, activeNetwork]);
 
   const currentTabInfo = TAB_TITLES[activeTab] || {
     title: 'Dashboard',
@@ -271,9 +295,26 @@ export function TopBar({
               </div>
               <div className="text-left">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[11px] font-mono font-bold text-slate-800 dark:text-slate-200">
-                    {shortAddr}
-                  </span>
+                  {resolvedBasename ? (
+                    <a
+                      href={`https://base.org/name/${resolvedBasename.replace('.base.eth', '').replace('.basetest.eth', '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11px] font-mono font-bold text-blue-600 dark:text-sky-400 hover:underline flex items-center gap-1 transition-colors group"
+                      title={`Verified Basename on Base L2 (${walletAddress})`}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                      <span>{resolvedBasename}</span>
+                      <ExternalLink className="w-2.5 h-2.5 text-blue-400 opacity-60 group-hover:opacity-100 transition-opacity" />
+                    </a>
+                  ) : (
+                    <span
+                      className="text-[11px] font-mono font-bold text-slate-800 dark:text-slate-200"
+                      title={walletAddress || undefined}
+                    >
+                      {shortAddr}
+                    </span>
+                  )}
                   <span
                     className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded ${
                       isFounder

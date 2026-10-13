@@ -1,4 +1,12 @@
-import { createPublicClient, fallback, formatEther, formatUnits, http, parseAbi } from 'viem';
+import {
+  createPublicClient,
+  fallback,
+  formatEther,
+  formatUnits,
+  http,
+  namehash,
+  parseAbi,
+} from 'viem';
 import { base, baseSepolia } from 'viem/chains';
 import { getNetworkContracts, type NetworkId } from '@/config/contracts';
 
@@ -958,4 +966,105 @@ export async function executePlaygroundAgentPrompt(payload: {
     throw new Error(err.error || `Execution failed (${res.status})`);
   }
   return res.json();
+}
+
+const BASE_REVERSE_REGISTRAR = '0x79ea96012eea67a83431f1701b3dff7e37f9e282' as const;
+const BASE_L2_RESOLVER = '0xc6d566a56a1aff6508b41f6c90ff131615583bcd' as const;
+const BASE_REGISTRY = '0xb94704422c2a1e396835a571837aa5ae53285a95' as const;
+
+/**
+ * Resolves the primary Basename (.base.eth) for a wallet address on Base Mainnet.
+ * Uses cached reverse resolution against the official Base L2 ReverseRegistrar & L2Resolver.
+ */
+export async function getBasename(
+  address: string | null | undefined,
+  networkId: NetworkId = 'base-mainnet',
+): Promise<string | null> {
+  if (!address || typeof address !== 'string' || !address.startsWith('0x')) {
+    return null;
+  }
+
+  const cleanAddr = address.toLowerCase();
+  const mainnetFounder = getNetworkContracts('base-mainnet').founder.toLowerCase();
+
+  // Instant canonical mapping for official protocol founder on Base Mainnet
+  if (cleanAddr === mainnetFounder) {
+    return 'apayprotocol.base.eth';
+  }
+
+  // Reverse resolution is an active on-chain feature on Base Mainnet
+  if (networkId !== 'base-mainnet') {
+    return null;
+  }
+
+  return cachedFetch<string | null>(`basename-rev-${cleanAddr}`, 120_000, async () => {
+    try {
+      const client = getPublicClient('base-mainnet');
+
+      const node = await client.readContract({
+        address: BASE_REVERSE_REGISTRAR,
+        abi: parseAbi(['function node(address addr) external view returns (bytes32)']),
+        functionName: 'node',
+        args: [cleanAddr as `0x${string}`],
+      });
+
+      if (!node || BigInt(node) === 0n) {
+        return null;
+      }
+
+      const name = await client.readContract({
+        address: BASE_L2_RESOLVER,
+        abi: parseAbi(['function name(bytes32 node) external view returns (string)']),
+        functionName: 'name',
+        args: [node],
+      });
+
+      return name && typeof name === 'string' && name.trim().length > 0 ? name.trim() : null;
+    } catch {
+      return null;
+    }
+  });
+}
+
+/**
+ * Forward resolves a Basename (e.g. 'apayprotocol.base.eth' or 'name.base.eth') to an EVM address on Base.
+ */
+export async function resolveBasename(name: string | null | undefined): Promise<string | null> {
+  if (!name || typeof name !== 'string' || !name.includes('.')) {
+    return null;
+  }
+
+  const cleanName = name.trim().toLowerCase();
+  if (cleanName === 'apayprotocol.base.eth') {
+    return getNetworkContracts('base-mainnet').founder;
+  }
+
+  return cachedFetch<string | null>(`basename-fwd-${cleanName}`, 120_000, async () => {
+    try {
+      const client = getPublicClient('base-mainnet');
+      const node = namehash(cleanName);
+
+      const resolver = await client.readContract({
+        address: BASE_REGISTRY,
+        abi: parseAbi(['function resolver(bytes32 node) external view returns (address)']),
+        functionName: 'resolver',
+        args: [node],
+      });
+
+      if (!resolver || resolver === '0x0000000000000000000000000000000000000000') {
+        return null;
+      }
+
+      const addr = await client.readContract({
+        address: resolver as `0x${string}`,
+        abi: parseAbi(['function addr(bytes32 node) external view returns (address)']),
+        functionName: 'addr',
+        args: [node],
+      });
+
+      return addr && addr !== '0x0000000000000000000000000000000000000000' ? addr : null;
+    } catch {
+      return null;
+    }
+  });
 }

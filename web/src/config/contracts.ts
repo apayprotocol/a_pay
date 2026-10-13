@@ -57,6 +57,11 @@ export interface NetworkContracts {
     aerodromeSwapUrl: string;
   };
   founder: `0x${string}`;
+  basename: {
+    name: string;
+    url: string;
+    explorerUrl: string;
+  };
 }
 
 export const NETWORKS: Record<NetworkId, NetworkContracts> = {
@@ -116,6 +121,11 @@ export const NETWORKS: Record<NetworkId, NetworkContracts> = {
         'https://aerodrome.finance/swap?from=eth&to=0x8dd4ff9035c7d4e0bef30aa64fc30d128a4066c3',
     },
     founder: '0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc' as `0x${string}`,
+    basename: {
+      name: 'apayprotocol.basetest.eth',
+      url: 'https://sepolia.basescan.org/name-lookup-search?id=apayprotocol.basetest.eth',
+      explorerUrl: 'https://sepolia.basescan.org/name-lookup-search?id=apayprotocol.basetest.eth',
+    },
   },
   'base-mainnet': {
     chain: {
@@ -174,6 +184,11 @@ export const NETWORKS: Record<NetworkId, NetworkContracts> = {
         'https://aerodrome.finance/swap?from=eth&to=0x8dd4ff9035c7d4e0bef30aa64fc30d128a4066c3',
     },
     founder: '0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc' as `0x${string}`,
+    basename: {
+      name: 'apayprotocol.base.eth',
+      url: 'https://base.org/name/apayprotocol',
+      explorerUrl: 'https://basescan.org/name-lookup-search?id=apayprotocol.base.eth',
+    },
   },
 };
 

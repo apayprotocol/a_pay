@@ -102,6 +102,7 @@ export function OverviewTab({
   const [copiedRouterV2, setCopiedRouterV2] = useState(false);
   const [copiedEscrow, setCopiedEscrow] = useState(false);
   const [copiedStaking, setCopiedStaking] = useState(false);
+  const [copiedBasename, setCopiedBasename] = useState(false);
 
   // Live Blockchain Telemetry State
   const [telemetry, setTelemetry] = useState<RpcTelemetry | null>(null);
@@ -1842,6 +1843,54 @@ export function OverviewTab({
               >
                 <Download className="w-2.5 h-2.5" />
                 JSON
+              </a>
+            </div>
+          </div>
+
+          {/* 6. Official Basename & On-Chain Identity */}
+          <div className="p-4 rounded-2xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200/80 dark:border-blue-900/50 space-y-2.5">
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-bold text-blue-600 dark:text-sky-400 uppercase font-mono flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                6. Official Basename (Base L2)
+              </span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-sky-300 font-mono font-bold flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3 text-blue-500" />
+                On-Chain
+              </span>
+            </div>
+            <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+              <span className="mono text-xs font-bold text-blue-700 dark:text-sky-300 truncate">
+                {contracts.basename.name}
+              </span>
+              <button
+                onClick={() => copyText(contracts.basename.name, setCopiedBasename)}
+                className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-colors"
+                title="Copy Basename"
+              >
+                {copiedBasename ? (
+                  <Check className="w-4 h-4 text-emerald-500" />
+                ) : (
+                  <Copy className="w-4 h-4" />
+                )}
+              </button>
+            </div>
+            <div className="flex items-center justify-between pt-1">
+              <a
+                href={contracts.basename.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs text-blue-600 dark:text-sky-400 font-semibold hover:underline"
+              >
+                Base.org Profile <ExternalLink className="w-3 h-3" />
+              </a>
+              <a
+                href={contracts.basename.explorerUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md bg-blue-100/80 hover:bg-blue-200 dark:bg-blue-900/40 dark:hover:bg-blue-900/60 text-blue-700 dark:text-sky-300 font-mono transition-colors"
+              >
+                BaseScan <ExternalLink className="w-2.5 h-2.5" />
               </a>
             </div>
           </div>

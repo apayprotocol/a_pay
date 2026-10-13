@@ -37,7 +37,7 @@ import type React from 'react';
 import { useEffect, useState } from 'react';
 import { getNetworkContracts, type NetworkId } from '@/config/contracts';
 import { isPlaceholderOrDemoDomain } from '@/lib/security';
-import { addApayTokenToWallet } from '@/services/blockchain';
+import { addApayTokenToWallet, resolveBasename } from '@/services/blockchain';
 
 interface PaywallEntry {
   id: string;
@@ -801,12 +801,18 @@ RewriteRule ^(.*)$ /apay-gate.php [L]
       return;
     }
 
-    const targetReceiver = receiver.trim() || walletAddress;
+    let targetReceiver = receiver.trim() || walletAddress;
+    if (targetReceiver?.includes('.')) {
+      const resolved = await resolveBasename(targetReceiver);
+      if (resolved) {
+        targetReceiver = resolved;
+      }
+    }
     if (!targetReceiver?.startsWith('0x') || targetReceiver.length !== 42) {
       setGenesisResult({
         success: false,
         error:
-          'Please enter a valid EVM payout wallet address (0x...) or connect your wallet before dispatching the genesis test call.',
+          'Please enter a valid EVM payout wallet address (0x... or merchant.base.eth) or connect your wallet before dispatching the genesis test call.',
       });
       return;
     }
@@ -1366,13 +1372,13 @@ RewriteRule ^(.*)$ /apay-gate.php [L]
                 required
                 value={receiver}
                 onChange={(e) => setReceiver(e.target.value)}
-                placeholder="0xYourBaseWalletAddress..."
+                placeholder="0xYourBaseWalletAddress or merchant.base.eth..."
                 className="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
               />
               {!walletAddress && !receiver && (
                 <p className="text-[10px] text-amber-600 dark:text-amber-400 font-mono">
-                  💡 Enter your EVM address or connect your wallet so bot micropayments route
-                  directly to you.
+                  💡 Enter your EVM address (or Basename, e.g. merchant.base.eth) so bot
+                  micropayments route directly to you.
                 </p>
               )}
             </div>
