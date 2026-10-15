@@ -11,7 +11,7 @@ This document contains formatted, verified submission materials for the top comm
 
 ### 📋 Markdown Entry Snippet (Alphabetical Placement):
 ```markdown
-- [apayprotocol/a_pay](https://github.com/apayprotocol/a_pay) [![a_pay MCP server](https://glama.ai/mcp/servers/apayprotocol/apay/badges/score.svg)](https://glama.ai/mcp/servers/apayprotocol/apay) 🐍 📇 ☁️ 🏠 🍎 🪟 🐧 - Universal HTTP 402 Micropayment Protocol & Autonomous Economic Settlement Engine on Base L2.
+- [apayprotocol/a_pay](https://github.com/apayprotocol/a_pay) [![a_pay MCP server](https://glama.ai/mcp/servers/apayprotocol/a_pay/badges/score.svg)](https://glama.ai/mcp/servers/apayprotocol/a_pay) 🐍 📇 ☁️ 🏠 🍎 🪟 🐧 - Universal HTTP 402 Micropayment Protocol & Autonomous Economic Settlement Engine on Base L2.
 ```
 
 ### 📝 Pull Request Template:
