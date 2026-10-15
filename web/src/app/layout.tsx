@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { JetBrains_Mono, Outfit, Plus_Jakarta_Sans, Space_Grotesk } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
+import { AlienBotFlyer } from '@/components/AlienBotFlyer';
 import './globals.css';
 
 const outfit = Outfit({
@@ -109,6 +110,7 @@ export default function RootLayout({
       >
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           {children}
+          <AlienBotFlyer />
         </ThemeProvider>
       </body>
     </html>
