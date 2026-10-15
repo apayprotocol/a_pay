@@ -219,6 +219,33 @@ apay protect --target http://localhost:8000 --price 0.001 --wallet 0xYourPayoutA
 
 ---
 
+### 5. Coinbase AgentKit (On-Chain Base L2 Agents)
+Drop-in Action Provider enabling any Coinbase AgentKit agent to probe and settle HTTP 402 micropayments on Base L2:
+
+#### Python:
+```python
+from apay.integrations.agentkit import create_apay_action_provider
+
+apay_provider = create_apay_action_provider(
+    network="base-mainnet",
+    max_per_call_usdc=0.05,
+    daily_budget_usdc=2.00,
+)
+```
+
+#### TypeScript:
+```typescript
+import { createAPayActionProvider } from "apay-gateway/agentkit";
+
+const apayProvider = createAPayActionProvider({
+  network: "base-mainnet",
+  preferredCurrency: "USDC",
+});
+```
+Provides 5 native tools: `apay_probe_endpoint`, `apay_request`, `apay_get_wallet_status`, `apay_get_balance`, `apay_set_budget`.
+
+---
+
 ## 📂 Project Architecture
 
 ```text

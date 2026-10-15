@@ -21,11 +21,13 @@ from .escrow import (
 )
 from .fastapi import APayPaywall, VerifiedClaim
 from .integrations import (
+    APayActionProvider,
     APayAutoGenToolkit,
     APayCrewTool,
     APayLlamaIndexTool,
     APayRequestsWrapper,
     APayTool,
+    create_apay_action_provider,
     create_apay_tool,
     create_autogen_payment_tool,
     create_crew_economy_toolkit,
@@ -56,6 +58,7 @@ from .wallet import (
 )
 
 __all__ = [
+    "APayActionProvider",
     "APayAutoGenToolkit",
     "APayClient",
     "APayCrewTool",
@@ -104,6 +107,7 @@ __all__ = [
     "TtlNonceStore",
     "UnauthorizedError",
     "VerifiedClaim",
+    "create_apay_action_provider",
     "create_apay_tool",
     "create_autogen_payment_tool",
     "create_crew_economy_toolkit",

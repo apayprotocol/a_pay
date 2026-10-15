@@ -21,6 +21,10 @@
       "./ai-sdk": {
         "types": "./dist/integrations/ai-sdk.d.ts",
         "import": "./dist/integrations/ai-sdk.js"
+      },
+      "./agentkit": {
+        "types": "./dist/integrations/agentkit.d.ts",
+        "import": "./dist/integrations/agentkit.js"
       }
     },
 
