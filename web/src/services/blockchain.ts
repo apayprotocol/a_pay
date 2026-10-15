@@ -825,7 +825,7 @@ export async function addApayTokenToWallet(
           address: contracts.APAYToken.address,
           symbol: contracts.APAYToken.symbol,
           decimals: contracts.APAYToken.decimals,
-          image: 'https://apay-network.vercel.app/favicon.png',
+          image: 'https://apayprotocol.org/apay-token-logo.png',
         },
       },
     });

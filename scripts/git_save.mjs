@@ -188,13 +188,21 @@ const commitMsg = customMsg
 console.log(`\n💾 Committing changes with message: "${commitMsg}"...`);
 run(`git commit -m "${commitMsg}"`);
 
-// 6. Push to Remote
+// 6. Push to Remotes (Decentralized GitLab mirror & GitHub origin)
+try {
+  console.log('\n⬆️ Pushing to gitlab main...');
+  const gitlabPush = run('git push gitlab main');
+  console.log(gitlabPush || 'GitLab pushed successfully.');
+} catch (err) {
+  console.warn('⚠️ GitLab push warning:', err.message);
+}
+
 try {
   console.log('\n⬆️ Pushing to origin main...');
   const pushOutput = run('git push origin main');
   console.log(pushOutput || 'Pushed successfully.');
 } catch (err) {
-  console.warn('⚠️ Push warning (may already be synced or network isolated):', err.message);
+  console.warn('⚠️ Origin push warning (may already be synced or network isolated):', err.message);
 }
 
 console.log('\n===============================================================');
