@@ -1,6 +1,6 @@
 [project]
 name = "apay"
-version = "0.1.8"
+version = "0.1.9"
 description = "Universal HTTP 402 Micropayment Protocol & CLI for Autonomous AI Agents"
 readme = "README.md"
 license = { text = "MIT" }

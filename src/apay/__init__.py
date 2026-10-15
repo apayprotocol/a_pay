@@ -5,7 +5,7 @@ Universal Micropayment & Economic Layer for Autonomous AI Agents.
 
 from __future__ import annotations
 
-__version__ = "0.1.8"
+__version__ = "0.1.9"
 
 from .burn_engine import AerodromeRoute, BurnEngine, DexSwapParams
 from .channel import ChannelPayerSession, ChannelReceiverValidator, ChannelVoucher
