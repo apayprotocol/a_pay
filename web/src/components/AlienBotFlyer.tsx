@@ -2,6 +2,7 @@
 
 import { Bot, ExternalLink, MessageSquareCode, Sparkles, X } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import type React from 'react';
 import { useEffect, useState } from 'react';
 
 // SSR-safe dynamic import — zero LCP impact
@@ -20,26 +21,23 @@ const AlienBotCanvas = dynamic(
 export function AlienBotFlyer() {
   const [isMounted, setIsMounted] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [isOpen, setIsOpen] = useState(false); // speech bubble starts closed
+  const [isOpen, setIsOpen] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
   const [isDark, setIsDark] = useState(false);
 
-  // Deferred mount via requestIdleCallback — keeps LCP 100% clean
+  // Deferred mount via requestIdleCallback — keeps initial LCP 100% clean
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // Restore dismiss state
     if (sessionStorage.getItem('apay_alien_dismissed') === 'true') {
       setIsDismissed(true);
     }
 
-    // Detect current theme
     const checkDark = () =>
       document.documentElement.classList.contains('dark') ||
       window.matchMedia('(prefers-color-scheme: dark)').matches;
     setIsDark(checkDark());
 
-    // Watch for theme changes (next-themes adds/removes .dark on <html>)
     const themeObserver = new MutationObserver(() => setIsDark(checkDark()));
     themeObserver.observe(document.documentElement, {
       attributes: true,
@@ -52,7 +50,7 @@ export function AlienBotFlyer() {
         window as Window & {
           requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => number;
         }
-      ).requestIdleCallback(startMount, { timeout: 1600 });
+      ).requestIdleCallback(startMount, { timeout: 1500 });
       return () => {
         (window as Window & { cancelIdleCallback: (id: number) => void }).cancelIdleCallback(
           handle,
@@ -60,7 +58,7 @@ export function AlienBotFlyer() {
         themeObserver.disconnect();
       };
     }
-    const t = setTimeout(startMount, 900);
+    const t = setTimeout(startMount, 800);
     return () => {
       clearTimeout(t);
       themeObserver.disconnect();
@@ -83,7 +81,7 @@ export function AlienBotFlyer() {
 
   if (!isMounted) return null;
 
-  // ── Minimized pill (after user dismisses) ──────────────────────────────────
+  // Minimized pill (when closed by user)
   if (isDismissed) {
     return (
       <div className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-40">
@@ -91,7 +89,7 @@ export function AlienBotFlyer() {
           type="button"
           onClick={handleRestore}
           aria-label="Open A-Pay Dev Bot"
-          className="flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-slate-900/90 dark:bg-slate-950/95 text-white border border-blue-500/40 shadow-xl backdrop-blur-lg hover:border-blue-400/70 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer min-h-[44px]"
+          className="flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-slate-900/95 dark:bg-slate-950/95 text-white border border-blue-500/50 shadow-2xl backdrop-blur-xl hover:border-blue-400 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer min-h-[44px]"
         >
           <span className="relative flex h-2.5 w-2.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75" />
@@ -110,13 +108,13 @@ export function AlienBotFlyer() {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* ── Speech Bubble (only when isOpen) ───────────────────────────────── */}
+      {/* Speech Bubble / Tooltip Dialog */}
       {isOpen && (
         <div
           className={`mb-3 w-72 sm:w-80 rounded-2xl border shadow-2xl backdrop-blur-2xl p-4 transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 ${
             isDark
-              ? 'bg-slate-950/92 border-blue-900/50 shadow-blue-950/60'
-              : 'bg-white/96 border-blue-200/80 shadow-blue-200/40'
+              ? 'bg-slate-950/95 border-blue-900/60 shadow-blue-950/70'
+              : 'bg-white/98 border-slate-300/80 shadow-2xl shadow-slate-900/15'
           }`}
         >
           {/* Header */}
@@ -148,7 +146,7 @@ export function AlienBotFlyer() {
                 isDark ? 'text-slate-200' : 'text-slate-800'
               }`}
             >
-              Hey dev! 1-click SDK setup, HTTP&nbsp;402 code snippets &amp; Base&nbsp;L2 testnet
+              Hey dev! 1-click SDK setup, HTTP 402 code snippets &amp; Base L2 testnet
               tokens&nbsp;—&nbsp;right here.
             </p>
 
@@ -160,7 +158,7 @@ export function AlienBotFlyer() {
                   className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-mono border ${
                     isDark
                       ? 'bg-blue-950/50 border-blue-800/50 text-sky-300'
-                      : 'bg-blue-50 border-blue-200 text-blue-700'
+                      : 'bg-blue-50/80 border-blue-200 text-blue-700'
                   }`}
                 >
                   <Sparkles className="w-2 h-2 shrink-0" />
@@ -184,12 +182,12 @@ export function AlienBotFlyer() {
         </div>
       )}
 
-      {/* ── 3D Alien Mascot Button ───────────────────────────────────────────── */}
+      {/* 3D Alien Mascot Interactive Button */}
       <div className="relative flex items-center justify-end">
-        {/* Notification dot — only visible when bubble is closed */}
+        {/* Notification dot — visible only when bubble is closed */}
         {!isOpen && (
-          <span className="absolute -top-0.5 -right-0.5 z-10 flex h-4 w-4">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-70" />
+          <span className="absolute 1 top-0 right-1 z-10 flex h-4 w-4">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75" />
             <span className="relative inline-flex rounded-full h-4 w-4 bg-sky-500 text-[8px] font-bold text-white items-center justify-center shadow-lg shadow-sky-500/50">
               1
             </span>
@@ -201,7 +199,6 @@ export function AlienBotFlyer() {
           tabIndex={0}
           aria-label="A-Pay 3D Alien Bot — click to chat"
           onClick={() => {
-            // First click opens bubble, second click opens Telegram
             if (!isOpen) {
               setIsOpen(true);
             } else {
@@ -213,28 +210,28 @@ export function AlienBotFlyer() {
               setIsOpen((v) => !v);
             }
           }}
-          className="relative w-[108px] h-[108px] sm:w-[124px] sm:h-[124px] flex items-center justify-center cursor-pointer active:scale-95 transition-transform duration-150"
+          className="relative w-[116px] h-[116px] sm:w-[136px] sm:h-[136px] flex items-center justify-center cursor-pointer active:scale-95 transition-transform duration-150"
         >
-          {/* Ambient radial glow behind character */}
+          {/* Subtle Dynamic Ambient Radial Glow */}
           <div
-            className={`absolute inset-0 rounded-full blur-2xl pointer-events-none transition-opacity duration-500 ${
-              isDark ? 'bg-blue-600/25 opacity-100' : 'bg-blue-400/10 opacity-80'
+            className={`absolute inset-0 rounded-full blur-2xl pointer-events-none transition-all duration-500 ${
+              isDark ? 'bg-blue-500/20 opacity-90' : 'bg-blue-600/15 opacity-80'
             } ${isHovered ? 'scale-125 opacity-100' : ''}`}
           />
 
-          {/* Procedural 3D canvas */}
+          {/* Procedural 3D Alien Canvas */}
           <AlienBotCanvas isHovered={isHovered} isDark={isDark} />
 
-          {/* Label badge */}
+          {/* High-Contrast Label Badge */}
           <div
-            className={`absolute -bottom-1 px-2 py-0.5 rounded-full border backdrop-blur-lg shadow flex items-center gap-1 pointer-events-none text-[9px] font-mono font-bold ${
+            className={`absolute -bottom-1 px-3 py-0.5 rounded-full border backdrop-blur-xl shadow-lg flex items-center gap-1.5 pointer-events-none text-[10px] font-mono font-bold transition-colors ${
               isDark
-                ? 'bg-slate-950/90 border-blue-500/40 text-sky-300'
-                : 'bg-white/90 border-blue-300/60 text-blue-700'
+                ? 'bg-slate-950/95 border-blue-500/50 text-sky-300 shadow-blue-950/50'
+                : 'bg-slate-900/95 border-blue-400/60 text-white shadow-slate-900/30'
             }`}
           >
             <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping" />
-            Telegram Bot
+            <span>Telegram Bot</span>
           </div>
         </div>
       </div>

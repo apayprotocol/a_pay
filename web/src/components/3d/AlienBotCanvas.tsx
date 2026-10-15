@@ -19,17 +19,15 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
     const el = mountRef.current;
     if (!el) return;
 
-    const W = el.clientWidth || 160;
-    const H = el.clientHeight || 160;
+    const W = el.clientWidth || 180;
+    const H = el.clientHeight || 180;
 
-    // ── Scene ────────────────────────────────────────────────────────────────
+    // ── 1. Scene & Camera ──────────────────────────────────────────────────
     const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(34, W / H, 0.1, 100);
+    camera.position.set(0, 0.15, 4.8);
 
-    // ── Camera ───────────────────────────────────────────────────────────────
-    const camera = new THREE.PerspectiveCamera(32, W / H, 0.05, 80);
-    camera.position.set(0, 0.08, 4.6);
-
-    // ── Renderer ─────────────────────────────────────────────────────────────
+    // ── 2. WebGL Renderer with High-DPI Clamping ────────────────────────────
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
@@ -38,15 +36,13 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
     renderer.setSize(W, H);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = isDark ? 1.1 : 1.5;
-    renderer.shadowMap.enabled = false;
+    renderer.toneMappingExposure = isDark ? 1.4 : 1.6;
     el.appendChild(renderer.domElement);
 
-    // ── Environment map (procedural gradient sphere for reflections) ──────────
+    // ── 3. Procedural Studio Environment for PBR Reflections ────────────────
     const pmremGen = new THREE.PMREMGenerator(renderer);
     pmremGen.compileCubemapShader();
 
-    // Procedural DataTexture gradient — zero network cost, zero external deps
     const buildEnvMap = (dark: boolean) => {
       const size = 64;
       const px = new Uint8Array(size * size * 4);
@@ -55,12 +51,14 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
           const t = y / (size - 1);
           const i = (y * size + x) * 4;
           if (dark) {
-            px[i] = Math.round(2 + t * 8);
-            px[i + 1] = Math.round(5 + t * 12);
-            px[i + 2] = Math.round(20 + t * 22);
+            // Night cyber reflection
+            px[i] = Math.round(10 + t * 25);
+            px[i + 1] = Math.round(20 + t * 40);
+            px[i + 2] = Math.round(60 + t * 80);
           } else {
-            px[i] = Math.round(220 - t * 28);
-            px[i + 1] = Math.round(232 - t * 18);
+            // High-contrast day studio reflection
+            px[i] = Math.round(180 + t * 50);
+            px[i + 1] = Math.round(200 + t * 45);
             px[i + 2] = 255;
           }
           px[i + 3] = 255;
@@ -75,523 +73,523 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
 
     const envMap = buildEnvMap(isDark);
     scene.environment = envMap;
-    scene.background = null;
 
-    // ── Adaptive Lights ───────────────────────────────────────────────────────
-    const ambient = new THREE.AmbientLight(0xffffff, isDark ? 0.5 : 1.2);
-    scene.add(ambient);
+    // ── 4. Cinematic Studio & Rim Lighting ─────────────────────────────────
+    // Ambient Light
+    const ambientLight = new THREE.AmbientLight(0xffffff, isDark ? 1.0 : 1.8);
+    scene.add(ambientLight);
 
-    // Key light
-    const key = new THREE.DirectionalLight(0xffffff, isDark ? 2.5 : 4.5);
-    key.position.set(3, 5, 4);
-    scene.add(key);
+    // Main Studio Key Light
+    const keyLight = new THREE.DirectionalLight(0xffffff, isDark ? 3.8 : 5.0);
+    keyLight.position.set(4, 5, 4);
+    scene.add(keyLight);
 
-    // Rim light — blue cobalt accent
-    const rim = new THREE.DirectionalLight(0x0052ff, isDark ? 6.0 : 2.5);
-    rim.position.set(-4, -1, -3);
-    scene.add(rim);
+    // Base Cobalt Blue Razor Rim Light (Intense contrast edge)
+    const rimLight = new THREE.DirectionalLight(0x0052ff, isDark ? 6.5 : 8.0);
+    rimLight.position.set(-4, -2, -3);
+    scene.add(rimLight);
 
-    // Cyan under-fill
-    const fill = new THREE.DirectionalLight(0x00eeff, isDark ? 4.0 : 1.2);
-    fill.position.set(1, -4, 2);
-    scene.add(fill);
+    // Cyber Cyan Fill
+    const fillLight = new THREE.DirectionalLight(0x00f0ff, isDark ? 3.5 : 4.5);
+    fillLight.position.set(2, -3, 3);
+    scene.add(fillLight);
 
-    // Animated glow point
-    const glowPt = new THREE.PointLight(0x0052ff, isDark ? 5.0 : 2.0, 6);
-    glowPt.position.set(0, 1.4, 1.2);
-    scene.add(glowPt);
+    // Top Reactor Glow Light
+    const topGlow = new THREE.PointLight(0x00f0ff, isDark ? 4.0 : 3.0, 7);
+    topGlow.position.set(0, 1.8, 1);
+    scene.add(topGlow);
 
-    // Warm top light (day only)
-    const top = new THREE.DirectionalLight(0xfff4e0, isDark ? 0 : 2.5);
-    top.position.set(0, 8, 2);
-    scene.add(top);
-
-    // ── Material Factory ──────────────────────────────────────────────────────
-
-    // Ceramic / porcelain body
-    const ceramicMat = new THREE.MeshPhysicalMaterial({
-      color: isDark ? 0xd0ddf5 : 0xeef4ff,
-      metalness: 0.0,
-      roughness: 0.18,
+    // ── 5. Materials: Contrast-Inverted (Day = Stealth Obsidian, Night = Pearl Ceramic) ──
+    // A. Main Armor Material:
+    //    DAY: Glossy Stealth Obsidian Black (High contrast on white page)
+    //    NIGHT: Luminous Pearl White Ceramic (High contrast on dark page)
+    const armorMat = new THREE.MeshPhysicalMaterial({
+      color: isDark ? 0xf1f5f9 : 0x0a0e1a, // White on dark, Black on white!
+      metalness: isDark ? 0.2 : 0.88,
+      roughness: isDark ? 0.12 : 0.16,
       clearcoat: 1.0,
-      clearcoatRoughness: 0.08,
-      reflectivity: 0.7,
+      clearcoatRoughness: 0.06,
+      reflectivity: 0.9,
       envMap,
-      envMapIntensity: isDark ? 1.6 : 0.9,
+      envMapIntensity: isDark ? 1.2 : 2.2,
     });
 
-    // Cobalt Blue suit — deep satin
+    // B. Mirror Chrome Razor Trim
+    const chromeMat = new THREE.MeshStandardMaterial({
+      color: isDark ? 0xffffff : 0xe2e8f0,
+      metalness: 0.98,
+      roughness: 0.05,
+      envMap,
+      envMapIntensity: 2.5,
+    });
+
+    // C. Base Cobalt Blue Suit / Pauldron Plates
     const suitMat = new THREE.MeshPhysicalMaterial({
-      color: 0x0042d0,
-      metalness: 0.15,
-      roughness: 0.38,
-      clearcoat: 0.6,
-      clearcoatRoughness: 0.25,
-      reflectivity: 0.5,
+      color: 0x0052ff,
+      metalness: 0.45,
+      roughness: 0.25,
+      clearcoat: 0.8,
+      clearcoatRoughness: 0.1,
       envMap,
-      envMapIntensity: 0.8,
+      envMapIntensity: 1.5,
     });
 
-    // Glass visor — refraction + tint
+    // D. Curved Dark Glass Visor
     const visorMat = new THREE.MeshPhysicalMaterial({
-      color: 0x001033,
-      metalness: 0.0,
-      roughness: 0.0,
-      transmission: 0.72,
-      thickness: 0.4,
-      ior: 1.52,
+      color: isDark ? 0x030712 : 0x020617,
+      metalness: 0.1,
+      roughness: 0.02,
+      transmission: 0.75,
+      thickness: 0.5,
+      ior: 1.6,
       reflectivity: 1.0,
       clearcoat: 1.0,
       clearcoatRoughness: 0.0,
       envMap,
-      envMapIntensity: isDark ? 3.0 : 1.8,
+      envMapIntensity: 3.0,
     });
 
-    // Emissive cyan — eyes, antenna orb, hover ring
-    const cyanMat = new THREE.MeshStandardMaterial({
-      color: isDark ? 0x00eeff : 0x0080ff,
-      emissive: isDark ? 0x00ddff : 0x0055ff,
-      emissiveIntensity: isDark ? 3.5 : 1.8,
-      roughness: 0.0,
-      metalness: 0.3,
-      envMap,
-      envMapIntensity: 0.5,
+    // E. Glowing Electric Cyan Plasma (Eyes, Reactor, Energy Veins)
+    const plasmaMat = new THREE.MeshStandardMaterial({
+      color: 0x00f0ff,
+      emissive: 0x00f0ff,
+      emissiveIntensity: isDark ? 3.8 : 4.5,
+      roughness: 0.05,
+      metalness: 0.8,
     });
 
-    // Telegram official blue (badge)
-    const tgBlueMat = new THREE.MeshPhysicalMaterial({
-      color: 0x229ed9,
-      metalness: 0.1,
-      roughness: 0.22,
-      clearcoat: 0.9,
-      clearcoatRoughness: 0.1,
-      envMap,
-      envMapIntensity: 0.7,
-    });
-
-    // Paper plane — satin white
-    const planeMat = new THREE.MeshPhysicalMaterial({
+    // F. Pure White Telegram Paper Plane Emblem
+    const planeMat = new THREE.MeshStandardMaterial({
       color: 0xffffff,
       emissive: 0xffffff,
-      emissiveIntensity: isDark ? 1.2 : 0.4,
-      metalness: 0.0,
-      roughness: 0.12,
-      clearcoat: 0.8,
-      clearcoatRoughness: 0.05,
+      emissiveIntensity: 1.2,
+      metalness: 0.1,
+      roughness: 0.1,
     });
 
-    // Dark joint / collar — titanium
-    const jointMat = new THREE.MeshPhysicalMaterial({
-      color: 0x131a2e,
+    // G. Gunmetal Tactical Joint Material
+    const jointMat = new THREE.MeshStandardMaterial({
+      color: 0x1e293b,
       metalness: 0.92,
-      roughness: 0.12,
-      clearcoat: 0.5,
-      reflectivity: 1.0,
-      envMap,
-      envMapIntensity: 1.2,
+      roughness: 0.2,
     });
 
-    // ── Root mascot group ─────────────────────────────────────────────────────
-    const mascot = new THREE.Group();
-    scene.add(mascot);
+    // ── 6. Construct High-End 3D Alien Mascot Model ────────────────────────
+    const mascotGroup = new THREE.Group();
+    scene.add(mascotGroup);
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // HEAD
-    // ─────────────────────────────────────────────────────────────────────────
-    const headG = new THREE.Group();
-    headG.position.set(0, 0.48, 0);
-    mascot.add(headG);
+    // =========================================================================
+    // A. SCULPTED HIGH-TECH HEAD & HELMET
+    // =========================================================================
+    const headGroup = new THREE.Group();
+    headGroup.position.set(0, 0.46, 0);
+    mascotGroup.add(headGroup);
 
-    // High-poly smooth head sphere
-    const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.5, 64, 48), ceramicMat);
-    headMesh.scale.set(1.06, 0.98, 0.97);
-    headG.add(headMesh);
+    // 1. Aerodynamic Mecha Head Sphere (64x48 segments for ultra-smooth silhouette)
+    const headGeo = new THREE.SphereGeometry(0.52, 64, 48);
+    const headMesh = new THREE.Mesh(headGeo, armorMat);
+    headMesh.scale.set(1.08, 0.98, 0.98);
+    headGroup.add(headMesh);
 
-    // Smooth cheek pads (subtle organic inflation)
-    const cheekGeo = new THREE.SphereGeometry(0.22, 32, 24);
-    const lCheek = new THREE.Mesh(cheekGeo, ceramicMat);
-    lCheek.position.set(-0.42, -0.1, 0.24);
-    lCheek.scale.set(0.7, 0.6, 0.55);
-    headG.add(lCheek);
-    const rCheek = lCheek.clone();
-    rCheek.position.set(0.42, -0.1, 0.24);
-    headG.add(rCheek);
+    // 2. Sculpted Helmet Brow Plate (Gives intelligent, heroic mecha look)
+    const browShape = new THREE.Shape();
+    browShape.moveTo(-0.45, 0);
+    browShape.quadraticCurveTo(0, 0.18, 0.45, 0);
+    browShape.lineTo(0.38, -0.12);
+    browShape.quadraticCurveTo(0, 0.02, -0.38, -0.12);
+    browShape.closePath();
 
-    // Glass visor — asymmetric organic shell
-    const visorGeo = new THREE.SphereGeometry(0.52, 48, 36, 0, Math.PI * 2, 0.28, 1.1);
-    const visor = new THREE.Mesh(visorGeo, visorMat);
-    visor.rotation.x = Math.PI * 0.52;
-    visor.position.set(0, -0.02, 0.06);
-    visor.scale.set(0.9, 0.72, 0.88);
-    headG.add(visor);
+    const browGeo = new THREE.ExtrudeGeometry(browShape, {
+      depth: 0.04,
+      bevelEnabled: true,
+      bevelThickness: 0.015,
+      bevelSize: 0.015,
+      bevelSegments: 3,
+    });
+    browGeo.center();
+    const brow = new THREE.Mesh(browGeo, chromeMat);
+    brow.position.set(0, 0.16, 0.48);
+    brow.rotation.x = -0.15;
+    headGroup.add(brow);
 
-    // Visor chrome rim — thin torus
-    const vRimGeo = new THREE.TorusGeometry(0.44, 0.012, 12, 80, Math.PI * 1.1);
-    const vRim = new THREE.Mesh(vRimGeo, jointMat);
+    // 3. Deep Glossy Curved Cyber Visor
+    const visorGeo = new THREE.SphereGeometry(0.49, 48, 36, 0, Math.PI * 2, 0.28, 1.05);
+    const visorMesh = new THREE.Mesh(visorGeo, visorMat);
+    visorMesh.rotation.x = Math.PI * 0.52;
+    visorMesh.position.set(0, -0.02, 0.08);
+    visorMesh.scale.set(0.92, 0.74, 0.9);
+    headGroup.add(visorMesh);
+
+    // Visor Razor Chrome Frame Trim
+    const vRimGeo = new THREE.TorusGeometry(0.45, 0.014, 16, 80, Math.PI * 1.15);
+    const vRim = new THREE.Mesh(vRimGeo, chromeMat);
     vRim.rotation.x = Math.PI * 0.52;
-    vRim.position.set(0, -0.02, 0.06);
-    headG.add(vRim);
+    vRim.position.set(0, -0.02, 0.08);
+    headGroup.add(vRim);
 
-    // Eyes — glowing capsules behind visor
-    const eyeGeo = new THREE.CapsuleGeometry(0.038, 0.095, 16, 20);
-    const lEye = new THREE.Mesh(eyeGeo, cyanMat);
-    lEye.position.set(-0.155, -0.03, 0.46);
-    lEye.rotation.z = -0.18;
-    headG.add(lEye);
-    const rEye = lEye.clone();
-    rEye.position.set(0.155, -0.03, 0.46);
-    rEye.rotation.z = 0.18;
-    headG.add(rEye);
+    // 4. Expressive Digital HUD Cyan Eyes (Wide capsule glow)
+    const eyeGeo = new THREE.CapsuleGeometry(0.045, 0.11, 16, 24);
+    const leftEye = new THREE.Mesh(eyeGeo, plasmaMat);
+    leftEye.position.set(-0.16, -0.04, 0.48);
+    leftEye.rotation.z = -0.22;
+    headGroup.add(leftEye);
 
-    // Pupil micro-dots
-    const pupilGeo = new THREE.SphereGeometry(0.022, 12, 12);
-    const pupilMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    const lPupil = new THREE.Mesh(pupilGeo, pupilMat);
-    lPupil.position.set(-0.155, -0.03, 0.492);
-    headG.add(lPupil);
-    const rPupil = lPupil.clone();
-    rPupil.position.set(0.155, -0.03, 0.492);
-    headG.add(rPupil);
+    const rightEye = new THREE.Mesh(eyeGeo, plasmaMat);
+    rightEye.position.set(0.16, -0.04, 0.48);
+    rightEye.rotation.z = 0.22;
+    headGroup.add(rightEye);
 
-    // Ear pods — smooth oblate spheroid
-    const earGeo = new THREE.SphereGeometry(0.13, 32, 24);
-    const lEar = new THREE.Mesh(earGeo, jointMat);
-    lEar.scale.set(0.42, 0.75, 0.7);
-    lEar.position.set(-0.54, 0.04, 0.02);
-    headG.add(lEar);
-    const lEarGlow = new THREE.Mesh(new THREE.SphereGeometry(0.06, 20, 16), cyanMat);
-    lEarGlow.position.set(-0.558, 0.04, 0.02);
-    headG.add(lEarGlow);
-    const rEar = lEar.clone();
-    rEar.position.set(0.54, 0.04, 0.02);
-    headG.add(rEar);
-    const rEarGlow = lEarGlow.clone();
-    rEarGlow.position.set(0.558, 0.04, 0.02);
-    headG.add(rEarGlow);
+    // Eye Spark Pupils (Diamond shine)
+    const sparkGeo = new THREE.OctahedronGeometry(0.025, 0);
+    const sparkMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const lSpark = new THREE.Mesh(sparkGeo, sparkMat);
+    lSpark.position.set(-0.16, -0.03, 0.52);
+    headGroup.add(lSpark);
 
-    // ── Antenna ────────────────────────────────────────────────────────────────
-    const antennaG = new THREE.Group();
-    antennaG.position.set(0.05, 0.44, 0);
-    headG.add(antennaG);
+    const rSpark = new THREE.Mesh(sparkGeo, sparkMat);
+    rSpark.position.set(0.16, -0.03, 0.52);
+    headGroup.add(rSpark);
 
-    // Flexible stem — smooth tapered cylinder
-    const stemGeo = new THREE.CylinderGeometry(0.016, 0.026, 0.34, 20, 4);
-    const stem = new THREE.Mesh(stemGeo, jointMat);
-    stem.position.set(0, 0.17, 0);
-    stem.rotation.z = 0.22;
-    antennaG.add(stem);
+    // 5. Audio Turbine Ear Pods (Mecha side pods with glowing plasma cores)
+    const earHousingGeo = new THREE.CylinderGeometry(0.12, 0.14, 0.1, 24);
+    const earCoreGeo = new THREE.CylinderGeometry(0.07, 0.07, 0.11, 16);
 
-    // Elbow joint
-    const elbowGeo = new THREE.SphereGeometry(0.032, 20, 16);
-    const elbow = new THREE.Mesh(elbowGeo, jointMat);
-    elbow.position.set(0.05, 0.34, 0.02);
-    antennaG.add(elbow);
+    const leftEar = new THREE.Mesh(earHousingGeo, jointMat);
+    leftEar.rotation.z = Math.PI / 2;
+    leftEar.position.set(-0.56, 0.02, 0);
+    headGroup.add(leftEar);
 
-    // Upper stem — thinner
-    const stem2Geo = new THREE.CylinderGeometry(0.012, 0.017, 0.22, 16, 4);
-    const stem2 = new THREE.Mesh(stem2Geo, jointMat);
-    stem2.position.set(0.1, 0.46, 0.04);
-    stem2.rotation.z = -0.38;
-    antennaG.add(stem2);
+    const leftEarRim = new THREE.Mesh(new THREE.TorusGeometry(0.13, 0.012, 12, 32), chromeMat);
+    leftEarRim.rotation.y = Math.PI / 2;
+    leftEarRim.position.set(-0.61, 0.02, 0);
+    headGroup.add(leftEarRim);
 
-    // Orb — glowing crystal sphere with internal glow
-    const orbGeo = new THREE.SphereGeometry(0.088, 40, 32);
-    const orbMat = new THREE.MeshPhysicalMaterial({
-      color: isDark ? 0x00bbff : 0x0066ff,
-      emissive: isDark ? 0x00aaff : 0x0044cc,
-      emissiveIntensity: isDark ? 3.0 : 1.5,
-      transmission: 0.6,
-      thickness: 0.3,
-      roughness: 0.0,
-      metalness: 0.0,
-      ior: 1.45,
-      clearcoat: 1.0,
-      clearcoatRoughness: 0.0,
-      envMap,
-      envMapIntensity: isDark ? 2.5 : 1.2,
-    });
-    const orb = new THREE.Mesh(orbGeo, orbMat);
-    orb.position.set(0.18, 0.58, 0.07);
-    antennaG.add(orb);
+    const leftEarGlow = new THREE.Mesh(earCoreGeo, plasmaMat);
+    leftEarGlow.rotation.z = Math.PI / 2;
+    leftEarGlow.position.set(-0.57, 0.02, 0);
+    headGroup.add(leftEarGlow);
 
-    // Orb halo ring
-    const orbHaloGeo = new THREE.TorusGeometry(0.11, 0.008, 12, 48);
-    const orbHalo = new THREE.Mesh(orbHaloGeo, cyanMat);
-    orbHalo.position.copy(orb.position);
-    orbHalo.rotation.x = 0.6;
-    orbHalo.rotation.z = 0.3;
-    antennaG.add(orbHalo);
+    const rightEar = leftEar.clone();
+    rightEar.position.set(0.56, 0.02, 0);
+    headGroup.add(rightEar);
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // BODY
-    // ─────────────────────────────────────────────────────────────────────────
-    const bodyG = new THREE.Group();
-    bodyG.position.set(0, -0.18, 0);
-    mascot.add(bodyG);
+    const rightEarRim = leftEarRim.clone();
+    rightEarRim.position.set(0.61, 0.02, 0);
+    headGroup.add(rightEarRim);
 
-    // Torso — smooth tapered cylinder (high segments)
-    const torsoMesh = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.32, 0.43, 0.56, 48, 6, false),
-      suitMat,
-    );
-    bodyG.add(torsoMesh);
+    const rightEarGlow = leftEarGlow.clone();
+    rightEarGlow.position.set(0.57, 0.02, 0);
+    headGroup.add(rightEarGlow);
 
-    // Shoulder roundings
-    const shoulderGeo = new THREE.SphereGeometry(0.18, 28, 20);
-    const lShoulderCap = new THREE.Mesh(shoulderGeo, suitMat);
-    lShoulderCap.scale.set(0.85, 0.65, 0.75);
-    lShoulderCap.position.set(-0.36, 0.24, 0);
-    bodyG.add(lShoulderCap);
-    const rShoulderCap = lShoulderCap.clone();
-    rShoulderCap.position.set(0.36, 0.24, 0);
-    bodyG.add(rShoulderCap);
+    // 6. High-Tech Articulated Reddit Antenna with Levitating Quantum Crystal Orb
+    const antennaGroup = new THREE.Group();
+    antennaGroup.position.set(0.04, 0.46, 0);
+    headGroup.add(antennaGroup);
 
-    // Neck collar — smooth ring
-    const collarGeo = new THREE.TorusGeometry(0.22, 0.055, 20, 48);
-    const collar = new THREE.Mesh(collarGeo, jointMat);
+    // Antenna Base Swivel Joint
+    const swivelGeo = new THREE.SphereGeometry(0.04, 16, 16);
+    const swivel = new THREE.Mesh(swivelGeo, chromeMat);
+    antennaGroup.add(swivel);
+
+    // Lower Curved Arm
+    const stemLower = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.028, 0.28, 16), jointMat);
+    stemLower.position.set(0.02, 0.13, 0);
+    stemLower.rotation.z = 0.2;
+    antennaGroup.add(stemLower);
+
+    // Knee Pivot Joint
+    const knee = new THREE.Mesh(new THREE.SphereGeometry(0.03, 16, 16), chromeMat);
+    knee.position.set(0.07, 0.26, 0.02);
+    antennaGroup.add(knee);
+
+    // Upper Bracket Arm
+    const stemUpper = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.02, 0.22, 16), jointMat);
+    stemUpper.position.set(0.12, 0.36, 0.03);
+    stemUpper.rotation.z = -0.36;
+    antennaGroup.add(stemUpper);
+
+    // Magnetic Emitter Ring
+    const emitterRing = new THREE.Mesh(new THREE.TorusGeometry(0.05, 0.008, 12, 24), chromeMat);
+    emitterRing.position.set(0.18, 0.46, 0.04);
+    emitterRing.rotation.x = Math.PI / 3;
+    antennaGroup.add(emitterRing);
+
+    // Levitating Quantum Crystal Orb (Glowing beacon)
+    const orbGeo = new THREE.SphereGeometry(0.095, 32, 32);
+    const orb = new THREE.Mesh(orbGeo, plasmaMat);
+    orb.position.set(0.18, 0.54, 0.04);
+    antennaGroup.add(orb);
+
+    // Orbiting Micro Gyroscope Ring around Antenna Orb
+    const gyroRingGeo = new THREE.TorusGeometry(0.13, 0.008, 12, 36);
+    const gyroRing = new THREE.Mesh(gyroRingGeo, chromeMat);
+    gyroRing.position.copy(orb.position);
+    antennaGroup.add(gyroRing);
+
+    // =========================================================================
+    // B. MECHA EXOSUIT TORSO & TELEGRAM ARC REACTOR
+    // =========================================================================
+    const bodyGroup = new THREE.Group();
+    bodyGroup.position.set(0, -0.22, 0);
+    mascotGroup.add(bodyGroup);
+
+    // 1. Sleek Tapered Mecha Torso
+    const torsoGeo = new THREE.CylinderGeometry(0.32, 0.44, 0.56, 48, 6);
+    const torsoMesh = new THREE.Mesh(torsoGeo, armorMat);
+    bodyGroup.add(torsoMesh);
+
+    // 2. Base Cobalt Blue Shoulder Armor Pauldrons
+    const pauldronGeo = new THREE.SphereGeometry(0.2, 32, 24);
+    const leftPauldron = new THREE.Mesh(pauldronGeo, suitMat);
+    leftPauldron.scale.set(0.9, 0.7, 0.8);
+    leftPauldron.position.set(-0.36, 0.24, 0);
+    bodyGroup.add(leftPauldron);
+
+    const rightPauldron = leftPauldron.clone();
+    rightPauldron.position.set(0.36, 0.24, 0);
+    bodyGroup.add(rightPauldron);
+
+    // 3. Heavy Titanium Collar Joint
+    const collar = new THREE.Mesh(new THREE.TorusGeometry(0.23, 0.05, 16, 48), jointMat);
     collar.rotation.x = Math.PI / 2;
     collar.position.set(0, 0.3, 0);
-    bodyG.add(collar);
+    bodyGroup.add(collar);
 
-    // Chest detail — subtle inset panel
-    const panelGeo = new THREE.CapsuleGeometry(0.08, 0.12, 12, 20);
-    const panelMat = new THREE.MeshPhysicalMaterial({
-      color: 0x0035b0,
-      metalness: 0.2,
-      roughness: 0.3,
-      clearcoat: 0.8,
-      clearcoatRoughness: 0.1,
-    });
-    const panelL = new THREE.Mesh(panelGeo, panelMat);
-    panelL.position.set(-0.16, 0.1, 0.31);
-    panelL.rotation.z = 0.2;
-    panelL.scale.set(0.7, 0.7, 0.4);
-    bodyG.add(panelL);
-    const panelR = panelL.clone();
-    panelR.position.set(0.16, 0.1, 0.31);
-    panelR.rotation.z = -0.2;
-    bodyG.add(panelR);
+    // 4. Glowing Blue Energy Veins / Conduits (Running down chest)
+    const veinGeo = new THREE.BoxGeometry(0.02, 0.26, 0.015);
+    const leftVein = new THREE.Mesh(veinGeo, plasmaMat);
+    leftVein.position.set(-0.16, 0.06, 0.36);
+    leftVein.rotation.z = -0.15;
+    bodyGroup.add(leftVein);
 
-    // ── Telegram Emblem ────────────────────────────────────────────────────────
-    const tgG = new THREE.Group();
-    tgG.position.set(0, 0.02, 0.38);
-    bodyG.add(tgG);
+    const rightVein = new THREE.Mesh(veinGeo, plasmaMat);
+    rightVein.position.set(0.16, 0.06, 0.36);
+    rightVein.rotation.z = 0.15;
+    bodyGroup.add(rightVein);
 
-    // Badge circle — smooth disc
-    const badge = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.022, 48), tgBlueMat);
-    badge.rotation.x = Math.PI / 2;
-    badge.position.z = 0.002;
-    tgG.add(badge);
+    // 5. Central Glowing Hexagonal Telegram Arc Reactor (Heart of the Mascot)
+    const reactorGroup = new THREE.Group();
+    reactorGroup.position.set(0, 0.02, 0.38);
+    bodyGroup.add(reactorGroup);
 
-    // Badge rim
-    const badgeRimGeo = new THREE.TorusGeometry(0.133, 0.006, 12, 48);
-    const badgeRim = new THREE.Mesh(badgeRimGeo, jointMat);
-    tgG.add(badgeRim);
+    // Chrome Hexagonal Bezel
+    const hexBezel = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.03, 6), chromeMat);
+    hexBezel.rotation.x = Math.PI / 2;
+    reactorGroup.add(hexBezel);
 
-    // Paper plane — smooth extruded shape
-    const ppShape = new THREE.Shape();
-    ppShape.moveTo(0.075, 0.022);
-    ppShape.quadraticCurveTo(0.04, 0.01, -0.065, 0.065);
-    ppShape.lineTo(-0.038, 0.008);
-    ppShape.quadraticCurveTo(-0.018, -0.012, -0.06, -0.065);
-    ppShape.closePath();
+    // Blue Telegram Core Plate
+    const tgPlate = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.035, 24), suitMat);
+    tgPlate.rotation.x = Math.PI / 2;
+    reactorGroup.add(tgPlate);
 
-    const ppGeo = new THREE.ExtrudeGeometry(ppShape, {
-      depth: 0.014,
+    // Luminous Extruded 3D Telegram Paper Plane
+    const planeShape = new THREE.Shape();
+    planeShape.moveTo(0.08, 0.02);
+    planeShape.lineTo(-0.065, 0.065);
+    planeShape.lineTo(-0.035, 0.005);
+    planeShape.lineTo(-0.065, -0.065);
+    planeShape.closePath();
+
+    const planeGeo = new THREE.ExtrudeGeometry(planeShape, {
+      depth: 0.02,
       bevelEnabled: true,
-      bevelThickness: 0.006,
-      bevelSize: 0.006,
-      bevelSegments: 4,
+      bevelThickness: 0.008,
+      bevelSize: 0.008,
+      bevelSegments: 3,
     });
-    ppGeo.center();
-    const plane = new THREE.Mesh(ppGeo, planeMat);
-    plane.position.set(0, 0, 0.024);
-    plane.rotation.z = 0.18;
-    tgG.add(plane);
+    planeGeo.center();
+    const planeMesh = new THREE.Mesh(planeGeo, planeMat);
+    planeMesh.rotation.z = 0.18;
+    planeMesh.position.set(0, 0, 0.03);
+    planeMesh.scale.set(1.15, 1.15, 1.15);
+    reactorGroup.add(planeMesh);
 
-    // ── Arms ───────────────────────────────────────────────────────────────────
-    // Left arm — smooth capsule
-    const armGeo = new THREE.CapsuleGeometry(0.076, 0.26, 12, 24);
-    const lArm = new THREE.Mesh(armGeo, suitMat);
-    lArm.position.set(-0.43, 0.02, 0.04);
-    lArm.rotation.z = 0.42;
-    lArm.rotation.x = 0.12;
-    bodyG.add(lArm);
+    // =========================================================================
+    // C. ARTICULATED MECHA ARMS & HOLOGRAPHIC WAVE
+    // =========================================================================
+    // 1. Left Arm (Stylish rest pose on hip)
+    const armGeo = new THREE.CapsuleGeometry(0.076, 0.28, 12, 24);
+    const leftArm = new THREE.Mesh(armGeo, suitMat);
+    leftArm.position.set(-0.44, 0.02, 0.04);
+    leftArm.rotation.z = 0.44;
+    leftArm.rotation.x = 0.14;
+    bodyGroup.add(leftArm);
 
-    const lHandGeo = new THREE.SphereGeometry(0.086, 28, 20);
-    const lHand = new THREE.Mesh(lHandGeo, ceramicMat);
-    lHand.position.set(-0.52, -0.18, 0.1);
-    bodyG.add(lHand);
+    const leftHand = new THREE.Mesh(new THREE.SphereGeometry(0.088, 24, 20), armorMat);
+    leftHand.position.set(-0.54, -0.18, 0.12);
+    bodyGroup.add(leftHand);
 
-    // Right arm — waving group
-    const rArmG = new THREE.Group();
-    rArmG.position.set(0.42, 0.14, 0.04);
-    bodyG.add(rArmG);
+    // 2. Right Arm (Friendly interactive waving arm)
+    const rightArmGroup = new THREE.Group();
+    rightArmGroup.position.set(0.42, 0.14, 0.04);
+    bodyGroup.add(rightArmGroup);
 
-    const rUpperArm = new THREE.Mesh(new THREE.CapsuleGeometry(0.07, 0.2, 12, 24), suitMat);
-    rUpperArm.position.set(0.09, 0.09, 0.04);
-    rUpperArm.rotation.z = -0.75;
-    rUpperArm.rotation.x = 0.28;
-    rArmG.add(rUpperArm);
+    const rightUpperArm = new THREE.Mesh(new THREE.CapsuleGeometry(0.07, 0.22, 12, 24), suitMat);
+    rightUpperArm.position.set(0.1, 0.1, 0.04);
+    rightUpperArm.rotation.z = -0.78;
+    rightUpperArm.rotation.x = 0.28;
+    rightArmGroup.add(rightUpperArm);
 
-    const rHand = new THREE.Mesh(new THREE.SphereGeometry(0.082, 28, 20), ceramicMat);
-    rHand.position.set(0.24, 0.26, 0.1);
-    rArmG.add(rHand);
+    const rightHand = new THREE.Mesh(new THREE.SphereGeometry(0.085, 24, 20), armorMat);
+    rightHand.position.set(0.26, 0.28, 0.1);
+    rightArmGroup.add(rightHand);
 
-    // Holographic palm ring
-    const palmRingGeo = new THREE.TorusGeometry(0.066, 0.009, 10, 36);
-    const palmRing = new THREE.Mesh(palmRingGeo, cyanMat);
-    palmRing.position.set(0.24, 0.26, 0.16);
-    palmRing.rotation.x = Math.PI / 3.5;
-    rArmG.add(palmRing);
+    // Floating Holographic Energy Disc in Right Palm
+    const palmHolo = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.01, 10, 36), plasmaMat);
+    palmHolo.position.set(0.26, 0.28, 0.18);
+    palmHolo.rotation.x = Math.PI / 3.5;
+    rightArmGroup.add(palmHolo);
 
-    // ── Levitation energy ring ─────────────────────────────────────────────────
-    const hRingGeo = new THREE.TorusGeometry(0.52, 0.012, 16, 96);
-    const hRing = new THREE.Mesh(hRingGeo, cyanMat);
-    hRing.rotation.x = Math.PI / 2;
-    hRing.position.set(0, -0.58, 0);
-    mascot.add(hRing);
+    // Mini Orbiting Telegram Beacon above palm
+    const miniBeacon = new THREE.Mesh(new THREE.OctahedronGeometry(0.035, 1), planeMat);
+    miniBeacon.position.set(0.26, 0.38, 0.18);
+    rightArmGroup.add(miniBeacon);
 
-    // Outer orbit ring (thinner, tilted)
-    const outerRingGeo = new THREE.TorusGeometry(0.7, 0.007, 10, 120);
-    const outerRing = new THREE.Mesh(outerRingGeo, cyanMat);
-    outerRing.rotation.x = Math.PI / 2.4;
-    outerRing.rotation.z = 0.3;
-    outerRing.position.set(0, -0.5, 0);
-    mascot.add(outerRing);
+    // =========================================================================
+    // D. LEVITATION BASE & DUAL COUNTER-ROTATING GYROSCOPES
+    // =========================================================================
+    // Ion Thruster Ring (Base glowing ring)
+    const thrusterRing = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.016, 16, 96), plasmaMat);
+    thrusterRing.rotation.x = Math.PI / 2;
+    thrusterRing.position.set(0, -0.58, 0);
+    mascotGroup.add(thrusterRing);
 
-    // Orbiting micro-drone (single bright dot)
-    const droneMat = new THREE.MeshStandardMaterial({
-      color: 0xffffff,
-      emissive: 0x0088ff,
-      emissiveIntensity: isDark ? 5.0 : 2.5,
-    });
-    const drone = new THREE.Mesh(new THREE.OctahedronGeometry(0.038, 1), droneMat);
-    mascot.add(drone);
+    // Outer Chrome Gyroscopic Orbital Ring
+    const gyroOrbit = new THREE.Mesh(new THREE.TorusGeometry(0.72, 0.009, 12, 120), chromeMat);
+    gyroOrbit.rotation.x = Math.PI / 2.3;
+    gyroOrbit.rotation.z = 0.35;
+    gyroOrbit.position.set(0, -0.5, 0);
+    mascotGroup.add(gyroOrbit);
 
-    // ── Interaction state ──────────────────────────────────────────────────────
-    let mx = 0;
-    let my = 0;
+    // 2 Orbiting Quantum Micro-Drones
+    const droneGeo = new THREE.OctahedronGeometry(0.04, 1);
+    const drone1 = new THREE.Mesh(droneGeo, plasmaMat);
+    const drone2 = new THREE.Mesh(droneGeo, chromeMat);
+    mascotGroup.add(drone1);
+    mascotGroup.add(drone2);
+
+    // ── 7. Interactive Mouse / Pointer Tracker ──────────────────────────────
+    let targetX = 0;
+    let targetY = 0;
     let curRotY = 0;
     let curRotX = 0;
 
     const onPointerMove = (e: MouseEvent) => {
-      const r = el.getBoundingClientRect();
-      mx = ((e.clientX - r.left) / r.width) * 2 - 1;
-      my = -(((e.clientY - r.top) / r.height) * 2 - 1);
-      mx = Math.max(-1, Math.min(1, mx));
-      my = Math.max(-1, Math.min(1, my));
+      const rect = el.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
+      targetX = Math.max(-1, Math.min(1, x));
+      targetY = Math.max(-1, Math.min(1, y));
     };
+
     window.addEventListener('mousemove', onPointerMove, { passive: true });
 
-    // ── Visibility gate ────────────────────────────────────────────────────────
-    let visible = true;
-    const onVis = () => {
-      visible = document.visibilityState === 'visible';
+    // ── 8. Visibility Gate ──────────────────────────────────────────────────
+    let isVisible = true;
+    const handleVis = () => {
+      isVisible = document.visibilityState === 'visible';
     };
-    document.addEventListener('visibilitychange', onVis);
+    document.addEventListener('visibilitychange', handleVis);
 
-    // ── Blink state ────────────────────────────────────────────────────────────
-    let blinkTimer = 0;
-
-    // ── Render loop ────────────────────────────────────────────────────────────
+    // ── 9. Render & Animation Loop ──────────────────────────────────────────
     let animId = 0;
     const clock = new THREE.Clock();
+    let blinkTimer = 0;
 
     const animate = () => {
       animId = requestAnimationFrame(animate);
-      if (!visible) return;
+      if (!isVisible) return;
 
-      const t = clock.getElapsedTime();
-      const dt = clock.getDelta();
+      const elapsed = clock.getElapsedTime();
+      const delta = clock.getDelta();
 
-      // Dynamic exposure based on theme
-      renderer.toneMappingExposure = isDarkRef.current ? 1.1 : 1.5;
+      // Smooth tracking interpolation
+      curRotY += (targetX * 0.48 - curRotY) * 0.07;
+      curRotX += (-targetY * 0.36 - curRotX) * 0.07;
 
-      // Smooth mouse follow
-      curRotY += (mx * 0.42 - curRotY) * 0.06;
-      curRotX += (-my * 0.32 - curRotX) * 0.06;
+      // Head & Visor follow cursor
+      headGroup.rotation.y = curRotY * 0.7;
+      headGroup.rotation.x = curRotX * 0.48;
 
-      // Head tracking
-      headG.rotation.y = curRotY * 0.65;
-      headG.rotation.x = curRotX * 0.45;
+      // Eyes follow cursor with subtle parallax
+      leftEye.position.x = -0.16 + curRotY * 0.035;
+      leftEye.position.y = -0.04 + curRotX * 0.025;
+      rightEye.position.x = 0.16 + curRotY * 0.035;
+      rightEye.position.y = -0.04 + curRotX * 0.025;
+      lSpark.position.x = -0.16 + curRotY * 0.04;
+      lSpark.position.y = -0.03 + curRotX * 0.03;
+      rSpark.position.x = 0.16 + curRotY * 0.04;
+      rSpark.position.y = -0.03 + curRotX * 0.03;
 
-      // Eye micro-tracking
-      lEye.position.x = -0.155 + curRotY * 0.032;
-      lEye.position.y = -0.03 + curRotX * 0.022;
-      rEye.position.x = 0.155 + curRotY * 0.032;
-      rEye.position.y = -0.03 + curRotX * 0.022;
-      lPupil.position.x = -0.155 + curRotY * 0.036;
-      lPupil.position.y = -0.03 + curRotX * 0.026;
-      rPupil.position.x = 0.155 + curRotY * 0.036;
-      rPupil.position.y = -0.03 + curRotX * 0.026;
-
-      // Realistic blink
-      blinkTimer += dt;
-      if (blinkTimer > 3.8 + Math.sin(t * 0.3) * 0.8) {
-        const bProg = (blinkTimer - 3.8) / 0.14;
+      // Realistic Cyber Eye Blink
+      blinkTimer += delta;
+      if (blinkTimer > 3.6 + Math.sin(elapsed * 0.4) * 0.8) {
+        const bProg = (blinkTimer - 3.6) / 0.15;
         const bScale = bProg < 0.5 ? 1 - bProg * 2 : (bProg - 0.5) * 2;
-        lEye.scale.y = Math.max(0.08, bScale);
-        rEye.scale.y = Math.max(0.08, bScale);
-        if (blinkTimer > 4.1) blinkTimer = 0;
+        leftEye.scale.y = Math.max(0.08, bScale);
+        rightEye.scale.y = Math.max(0.08, bScale);
+        if (blinkTimer > 3.9) blinkTimer = 0;
       } else {
-        lEye.scale.y = 1;
-        rEye.scale.y = 1;
+        leftEye.scale.y = 1;
+        rightEye.scale.y = 1;
       }
 
-      // Breathing / levitation
-      const breathe = Math.sin(t * 1.85) * 0.055;
-      mascot.position.y = breathe;
-      mascot.rotation.z = Math.sin(t * 1.2) * 0.018;
+      // Friendly wave gesture (faster and wider on hover)
+      const waveSpeed = hoverRef.current ? 8.5 : 3.0;
+      const waveAmp = hoverRef.current ? 0.42 : 0.14;
+      rightArmGroup.rotation.z = Math.sin(elapsed * waveSpeed) * waveAmp;
+      rightArmGroup.rotation.x = Math.sin(elapsed * waveSpeed * 0.8) * waveAmp * 0.5;
 
-      // Subtle idle sway
-      mascot.rotation.y = curRotY * 0.12 + Math.sin(t * 0.6) * 0.025;
+      palmHolo.rotation.z += 0.08;
+      miniBeacon.rotation.y += 0.06;
+      miniBeacon.position.y = 0.38 + Math.sin(elapsed * 4.0) * 0.03;
 
-      // Wave animation (fast on hover)
-      const waveSpd = hoverRef.current ? 8.0 : 2.8;
-      const waveAmp = hoverRef.current ? 0.38 : 0.12;
-      rArmG.rotation.z = Math.sin(t * waveSpd) * waveAmp;
-      rArmG.rotation.x = Math.sin(t * waveSpd * 0.7) * waveAmp * 0.4;
+      // Floating Levitation Bobbing
+      const floatHeight = Math.sin(elapsed * 2.0) * 0.06;
+      mascotGroup.position.y = floatHeight;
+      mascotGroup.rotation.z = Math.sin(elapsed * 1.4) * 0.015;
 
-      // Palm ring spin
-      palmRing.rotation.z += 0.06;
+      // Thruster ring pulse
+      const thrusterPulse = 1.0 + Math.sin(elapsed * 3.5) * 0.08;
+      thrusterRing.scale.setScalar(thrusterPulse);
+      thrusterRing.rotation.z += 0.02;
 
-      // Hover energy ring pulse
-      const pulse = 1 + Math.sin(t * 3.2) * 0.07;
-      hRing.scale.setScalar(pulse);
-      hRing.rotation.z += 0.018;
-      outerRing.rotation.y += 0.022;
-      outerRing.rotation.z += 0.008;
+      // Counter-rotating outer gyroscope
+      gyroOrbit.rotation.y += 0.018;
+      gyroOrbit.rotation.z += 0.009;
 
-      // Orbiting drone
-      const dAngle = t * 2.1;
-      drone.position.set(
-        Math.cos(dAngle) * 0.7,
-        Math.sin(dAngle * 0.5) * 0.18 - 0.5,
-        Math.sin(dAngle) * 0.7,
+      // Orbiting Drones
+      const a1 = elapsed * 2.0;
+      drone1.position.set(
+        Math.cos(a1) * 0.72,
+        Math.sin(a1 * 0.6) * 0.16 - 0.5,
+        Math.sin(a1) * 0.72,
       );
-      drone.rotation.x += 0.07;
-      drone.rotation.y += 0.05;
+      drone1.rotation.x += 0.08;
+      drone1.rotation.y += 0.06;
 
-      // Antenna orb pulse
-      const oPulse = (isDarkRef.current ? 3.0 : 1.5) + Math.sin(t * 4.2) * 0.8;
-      orbMat.emissiveIntensity = oPulse;
-      orbHalo.rotation.z += 0.025;
+      const a2 = a1 + Math.PI;
+      drone2.position.set(
+        Math.cos(a2) * 0.72,
+        Math.sin(a2 * 0.6) * 0.16 - 0.5,
+        Math.sin(a2) * 0.72,
+      );
+      drone2.rotation.x -= 0.08;
+      drone2.rotation.y -= 0.06;
 
-      // Cyan mats pulse together
-      cyanMat.emissiveIntensity = (isDarkRef.current ? 3.5 : 1.8) + Math.sin(t * 5.0) * 0.6;
-
-      // Glow point animation
-      glowPt.intensity = (isDarkRef.current ? 5.0 : 2.0) + Math.sin(t * 3.8) * 1.2;
-      glowPt.position.set(Math.sin(t * 1.3) * 0.4, 1.4 + Math.sin(t * 2.1) * 0.2, 1.2);
+      // Antenna Gyro & Plasma Pulse
+      gyroRing.rotation.x += 0.03;
+      gyroRing.rotation.y += 0.04;
+      const orbPulse = (isDarkRef.current ? 3.8 : 4.5) + Math.sin(elapsed * 4.5) * 1.0;
+      plasmaMat.emissiveIntensity = orbPulse;
 
       renderer.render(scene, camera);
     };
 
     animate();
 
-    // ── Resize ────────────────────────────────────────────────────────────────
-    const onResize = () => {
+    // ── 10. Resize ──────────────────────────────────────────────────────────
+    const handleResize = () => {
       if (!el) return;
       const w = el.clientWidth;
       const h = el.clientHeight;
@@ -599,30 +597,29 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
     };
-    window.addEventListener('resize', onResize);
+    window.addEventListener('resize', handleResize);
 
-    // ── Cleanup ────────────────────────────────────────────────────────────────
+    // ── 11. Cleanup ─────────────────────────────────────────────────────────
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener('mousemove', onPointerMove);
-      window.removeEventListener('resize', onResize);
-      document.removeEventListener('visibilitychange', onVis);
+      window.removeEventListener('resize', handleResize);
+      document.removeEventListener('visibilitychange', handleVis);
       if (el.contains(renderer.domElement)) el.removeChild(renderer.domElement);
+
       pmremGen.dispose();
       envMap.dispose();
       renderer.dispose();
 
       for (const m of [
-        ceramicMat,
+        armorMat,
+        chromeMat,
         suitMat,
         visorMat,
-        cyanMat,
-        tgBlueMat,
+        plasmaMat,
         planeMat,
         jointMat,
-        orbMat,
-        panelMat,
-        droneMat,
+        sparkMat,
       ]) {
         m.dispose();
       }
@@ -631,7 +628,7 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
 
   return (
     <div className="relative w-full h-full flex items-center justify-center select-none pointer-events-none">
-      <div ref={mountRef} className="w-full h-full" />
+      <div ref={mountRef} className="w-full h-full flex items-center justify-center" />
     </div>
   );
 }
