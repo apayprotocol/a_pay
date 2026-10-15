@@ -1287,6 +1287,17 @@ export function LandingPage({
                 <ExternalLink className="w-3 h-3" />
               </a>
               <span className="hidden sm:inline text-slate-400">•</span>
+              <a
+                href="https://discord.gg/cW2WRSfb35"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 font-medium transition-colors"
+                title="Official A-Pay Discord Community"
+              >
+                <span>Discord</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+              <span className="hidden sm:inline text-slate-400">•</span>
               <span>Non-Custodial Architecture • 100M Fixed Token Cap • Audited Solidity</span>
             </div>
           </div>

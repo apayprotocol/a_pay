@@ -8,6 +8,7 @@
 [![TypeScript / Node](https://img.shields.io/badge/TypeScript-5.0+-3178C6.svg?logo=typescript&logoColor=white)](https://www.npmjs.com/package/create-apay-app)
 [![MCP Protocol 2025](https://img.shields.io/badge/MCP-Standard_2025--12--11-6B46C1.svg)](https://modelcontextprotocol.io)
 [![Smithery Verified](https://smithery.ai/badge/apayprotocol/apay)](https://smithery.ai/servers/apayprotocol/apay)
+[![Discord Community](https://img.shields.io/badge/Discord-Join_Community-5865F2.svg?logo=discord&logoColor=white)](https://discord.gg/cW2WRSfb35)
 [![Cloudflare Edge](https://img.shields.io/badge/Domain-apayprotocol.org-F38020.svg?logo=cloudflare)](https://apayprotocol.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
@@ -19,6 +20,7 @@
 * **Official Basename (Base L2 ENS)**: [`apayprotocol.base.eth`](https://basescan.org/name-lookup-search?id=apayprotocol.base.eth)
 * **Official Inboxes**: `founder@apayprotocol.org` | `contact@apayprotocol.org` | `security@apayprotocol.org`
 * **Official GitHub Organization**: [https://github.com/apayprotocol](https://github.com/apayprotocol) *(Verified Domain Organization)*
+* **Official Discord Community**: [https://discord.gg/cW2WRSfb35](https://discord.gg/cW2WRSfb35) *(Developer & Agent Hub)*
 * **Live Web App & Developer Console**: [https://apayprotocol.org](https://apayprotocol.org) / [https://apay-network.vercel.app](https://apay-network.vercel.app)
 
 ### ⛓️ Verified Smart Contracts (Base Mainnet — Chain ID `8453`)
@@ -286,6 +288,8 @@ a_pay/
 ## 🤝 Community & Ecosystem
 
 * **Official Website**: [https://apayprotocol.org](https://apayprotocol.org)
+* **Official Discord**: [https://discord.gg/cW2WRSfb35](https://discord.gg/cW2WRSfb35) *(Developer Community)*
+* **Official Subreddit**: [r/A_Pay_Protocol](https://www.reddit.com/r/A_Pay_Protocol/)
 * **GitHub Organization**: [https://github.com/apayprotocol](https://github.com/apayprotocol)
 * **Official Basename**: `apayprotocol.base.eth`
 * **Contact & Security**: `founder@apayprotocol.org` | `security@apayprotocol.org`
