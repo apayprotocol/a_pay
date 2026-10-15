@@ -1,5 +1,5 @@
 === A-Pay Web3 AI Paywall ===
-Contributors: apay98, apayprotocol, sagarofficial
+Contributors: apay98
 Tags: ai-paywall, web3, monetization, gptbot, micropayments
 Requires at least: 5.8
 Tested up to: 7.1
