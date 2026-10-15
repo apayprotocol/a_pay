@@ -87,11 +87,16 @@ export async function POST(request: Request) {
       bareHost = cleanDomain.split('/')[0].split(':')[0];
     }
 
+    const isDevOrTest =
+      process.env.NODE_ENV === 'test' ||
+      process.env.NODE_ENV === 'development' ||
+      process.env.APAY_ALLOW_LOCALHOST === 'true';
+
     const isTestMode =
-      request.headers.get('x-apay-test') === 'true' ||
-      bareHost.endsWith('.test') ||
-      bareHost.endsWith('.internal') ||
-      process.env.NODE_ENV === 'test';
+      isDevOrTest &&
+      (request.headers.get('x-apay-test') === 'true' ||
+        bareHost.endsWith('.test') ||
+        bareHost.endsWith('.internal'));
 
     let verified = false;
     let verificationDetail = '';

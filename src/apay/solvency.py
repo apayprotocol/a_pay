@@ -156,6 +156,7 @@ class CachedRpcSolvencyValidator(BaseSolvencyValidator):
         self.router_address = router_address.lower()
         self.cache_ttl_seconds = cache_ttl_seconds
         self.require_allowance = require_allowance
+        self.max_cache_entries = 10_000
         # addr -> (balance_base_units, expires_at)
         self._cache: dict[str, tuple[int, float]] = {}
         # (owner, spender) -> (allowance_base_units, expires_at)
@@ -173,6 +174,14 @@ class CachedRpcSolvencyValidator(BaseSolvencyValidator):
         return None
 
     def _set_cached_balance(self, address: str, balance: int) -> None:
+        if len(self._cache) >= self.max_cache_entries:
+            now = time.time()
+            expired = [k for k, (_, exp) in self._cache.items() if exp <= now]
+            for k in expired:
+                del self._cache[k]
+            if len(self._cache) >= self.max_cache_entries:
+                first_key = next(iter(self._cache))
+                del self._cache[first_key]
         self._cache[address.lower()] = (balance, time.time() + self.cache_ttl_seconds)
 
     def _get_cached_allowance(self, owner: str, spender: str) -> int | None:
@@ -185,6 +194,14 @@ class CachedRpcSolvencyValidator(BaseSolvencyValidator):
 
     def _set_cached_allowance(self, owner: str, spender: str, allowance: int) -> None:
         key = (owner.lower(), spender.lower())
+        if len(self._allowance_cache) >= self.max_cache_entries:
+            now = time.time()
+            expired = [k for k, (_, exp) in self._allowance_cache.items() if exp <= now]
+            for k in expired:
+                del self._allowance_cache[k]
+            if len(self._allowance_cache) >= self.max_cache_entries:
+                first_key = next(iter(self._allowance_cache))
+                del self._allowance_cache[first_key]
         self._allowance_cache[key] = (allowance, time.time() + self.cache_ttl_seconds)
 
     def _query_onchain_balance(self, address: str) -> int | None:

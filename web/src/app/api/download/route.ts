@@ -7,11 +7,27 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const platform = searchParams.get('platform') || 'cloudflare';
-  const wallet = searchParams.get('wallet') || '0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc';
-  const targetUrl = searchParams.get('targetUrl') || 'https://api.yourdomain.com/v1/data';
-  const priceUsdc = searchParams.get('priceUsdc') || '0.001';
-  const priceApay = searchParams.get('priceApay') || '4.0';
-  const currency = (searchParams.get('currency') || 'DUAL').toUpperCase();
+
+  // Strict sanitization & validation to prevent code injection into generated scripts
+  const rawWallet = searchParams.get('wallet') || '';
+  const wallet = /^0x[a-fA-F0-9]{40}$/i.test(rawWallet)
+    ? rawWallet
+    : '0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc';
+
+  const rawTargetUrl = (searchParams.get('targetUrl') || '').replace(/[\r\n"'\\]/g, '').trim();
+  const targetUrl = /^https?:\/\/[^\s]+$/i.test(rawTargetUrl)
+    ? rawTargetUrl
+    : 'https://api.yourdomain.com/v1/data';
+
+  const rawPriceUsdc = searchParams.get('priceUsdc') || '';
+  const priceUsdc = /^\d+(\.\d+)?$/.test(rawPriceUsdc) ? rawPriceUsdc : '0.001';
+
+  const rawPriceApay = searchParams.get('priceApay') || '';
+  const priceApay = /^\d+(\.\d+)?$/.test(rawPriceApay) ? rawPriceApay : '4.0';
+
+  const rawCurrency = (searchParams.get('currency') || 'DUAL').toUpperCase();
+  const currency = ['USDC', 'APAY', 'DUAL'].includes(rawCurrency) ? rawCurrency : 'DUAL';
+
   const network = searchParams.get('network') === 'base-mainnet' ? 'base-mainnet' : 'base-sepolia';
 
   const contracts = getNetworkContracts(network as NetworkId);

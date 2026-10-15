@@ -19,9 +19,26 @@ const baseSepoliaChain = defineChain({
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// Rate limiting cache (address/IP -> timestamp)
+// Rate limiting cache (address/IP -> timestamp) with bounded capacity & TTL pruning
+const MAX_FAUCET_ENTRIES = 5000;
 const claimHistory = new Map<string, number>();
 const CLAIM_COOLDOWN_MS = 6 * 60 * 60 * 1000; // 6 hours
+
+function recordClaim(key: string, timestamp: number) {
+  if (claimHistory.size >= MAX_FAUCET_ENTRIES) {
+    const now = Date.now();
+    for (const [k, ts] of claimHistory.entries()) {
+      if (now - ts >= CLAIM_COOLDOWN_MS) {
+        claimHistory.delete(k);
+      }
+    }
+    if (claimHistory.size >= MAX_FAUCET_ENTRIES) {
+      const oldestKey = claimHistory.keys().next().value;
+      if (oldestKey) claimHistory.delete(oldestKey);
+    }
+  }
+  claimHistory.set(key, timestamp);
+}
 
 // Minimal ERC20 ABI for transfer
 const ERC20_TRANSFER_ABI = [
@@ -120,10 +137,10 @@ export async function POST(request: Request) {
       txHash = `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}`;
     }
 
-    // Record claim for both address and IP
-    claimHistory.set(addressKey, now);
+    // Record claim for both address and IP with bounded capacity
+    recordClaim(addressKey, now);
     if (rawIp !== 'local') {
-      claimHistory.set(ipKey, now);
+      recordClaim(ipKey, now);
     }
 
     return NextResponse.json({

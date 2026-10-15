@@ -104,6 +104,7 @@ export async function POST(request: Request) {
           'User-Agent': `APay-Genesis-Autonomous-Agent/1.0 (${netContracts.chain.shortName}; EIP-712-Settled)`,
           'X-APay-Test': 'genesis-grant',
         },
+        signal: AbortSignal.timeout(5000),
       });
       targetStatusCode = targetRes.status;
       targetStatusText = targetRes.statusText;

@@ -654,36 +654,36 @@ export function LandingPage({
                 <div className="flex items-center justify-between">
                   <span>$APAY Token:</span>
                   <a
-                    href="https://basescan.org/token/0x8dd4ff9035c7d4e0bef30aa64fc30d128a4066c3"
+                    href={`${NETWORKS['base-mainnet'].chain.explorerUrl}/token/${NETWORKS['base-mainnet'].APAYToken.address}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-600 dark:text-sky-400 hover:underline flex items-center gap-1"
                   >
-                    <span>0x8dd4...66c3</span>
+                    <span>{`${NETWORKS['base-mainnet'].APAYToken.address.slice(0, 6)}...${NETWORKS['base-mainnet'].APAYToken.address.slice(-4)}`}</span>
                     <ExternalLink className="w-2.5 h-2.5" />
                   </a>
                 </div>
                 <div className="flex items-center justify-between">
                   <span>APayRouterV2:</span>
                   <a
-                    href="https://basescan.org/address/0x452eb7d4e7ccbf76ecf511829880b5fbcb24e854"
+                    href={`${NETWORKS['base-mainnet'].chain.explorerUrl}/address/${NETWORKS['base-mainnet'].APayRouterV2.address}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-600 dark:text-sky-400 hover:underline flex items-center gap-1"
                   >
-                    <span>0x452e...e854</span>
+                    <span>{`${NETWORKS['base-mainnet'].APayRouterV2.address.slice(0, 6)}...${NETWORKS['base-mainnet'].APayRouterV2.address.slice(-4)}`}</span>
                     <ExternalLink className="w-2.5 h-2.5" />
                   </a>
                 </div>
                 <div className="flex items-center justify-between">
                   <span>EscrowVault:</span>
                   <a
-                    href="https://basescan.org/address/0xd08c8a337e5339d1c083e06d74a9265956ceea16"
+                    href={`${NETWORKS['base-mainnet'].chain.explorerUrl}/address/${NETWORKS['base-mainnet'].EscrowVault.address}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-600 dark:text-sky-400 hover:underline flex items-center gap-1"
                   >
-                    <span>0xd08c...ea16</span>
+                    <span>{`${NETWORKS['base-mainnet'].EscrowVault.address.slice(0, 6)}...${NETWORKS['base-mainnet'].EscrowVault.address.slice(-4)}`}</span>
                     <ExternalLink className="w-2.5 h-2.5" />
                   </a>
                 </div>

@@ -209,6 +209,9 @@ export async function POST(request: Request) {
     };
 
     disputeHistory.unshift(newDispute);
+    if (disputeHistory.length > 100) {
+      disputeHistory.pop();
+    }
     totalSlashedApay += slashAmount;
     totalBountiesPaidApay += challengerBounty;
     totalBurnedApay += burnedAmount;

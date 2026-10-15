@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { NETWORKS } from '@/config/contracts';
 import { validateSafePublicUrl } from '@/lib/security';
 
 export const runtime = 'nodejs';
@@ -256,7 +257,10 @@ export async function POST(request: Request) {
         }
 
         try {
-          const probe = await fetch(url, { method: 'GET' });
+          const probe = await fetch(url, {
+            method: 'GET',
+            signal: AbortSignal.timeout(5000),
+          });
           const is402 = probe.status === 402;
           const priceHeader =
             probe.headers.get('x-apay-amount') || probe.headers.get('x-apay-price') || 'N/A';
@@ -333,7 +337,8 @@ export async function POST(request: Request) {
         }
 
         try {
-          const ethRes = await fetch('https://mainnet.base.org', {
+          const mainnetRpc = NETWORKS['base-mainnet'].chain.rpcUrl;
+          const ethRes = await fetch(mainnetRpc, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -342,6 +347,7 @@ export async function POST(request: Request) {
               params: [targetAddress, 'latest'],
               id: 1,
             }),
+            signal: AbortSignal.timeout(5000),
           });
           const ethData = await ethRes.json();
           const ethWei = ethData.result ? BigInt(ethData.result) : 0n;
