@@ -1320,6 +1320,28 @@ export function LandingPage({
                 <ExternalLink className="w-3 h-3" />
               </a>
               <span className="hidden sm:inline text-slate-400">•</span>
+              <a
+                href="https://x.com/apayprotocol"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-slate-600 dark:text-slate-300 hover:text-black dark:hover:text-white hover:underline flex items-center gap-1 font-medium transition-colors"
+                title="Official X / Twitter: @apayprotocol"
+              >
+                <span>X (Twitter)</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+              <span className="hidden sm:inline text-slate-400">•</span>
+              <a
+                href="https://www.linkedin.com/company/a-pay-protocol/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1 font-medium transition-colors"
+                title="Official LinkedIn Company Page"
+              >
+                <span>LinkedIn</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+              <span className="hidden sm:inline text-slate-400">•</span>
               <span>Non-Custodial Architecture • 100M Fixed Token Cap • Audited Solidity</span>
             </div>
           </div>
