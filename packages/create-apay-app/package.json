@@ -1,10 +1,10 @@
 {
   "name": "create-apay-app",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Initialize a monetized AI Agent API or Paywall app with A-Pay in 60 seconds",
   "type": "module",
   "bin": {
-    "create-apay-app": "./bin/index.js"
+    "create-apay-app": "bin/index.js"
   },
   "keywords": [
     "create-apay-app",

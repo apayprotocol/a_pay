@@ -2,7 +2,10 @@
 
 > Initialize a monetized AI Agent API or Paywall app with **A-Pay** on Base Layer 2 in 60 seconds.
 
----
+[![npm version](https://img.shields.io/npm/v/create-apay-app.svg)](https://www.npmjs.com/package/create-apay-app)
+[![Base L2 Verified](https://img.shields.io/badge/Base%20L2-Verified%20Contracts-0052FF.svg)](https://basescan.org/address/0xd08c8a337e5339d1c083e06d74a9265956ceea16)
+[![Discord Community](https://img.shields.io/badge/Discord-Join%20Community-5865F2?logo=discord&logoColor=white)](https://discord.gg/cW2WRSfb35)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## 🚀 Quickstart
 
