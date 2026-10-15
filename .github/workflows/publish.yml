@@ -1,0 +1,30 @@
+name: Publish A-Pay to PyPI
+
+on:
+  release:
+    types: [published]
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  pypi-publish:
+    name: Build and publish to PyPI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Build distribution packages
+        run: uv build
+
+      - name: Publish distribution packages to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
