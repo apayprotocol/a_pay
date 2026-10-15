@@ -13,6 +13,20 @@ startCommand:
       APAY_CURRENCY: "DUAL"
       APAY_MAX_PER_CALL: "0.05"
       APAY_DAILY_BUDGET: "2.0"
+  commandFunction: |
+    (config) => ({
+      command: 'uvx',
+      args: ['apay', 'mcp'],
+      env: {
+        APAY_NETWORK: config.APAY_NETWORK || 'base-mainnet',
+        APAY_CURRENCY: config.APAY_CURRENCY || 'DUAL',
+        APAY_MAX_PER_CALL: String(config.APAY_MAX_PER_CALL || 0.05),
+        APAY_DAILY_BUDGET: String(config.APAY_DAILY_BUDGET || 2.0),
+        APAY_MAX_PER_CALL_APAY: String(config.APAY_MAX_PER_CALL_APAY || 10.0),
+        APAY_DAILY_BUDGET_APAY: String(config.APAY_DAILY_BUDGET_APAY || 100.0),
+        ...(config.APAY_PRIVATE_KEY ? { APAY_PRIVATE_KEY: config.APAY_PRIVATE_KEY } : {})
+      }
+    })
 
 configSchema:
   type: object
