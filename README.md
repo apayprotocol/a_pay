@@ -7,6 +7,7 @@
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11+-3776AB.svg?logo=python&logoColor=white)](https://pypi.org/project/apay/)
 [![TypeScript / Node](https://img.shields.io/badge/TypeScript-5.0+-3178C6.svg?logo=typescript&logoColor=white)](https://www.npmjs.com/package/create-apay-app)
 [![MCP Protocol 2025](https://img.shields.io/badge/MCP-Standard_2025--12--11-6B46C1.svg)](https://modelcontextprotocol.io)
+[![Smithery Verified](https://smithery.ai/badge/apayprotocol/apay)](https://smithery.ai/servers/apayprotocol/apay)
 [![Cloudflare Edge](https://img.shields.io/badge/Domain-apayprotocol.org-F38020.svg?logo=cloudflare)](https://apayprotocol.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
@@ -179,7 +180,7 @@ console.log(data);
 
 #### One-Click Install via Smithery:
 ```bash
-npx -y @smithery/cli install apay --client claude
+npx -y smithery mcp add apayprotocol/apay
 ```
 
 #### Or Add to `claude_desktop_config.json` / Cursor (`.cursor/mcp.json`):

@@ -1276,6 +1276,17 @@ export function LandingPage({
                 <span>contact@apayprotocol.org</span>
               </a>
               <span className="hidden sm:inline text-slate-400">•</span>
+              <a
+                href="https://smithery.ai/servers/apayprotocol/apay"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-slate-500 hover:text-slate-900 dark:hover:text-slate-200 hover:underline flex items-center gap-1 transition-colors"
+                title="Verified Smithery MCP Registry"
+              >
+                <span>Smithery MCP</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+              <span className="hidden sm:inline text-slate-400">•</span>
               <span>Non-Custodial Architecture • 100M Fixed Token Cap • Audited Solidity</span>
             </div>
           </div>
