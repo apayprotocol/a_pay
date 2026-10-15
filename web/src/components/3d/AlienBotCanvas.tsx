@@ -51,12 +51,10 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
           const t = y / (size - 1);
           const i = (y * size + x) * 4;
           if (dark) {
-            // Night cyber reflection
             px[i] = Math.round(10 + t * 25);
             px[i + 1] = Math.round(20 + t * 40);
             px[i + 2] = Math.round(60 + t * 80);
           } else {
-            // High-contrast day studio reflection
             px[i] = Math.round(180 + t * 50);
             px[i + 1] = Math.round(200 + t * 45);
             px[i + 2] = 255;
@@ -75,36 +73,28 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
     scene.environment = envMap;
 
     // ── 4. Cinematic Studio & Rim Lighting ─────────────────────────────────
-    // Ambient Light
     const ambientLight = new THREE.AmbientLight(0xffffff, isDark ? 1.0 : 1.8);
     scene.add(ambientLight);
 
-    // Main Studio Key Light
     const keyLight = new THREE.DirectionalLight(0xffffff, isDark ? 3.8 : 5.0);
     keyLight.position.set(4, 5, 4);
     scene.add(keyLight);
 
-    // Base Cobalt Blue Razor Rim Light (Intense contrast edge)
     const rimLight = new THREE.DirectionalLight(0x0052ff, isDark ? 6.5 : 8.0);
     rimLight.position.set(-4, -2, -3);
     scene.add(rimLight);
 
-    // Cyber Cyan Fill
     const fillLight = new THREE.DirectionalLight(0x00f0ff, isDark ? 3.5 : 4.5);
     fillLight.position.set(2, -3, 3);
     scene.add(fillLight);
 
-    // Top Reactor Glow Light
     const topGlow = new THREE.PointLight(0x00f0ff, isDark ? 4.0 : 3.0, 7);
     topGlow.position.set(0, 1.8, 1);
     scene.add(topGlow);
 
     // ── 5. Materials: Contrast-Inverted (Day = Stealth Obsidian, Night = Pearl Ceramic) ──
-    // A. Main Armor Material:
-    //    DAY: Glossy Stealth Obsidian Black (High contrast on white page)
-    //    NIGHT: Luminous Pearl White Ceramic (High contrast on dark page)
     const armorMat = new THREE.MeshPhysicalMaterial({
-      color: isDark ? 0xf1f5f9 : 0x0a0e1a, // White on dark, Black on white!
+      color: isDark ? 0xf1f5f9 : 0x0a0e1a, // Pearl white on night, deep obsidian on day
       metalness: isDark ? 0.2 : 0.88,
       roughness: isDark ? 0.12 : 0.16,
       clearcoat: 1.0,
@@ -114,7 +104,15 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
       envMapIntensity: isDark ? 1.2 : 2.2,
     });
 
-    // B. Mirror Chrome Razor Trim
+    // Dark sleek titanium bezel trim (Seamlessly integrates with helmet — zero white stripes!)
+    const bezelMat = new THREE.MeshStandardMaterial({
+      color: 0x1e293b,
+      metalness: 0.95,
+      roughness: 0.2,
+      envMap,
+      envMapIntensity: 1.5,
+    });
+
     const chromeMat = new THREE.MeshStandardMaterial({
       color: isDark ? 0xffffff : 0xe2e8f0,
       metalness: 0.98,
@@ -123,7 +121,6 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
       envMapIntensity: 2.5,
     });
 
-    // C. Base Cobalt Blue Suit / Pauldron Plates
     const suitMat = new THREE.MeshPhysicalMaterial({
       color: 0x0052ff,
       metalness: 0.45,
@@ -134,22 +131,39 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
       envMapIntensity: 1.5,
     });
 
-    // D. Curved Dark Glass Visor
+    // Deep curved cyber glass visor
     const visorMat = new THREE.MeshPhysicalMaterial({
       color: isDark ? 0x030712 : 0x020617,
-      metalness: 0.1,
+      metalness: 0.15,
       roughness: 0.02,
-      transmission: 0.75,
-      thickness: 0.5,
-      ior: 1.6,
+      transmission: 0.72,
+      thickness: 0.45,
+      ior: 1.55,
       reflectivity: 1.0,
       clearcoat: 1.0,
       clearcoatRoughness: 0.0,
       envMap,
-      envMapIntensity: 3.0,
+      envMapIntensity: 2.8,
     });
 
-    // E. Glowing Electric Cyan Plasma (Eyes, Reactor, Energy Veins)
+    // Dynamic Cyber HUD Eye Material (Interactive Color Logic)
+    const eyeMat = new THREE.MeshStandardMaterial({
+      color: 0x00f0ff,
+      emissive: 0x00f0ff,
+      emissiveIntensity: 4.5,
+      roughness: 0.05,
+      metalness: 0.2,
+    });
+
+    // Inner glowing HUD ring
+    const hudRingMat = new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      emissive: 0x38bdf8,
+      emissiveIntensity: 5.0,
+      roughness: 0.0,
+    });
+
+    // Plasma Material for thruster and conduits
     const plasmaMat = new THREE.MeshStandardMaterial({
       color: 0x00f0ff,
       emissive: 0x00f0ff,
@@ -158,7 +172,6 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
       metalness: 0.8,
     });
 
-    // F. Pure White Telegram Paper Plane Emblem
     const planeMat = new THREE.MeshStandardMaterial({
       color: 0xffffff,
       emissive: 0xffffff,
@@ -167,7 +180,6 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
       roughness: 0.1,
     });
 
-    // G. Gunmetal Tactical Joint Material
     const jointMat = new THREE.MeshStandardMaterial({
       color: 0x1e293b,
       metalness: 0.92,
@@ -179,78 +191,78 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
     scene.add(mascotGroup);
 
     // =========================================================================
-    // A. SCULPTED HIGH-TECH HEAD & HELMET
+    // A. SEAMLESS AERODYNAMIC HEAD & EXPRESSIVE CYBER HUD EYES
     // =========================================================================
     const headGroup = new THREE.Group();
     headGroup.position.set(0, 0.46, 0);
     mascotGroup.add(headGroup);
 
-    // 1. Aerodynamic Mecha Head Sphere (64x48 segments for ultra-smooth silhouette)
+    // 1. Aerodynamic Mecha Head Sphere (Smooth, unbroken curvature)
     const headGeo = new THREE.SphereGeometry(0.52, 64, 48);
     const headMesh = new THREE.Mesh(headGeo, armorMat);
     headMesh.scale.set(1.08, 0.98, 0.98);
     headGroup.add(headMesh);
 
-    // 2. Sculpted Helmet Brow Plate (Gives intelligent, heroic mecha look)
-    const browShape = new THREE.Shape();
-    browShape.moveTo(-0.45, 0);
-    browShape.quadraticCurveTo(0, 0.18, 0.45, 0);
-    browShape.lineTo(0.38, -0.12);
-    browShape.quadraticCurveTo(0, 0.02, -0.38, -0.12);
-    browShape.closePath();
-
-    const browGeo = new THREE.ExtrudeGeometry(browShape, {
-      depth: 0.04,
-      bevelEnabled: true,
-      bevelThickness: 0.015,
-      bevelSize: 0.015,
-      bevelSegments: 3,
-    });
-    browGeo.center();
-    const brow = new THREE.Mesh(browGeo, chromeMat);
-    brow.position.set(0, 0.16, 0.48);
-    brow.rotation.x = -0.15;
-    headGroup.add(brow);
-
-    // 3. Deep Glossy Curved Cyber Visor
-    const visorGeo = new THREE.SphereGeometry(0.49, 48, 36, 0, Math.PI * 2, 0.28, 1.05);
+    // 2. Seamless Deep Cyber Visor (Flush with helmet, no protruding white brow!)
+    const visorGeo = new THREE.SphereGeometry(0.505, 48, 36, 0, Math.PI * 2, 0.3, 1.0);
     const visorMesh = new THREE.Mesh(visorGeo, visorMat);
     visorMesh.rotation.x = Math.PI * 0.52;
-    visorMesh.position.set(0, -0.02, 0.08);
+    visorMesh.position.set(0, -0.02, 0.06);
     visorMesh.scale.set(0.92, 0.74, 0.9);
     headGroup.add(visorMesh);
 
-    // Visor Razor Chrome Frame Trim
-    const vRimGeo = new THREE.TorusGeometry(0.45, 0.014, 16, 80, Math.PI * 1.15);
-    const vRim = new THREE.Mesh(vRimGeo, chromeMat);
+    // Subtle dark titanium bezel collar (replaces clumsy white chrome rim)
+    const vRimGeo = new THREE.TorusGeometry(0.46, 0.012, 16, 80, Math.PI * 1.1);
+    const vRim = new THREE.Mesh(vRimGeo, bezelMat);
     vRim.rotation.x = Math.PI * 0.52;
-    vRim.position.set(0, -0.02, 0.08);
+    vRim.position.set(0, -0.02, 0.06);
     headGroup.add(vRim);
 
-    // 4. Expressive Digital HUD Cyan Eyes (Wide capsule glow)
-    const eyeGeo = new THREE.CapsuleGeometry(0.045, 0.11, 16, 24);
-    const leftEye = new THREE.Mesh(eyeGeo, plasmaMat);
-    leftEye.position.set(-0.16, -0.04, 0.48);
-    leftEye.rotation.z = -0.22;
-    headGroup.add(leftEye);
+    // =========================================================================
+    // 3. UPGRADED EXPRESSIVE CYBER HUD EYE SYSTEM
+    // =========================================================================
+    const eyeGroup = new THREE.Group();
+    headGroup.add(eyeGroup);
 
-    const rightEye = new THREE.Mesh(eyeGeo, plasmaMat);
-    rightEye.position.set(0.16, -0.04, 0.48);
-    rightEye.rotation.z = 0.22;
-    headGroup.add(rightEye);
+    // Left Cyber Eye (Smooth rounded aperture, highly expressive)
+    const eyeGeo = new THREE.SphereGeometry(0.082, 32, 24);
+    const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
+    leftEye.position.set(-0.16, -0.035, 0.45);
+    leftEye.scale.set(1.15, 0.88, 0.35);
+    leftEye.rotation.z = -0.06;
+    eyeGroup.add(leftEye);
 
-    // Eye Spark Pupils (Diamond shine)
-    const sparkGeo = new THREE.OctahedronGeometry(0.025, 0);
-    const sparkMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    const lSpark = new THREE.Mesh(sparkGeo, sparkMat);
-    lSpark.position.set(-0.16, -0.03, 0.52);
-    headGroup.add(lSpark);
+    // Left Inner Glowing HUD Reticle Ring
+    const hudRingGeo = new THREE.TorusGeometry(0.046, 0.007, 12, 32);
+    const leftHudRing = new THREE.Mesh(hudRingGeo, hudRingMat);
+    leftHudRing.position.set(-0.16, -0.035, 0.485);
+    eyeGroup.add(leftHudRing);
 
-    const rSpark = new THREE.Mesh(sparkGeo, sparkMat);
-    rSpark.position.set(0.16, -0.03, 0.52);
-    headGroup.add(rSpark);
+    // Left Specular Glint (Living spark of intelligence)
+    const glintGeo = new THREE.SphereGeometry(0.016, 12, 12);
+    const glintMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const leftGlint = new THREE.Mesh(glintGeo, glintMat);
+    leftGlint.position.set(-0.14, -0.015, 0.49);
+    eyeGroup.add(leftGlint);
 
-    // 5. Audio Turbine Ear Pods (Mecha side pods with glowing plasma cores)
+    // Right Cyber Eye
+    const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
+    rightEye.position.set(0.16, -0.035, 0.45);
+    rightEye.scale.set(1.15, 0.88, 0.35);
+    rightEye.rotation.z = 0.06;
+    eyeGroup.add(rightEye);
+
+    // Right Inner Glowing HUD Reticle Ring
+    const rightHudRing = new THREE.Mesh(hudRingGeo, hudRingMat);
+    rightHudRing.position.set(0.16, -0.035, 0.485);
+    eyeGroup.add(rightHudRing);
+
+    // Right Specular Glint
+    const rightGlint = new THREE.Mesh(glintGeo, glintMat);
+    rightGlint.position.set(0.18, -0.015, 0.49);
+    eyeGroup.add(rightGlint);
+
+    // 4. Audio Turbine Ear Pods with glowing plasma cores
     const earHousingGeo = new THREE.CylinderGeometry(0.12, 0.14, 0.1, 24);
     const earCoreGeo = new THREE.CylinderGeometry(0.07, 0.07, 0.11, 16);
 
@@ -281,46 +293,38 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
     rightEarGlow.position.set(0.57, 0.02, 0);
     headGroup.add(rightEarGlow);
 
-    // 6. High-Tech Articulated Reddit Antenna with Levitating Quantum Crystal Orb
+    // 5. High-Tech Articulated Reddit Antenna with Levitating Quantum Crystal Orb
     const antennaGroup = new THREE.Group();
     antennaGroup.position.set(0.04, 0.46, 0);
     headGroup.add(antennaGroup);
 
-    // Antenna Base Swivel Joint
-    const swivelGeo = new THREE.SphereGeometry(0.04, 16, 16);
-    const swivel = new THREE.Mesh(swivelGeo, chromeMat);
+    const swivel = new THREE.Mesh(new THREE.SphereGeometry(0.04, 16, 16), chromeMat);
     antennaGroup.add(swivel);
 
-    // Lower Curved Arm
     const stemLower = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.028, 0.28, 16), jointMat);
     stemLower.position.set(0.02, 0.13, 0);
     stemLower.rotation.z = 0.2;
     antennaGroup.add(stemLower);
 
-    // Knee Pivot Joint
     const knee = new THREE.Mesh(new THREE.SphereGeometry(0.03, 16, 16), chromeMat);
     knee.position.set(0.07, 0.26, 0.02);
     antennaGroup.add(knee);
 
-    // Upper Bracket Arm
     const stemUpper = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.02, 0.22, 16), jointMat);
     stemUpper.position.set(0.12, 0.36, 0.03);
     stemUpper.rotation.z = -0.36;
     antennaGroup.add(stemUpper);
 
-    // Magnetic Emitter Ring
     const emitterRing = new THREE.Mesh(new THREE.TorusGeometry(0.05, 0.008, 12, 24), chromeMat);
     emitterRing.position.set(0.18, 0.46, 0.04);
     emitterRing.rotation.x = Math.PI / 3;
     antennaGroup.add(emitterRing);
 
-    // Levitating Quantum Crystal Orb (Glowing beacon)
     const orbGeo = new THREE.SphereGeometry(0.095, 32, 32);
     const orb = new THREE.Mesh(orbGeo, plasmaMat);
     orb.position.set(0.18, 0.54, 0.04);
     antennaGroup.add(orb);
 
-    // Orbiting Micro Gyroscope Ring around Antenna Orb
     const gyroRingGeo = new THREE.TorusGeometry(0.13, 0.008, 12, 36);
     const gyroRing = new THREE.Mesh(gyroRingGeo, chromeMat);
     gyroRing.position.copy(orb.position);
@@ -333,12 +337,10 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
     bodyGroup.position.set(0, -0.22, 0);
     mascotGroup.add(bodyGroup);
 
-    // 1. Sleek Tapered Mecha Torso
     const torsoGeo = new THREE.CylinderGeometry(0.32, 0.44, 0.56, 48, 6);
     const torsoMesh = new THREE.Mesh(torsoGeo, armorMat);
     bodyGroup.add(torsoMesh);
 
-    // 2. Base Cobalt Blue Shoulder Armor Pauldrons
     const pauldronGeo = new THREE.SphereGeometry(0.2, 32, 24);
     const leftPauldron = new THREE.Mesh(pauldronGeo, suitMat);
     leftPauldron.scale.set(0.9, 0.7, 0.8);
@@ -349,13 +351,11 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
     rightPauldron.position.set(0.36, 0.24, 0);
     bodyGroup.add(rightPauldron);
 
-    // 3. Heavy Titanium Collar Joint
     const collar = new THREE.Mesh(new THREE.TorusGeometry(0.23, 0.05, 16, 48), jointMat);
     collar.rotation.x = Math.PI / 2;
     collar.position.set(0, 0.3, 0);
     bodyGroup.add(collar);
 
-    // 4. Glowing Blue Energy Veins / Conduits (Running down chest)
     const veinGeo = new THREE.BoxGeometry(0.02, 0.26, 0.015);
     const leftVein = new THREE.Mesh(veinGeo, plasmaMat);
     leftVein.position.set(-0.16, 0.06, 0.36);
@@ -367,22 +367,19 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
     rightVein.rotation.z = 0.15;
     bodyGroup.add(rightVein);
 
-    // 5. Central Glowing Hexagonal Telegram Arc Reactor (Heart of the Mascot)
+    // Central Glowing Hexagonal Telegram Arc Reactor
     const reactorGroup = new THREE.Group();
     reactorGroup.position.set(0, 0.02, 0.38);
     bodyGroup.add(reactorGroup);
 
-    // Chrome Hexagonal Bezel
     const hexBezel = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.03, 6), chromeMat);
     hexBezel.rotation.x = Math.PI / 2;
     reactorGroup.add(hexBezel);
 
-    // Blue Telegram Core Plate
     const tgPlate = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.035, 24), suitMat);
     tgPlate.rotation.x = Math.PI / 2;
     reactorGroup.add(tgPlate);
 
-    // Luminous Extruded 3D Telegram Paper Plane
     const planeShape = new THREE.Shape();
     planeShape.moveTo(0.08, 0.02);
     planeShape.lineTo(-0.065, 0.065);
@@ -407,7 +404,6 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
     // =========================================================================
     // C. ARTICULATED MECHA ARMS & HOLOGRAPHIC WAVE
     // =========================================================================
-    // 1. Left Arm (Stylish rest pose on hip)
     const armGeo = new THREE.CapsuleGeometry(0.076, 0.28, 12, 24);
     const leftArm = new THREE.Mesh(armGeo, suitMat);
     leftArm.position.set(-0.44, 0.02, 0.04);
@@ -419,7 +415,6 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
     leftHand.position.set(-0.54, -0.18, 0.12);
     bodyGroup.add(leftHand);
 
-    // 2. Right Arm (Friendly interactive waving arm)
     const rightArmGroup = new THREE.Group();
     rightArmGroup.position.set(0.42, 0.14, 0.04);
     bodyGroup.add(rightArmGroup);
@@ -434,13 +429,11 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
     rightHand.position.set(0.26, 0.28, 0.1);
     rightArmGroup.add(rightHand);
 
-    // Floating Holographic Energy Disc in Right Palm
     const palmHolo = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.01, 10, 36), plasmaMat);
     palmHolo.position.set(0.26, 0.28, 0.18);
     palmHolo.rotation.x = Math.PI / 3.5;
     rightArmGroup.add(palmHolo);
 
-    // Mini Orbiting Telegram Beacon above palm
     const miniBeacon = new THREE.Mesh(new THREE.OctahedronGeometry(0.035, 1), planeMat);
     miniBeacon.position.set(0.26, 0.38, 0.18);
     rightArmGroup.add(miniBeacon);
@@ -448,20 +441,17 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
     // =========================================================================
     // D. LEVITATION BASE & DUAL COUNTER-ROTATING GYROSCOPES
     // =========================================================================
-    // Ion Thruster Ring (Base glowing ring)
     const thrusterRing = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.016, 16, 96), plasmaMat);
     thrusterRing.rotation.x = Math.PI / 2;
     thrusterRing.position.set(0, -0.58, 0);
     mascotGroup.add(thrusterRing);
 
-    // Outer Chrome Gyroscopic Orbital Ring
     const gyroOrbit = new THREE.Mesh(new THREE.TorusGeometry(0.72, 0.009, 12, 120), chromeMat);
     gyroOrbit.rotation.x = Math.PI / 2.3;
     gyroOrbit.rotation.z = 0.35;
     gyroOrbit.position.set(0, -0.5, 0);
     mascotGroup.add(gyroOrbit);
 
-    // 2 Orbiting Quantum Micro-Drones
     const droneGeo = new THREE.OctahedronGeometry(0.04, 1);
     const drone1 = new THREE.Mesh(droneGeo, plasmaMat);
     const drone2 = new THREE.Mesh(droneGeo, chromeMat);
@@ -496,6 +486,13 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
     const clock = new THREE.Clock();
     let blinkTimer = 0;
 
+    // Color definitions for dynamic eye logic
+    const idleCyan = new THREE.Color(0x00f5ff);
+    const idleBlue = new THREE.Color(0x0052ff);
+    const hoverViolet = new THREE.Color(0x8b5cf6);
+    const hoverElectricBlue = new THREE.Color(0x38bdf8);
+    const currentEyeColor = new THREE.Color(0x00f5ff);
+
     const animate = () => {
       animId = requestAnimationFrame(animate);
       if (!isVisible) return;
@@ -511,30 +508,59 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
       headGroup.rotation.y = curRotY * 0.7;
       headGroup.rotation.x = curRotX * 0.48;
 
-      // Eyes follow cursor with subtle parallax
-      leftEye.position.x = -0.16 + curRotY * 0.035;
-      leftEye.position.y = -0.04 + curRotX * 0.025;
-      rightEye.position.x = 0.16 + curRotY * 0.035;
-      rightEye.position.y = -0.04 + curRotX * 0.025;
-      lSpark.position.x = -0.16 + curRotY * 0.04;
-      lSpark.position.y = -0.03 + curRotX * 0.03;
-      rSpark.position.x = 0.16 + curRotY * 0.04;
-      rSpark.position.y = -0.03 + curRotX * 0.03;
+      // Micro parallax for eyes
+      eyeGroup.position.x = curRotY * 0.035;
+      eyeGroup.position.y = curRotX * 0.025;
+
+      // ── DYNAMIC CYBER EYE COLOR & PULSE LOGIC ──
+      if (hoverRef.current) {
+        // When hovered: Energize eyes into electric violet-blue pulse with high intensity
+        const hoverWave = (Math.sin(elapsed * 5.0) + 1) * 0.5;
+        const targetColor = hoverElectricBlue.clone().lerp(hoverViolet, hoverWave);
+        currentEyeColor.lerp(targetColor, 0.15);
+        eyeMat.emissive.copy(currentEyeColor);
+        eyeMat.color.copy(currentEyeColor);
+        eyeMat.emissiveIntensity = 5.5 + Math.sin(elapsed * 6.0) * 1.5;
+
+        // Attentive wide eye scale on hover
+        leftEye.scale.set(1.22, 0.96, 0.35);
+        rightEye.scale.set(1.22, 0.96, 0.35);
+        leftHudRing.rotation.z += 0.05;
+        rightHudRing.rotation.z -= 0.05;
+      } else {
+        // When idle: Gentle oceanic cyan-blue cybernetic pulse
+        const idleWave = (Math.sin(elapsed * 2.5) + 1) * 0.5;
+        const targetColor = idleCyan.clone().lerp(idleBlue, idleWave * 0.4);
+        currentEyeColor.lerp(targetColor, 0.08);
+        eyeMat.emissive.copy(currentEyeColor);
+        eyeMat.color.copy(currentEyeColor);
+        eyeMat.emissiveIntensity = 4.0 + Math.sin(elapsed * 3.0) * 0.8;
+
+        leftEye.scale.set(1.15, 0.88, 0.35);
+        rightEye.scale.set(1.15, 0.88, 0.35);
+        leftHudRing.rotation.z += 0.015;
+        rightHudRing.rotation.z -= 0.015;
+      }
 
       // Realistic Cyber Eye Blink
       blinkTimer += delta;
       if (blinkTimer > 3.6 + Math.sin(elapsed * 0.4) * 0.8) {
         const bProg = (blinkTimer - 3.6) / 0.15;
         const bScale = bProg < 0.5 ? 1 - bProg * 2 : (bProg - 0.5) * 2;
-        leftEye.scale.y = Math.max(0.08, bScale);
-        rightEye.scale.y = Math.max(0.08, bScale);
-        if (blinkTimer > 3.9) blinkTimer = 0;
-      } else {
-        leftEye.scale.y = 1;
-        rightEye.scale.y = 1;
+        leftEye.scale.y = Math.max(0.06, bScale * 0.88);
+        rightEye.scale.y = Math.max(0.06, bScale * 0.88);
+        leftHudRing.scale.y = Math.max(0.06, bScale);
+        rightHudRing.scale.y = Math.max(0.06, bScale);
+        leftGlint.visible = bScale > 0.4;
+        rightGlint.visible = bScale > 0.4;
+        if (blinkTimer > 3.9) {
+          blinkTimer = 0;
+          leftGlint.visible = true;
+          rightGlint.visible = true;
+        }
       }
 
-      // Friendly wave gesture (faster and wider on hover)
+      // Friendly wave gesture
       const waveSpeed = hoverRef.current ? 8.5 : 3.0;
       const waveAmp = hoverRef.current ? 0.42 : 0.14;
       rightArmGroup.rotation.z = Math.sin(elapsed * waveSpeed) * waveAmp;
@@ -613,13 +639,16 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
 
       for (const m of [
         armorMat,
+        bezelMat,
         chromeMat,
         suitMat,
         visorMat,
+        eyeMat,
+        hudRingMat,
         plasmaMat,
         planeMat,
         jointMat,
-        sparkMat,
+        glintMat,
       ]) {
         m.dispose();
       }
