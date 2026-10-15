@@ -8,6 +8,7 @@ This document contains formatted, verified submission materials for the top comm
 * **Target Repository**: [https://github.com/punkpeye/awesome-mcp-servers](https://github.com/punkpeye/awesome-mcp-servers)
 * **Target File**: `README.md`
 * **Target Section**: `### 💰 Finance & Fintech` (or `### 🛠️ Developer Tools`)
+* **Live PR**: [PR #16506](https://github.com/punkpeye/awesome-mcp-servers/pull/16506) (Status: ✅ All CI checks passed, Awaiting merge)
 
 ### 📋 Markdown Entry Snippet (Alphabetical Placement):
 ```markdown
