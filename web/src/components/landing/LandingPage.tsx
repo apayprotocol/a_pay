@@ -1298,6 +1298,28 @@ export function LandingPage({
                 <ExternalLink className="w-3 h-3" />
               </a>
               <span className="hidden sm:inline text-slate-400">•</span>
+              <a
+                href="https://www.reddit.com/r/A_Pay_Protocol/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-orange-600 dark:text-orange-400 hover:underline flex items-center gap-1 font-medium transition-colors"
+                title="Official Subreddit: r/A_Pay_Protocol"
+              >
+                <span>Reddit</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+              <span className="hidden sm:inline text-slate-400">•</span>
+              <a
+                href="https://gitlab.com/apayprotocol/a_pay"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 font-medium transition-colors"
+                title="Official GitLab Repository"
+              >
+                <span>GitLab</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+              <span className="hidden sm:inline text-slate-400">•</span>
               <span>Non-Custodial Architecture • 100M Fixed Token Cap • Audited Solidity</span>
             </div>
           </div>
