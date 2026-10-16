@@ -24,8 +24,8 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
 
     // ── 1. Scene & Camera ──────────────────────────────────────────────────
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(34, W / H, 0.1, 100);
-    camera.position.set(0, 0.06, 3.95);
+    const camera = new THREE.PerspectiveCamera(36, W / H, 0.1, 100);
+    camera.position.set(0, 0.36, 4.35);
 
     // ── 2. WebGL Renderer with High-DPI Clamping ────────────────────────────
     const renderer = new THREE.WebGLRenderer({
@@ -587,8 +587,8 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
       miniBeacon.position.y = 0.38 + Math.sin(elapsed * 4.0) * 0.03;
 
       // Floating Levitation Bobbing
-      const floatHeight = Math.sin(elapsed * 2.0) * 0.06;
-      mascotGroup.position.y = floatHeight;
+      const floatHeight = Math.sin(elapsed * 2.0) * 0.05;
+      mascotGroup.position.y = -0.08 + floatHeight;
       mascotGroup.rotation.z = Math.sin(elapsed * 1.4) * 0.015;
 
       // Dynamic Levitation Shadow Breathing

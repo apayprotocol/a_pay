@@ -349,7 +349,7 @@ export function AlienBotFlyer() {
           ref={chatboxRef}
           className={`mb-3 w-[320px] sm:w-[370px] max-w-[calc(100vw-24px)] rounded-2xl border shadow-2xl backdrop-blur-2xl overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 ${
             isDark
-              ? 'bg-[#07080b]/98 border-blue-900/60 shadow-blue-950/80 ring-1 ring-blue-500/20'
+              ? 'bg-slate-950/98 border-blue-900/60 shadow-blue-950/80 ring-1 ring-blue-500/20'
               : 'bg-white/98 border-slate-200/90 shadow-[0_20px_50px_rgba(0,82,255,0.14)] ring-1 ring-slate-900/5'
           }`}
         >
@@ -847,7 +847,7 @@ export function AlienBotFlyer() {
               setIsOpen((v) => !v);
             }
           }}
-          className="relative w-[124px] h-[124px] sm:w-[144px] sm:h-[144px] flex items-center justify-center cursor-pointer active:scale-95 transition-transform duration-150"
+          className="relative w-[130px] h-[142px] sm:w-[150px] sm:h-[164px] flex items-center justify-center cursor-pointer active:scale-95 transition-transform duration-150"
         >
           {/* Subtle Dynamic Ambient Radial Glow (Day & Night Balanced) */}
           <div
@@ -861,7 +861,7 @@ export function AlienBotFlyer() {
 
           {/* High-Contrast Interactive Label Badge (Clear in Day & Night) */}
           <div
-            className={`absolute -bottom-2 px-3.5 py-1 rounded-full border backdrop-blur-xl shadow-lg flex items-center gap-1.5 pointer-events-none text-[10px] font-mono font-bold transition-all ${
+            className={`absolute -bottom-1.5 px-3.5 py-1 rounded-full border backdrop-blur-xl shadow-lg flex items-center gap-1.5 pointer-events-none text-[10px] font-mono font-bold transition-all ${
               isDark
                 ? 'bg-slate-950/95 border-blue-500/50 text-sky-300 shadow-blue-950/60'
                 : 'bg-white/95 border-slate-200/90 text-slate-800 shadow-[0_4px_16px_rgba(0,0,0,0.12)]'

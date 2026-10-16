@@ -214,9 +214,9 @@ export function Sidebar({
   }, [searchQuery, navSections]);
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-white/95 dark:bg-[#07080b]/98 text-slate-800 dark:text-slate-100 border-r border-slate-200/90 dark:border-slate-800/80 backdrop-blur-2xl transition-colors duration-300 select-none">
+    <div className="flex flex-col h-full bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 border-r border-slate-200/90 dark:border-slate-800/80 backdrop-blur-2xl transition-colors duration-300 select-none">
       {/* Brand Header */}
-      <div className="p-4 sm:p-5 border-b border-slate-200/80 dark:border-slate-800/80 flex items-center justify-between shrink-0">
+      <div className="p-4 sm:p-5 border-b border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-950 flex items-center justify-between shrink-0">
         <div
           className="flex items-center gap-3 cursor-pointer group"
           onClick={() => {
@@ -243,7 +243,7 @@ export function Sidebar({
       </div>
 
       {/* Quick Search & Public Homepage Link Bar */}
-      <div className="px-3 pt-3 pb-1 space-y-2 shrink-0">
+      <div className="px-3 pt-3 pb-1 space-y-2 shrink-0 bg-white dark:bg-slate-950">
         {onNavigateToLanding && (
           <button
             type="button"
@@ -251,13 +251,13 @@ export function Sidebar({
               onNavigateToLanding();
               setIsMobileOpen(false);
             }}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-blue-50/90 hover:bg-blue-100/90 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 border border-blue-200/80 dark:border-blue-500/25 text-blue-700 dark:text-sky-400 text-xs font-semibold transition-all group cursor-pointer shadow-xs active:scale-[0.98] min-h-[40px]"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-blue-50/90 hover:bg-blue-100/90 dark:bg-slate-900 hover:dark:bg-slate-800/80 border border-blue-200/80 dark:border-slate-800 text-blue-700 dark:text-sky-400 text-xs font-semibold transition-all group cursor-pointer shadow-xs active:scale-[0.98] min-h-[40px]"
           >
             <div className="flex items-center gap-2">
               <Home className="w-3.5 h-3.5 text-blue-600 dark:text-sky-400 group-hover:scale-110 transition-transform" />
               <span className="font-sans font-medium">Public Homepage</span>
             </div>
-            <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-blue-100/80 text-blue-700 dark:bg-blue-500/20 dark:text-sky-300 border border-blue-200/80 dark:border-blue-400/30">
+            <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-blue-100/80 dark:bg-slate-800 text-blue-700 dark:text-sky-300 border border-blue-200/80 dark:border-slate-700">
               3 Pillars
             </span>
           </button>
@@ -271,7 +271,7 @@ export function Sidebar({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Quick jump / filter tabs..."
-            className="w-full pl-8 pr-7 py-1.5 rounded-xl bg-slate-100/80 dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 text-[11px] font-mono text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500/60 focus:ring-1 focus:ring-blue-500/30 transition-all"
+            className="w-full pl-8 pr-7 py-1.5 rounded-xl bg-slate-100/80 dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 text-[11px] font-mono text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-blue-500/60 focus:ring-1 focus:ring-blue-500/30 transition-all"
           />
           {searchQuery && (
             <button
@@ -287,7 +287,7 @@ export function Sidebar({
       </div>
 
       {/* Navigation Sections (Dynamic Accordion: ONLY Active Node Expands Subheading) */}
-      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-4 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-800 scrollbar-track-transparent">
+      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-4 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-800 scrollbar-track-transparent bg-white dark:bg-slate-950">
         {filteredSections.map((section) => (
           <div key={section.title} className="space-y-1">
             {/* Section Heading with Counter Badge */}
@@ -310,7 +310,7 @@ export function Sidebar({
                     onClick={() => handleSelectTab(item.id)}
                     className={`w-full group relative flex items-start gap-2.5 px-3 py-2 rounded-xl text-left transition-all duration-200 cursor-pointer min-h-[42px] ${
                       isActive
-                        ? 'bg-blue-50/90 dark:bg-gradient-to-r dark:from-blue-600/20 dark:via-blue-500/10 dark:to-transparent border border-blue-500/35 dark:border-blue-500/40 text-blue-700 dark:text-white shadow-xs dark:shadow-blue-950/40'
+                        ? 'bg-blue-50/90 dark:bg-slate-900/90 border border-blue-500/35 dark:border-blue-500/50 text-blue-700 dark:text-white shadow-xs'
                         : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100/80 dark:hover:bg-slate-900/70 border border-transparent hover:translate-x-0.5'
                     }`}
                   >
@@ -394,8 +394,8 @@ export function Sidebar({
       </div>
 
       {/* Live Base L2 Telemetry Card (Bottom) */}
-      <div className="p-3 border-t border-slate-200/90 dark:border-slate-800/80 bg-slate-50/90 dark:bg-slate-950/80 shrink-0">
-        <div className="p-3 rounded-2xl bg-white dark:bg-gradient-to-b dark:from-slate-900/90 dark:to-slate-950 border border-slate-200/90 dark:border-slate-800/80 shadow-xs dark:shadow-none space-y-2">
+      <div className="p-3 border-t border-slate-200/90 dark:border-slate-800/80 bg-slate-50/90 dark:bg-slate-950 shrink-0">
+        <div className="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800/80 shadow-xs space-y-2">
           <div className="flex items-center justify-between text-[11px]">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">
@@ -462,7 +462,9 @@ export function Sidebar({
   return (
     <>
       {/* Desktop Fixed Left Sidebar */}
-      <aside className="hidden lg:block w-72 shrink-0 h-full z-30">{sidebarContent}</aside>
+      <aside className="hidden lg:block w-72 shrink-0 h-full z-30 bg-white dark:bg-slate-950 border-r border-slate-200/90 dark:border-slate-800/80">
+        {sidebarContent}
+      </aside>
 
       {/* Mobile Slide-over Drawer Backdrop */}
       {isMobileOpen && (
@@ -474,7 +476,7 @@ export function Sidebar({
 
       {/* Mobile Drawer (Responsive for all mobile screens) */}
       <div
-        className={`lg:hidden fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] transform transition-transform duration-300 ease-in-out shadow-2xl ${
+        className={`lg:hidden fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] transform transition-transform duration-300 ease-in-out shadow-2xl bg-white dark:bg-slate-950 ${
           isMobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
