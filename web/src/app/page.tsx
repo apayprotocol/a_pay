@@ -268,6 +268,8 @@ export default function DashboardPage() {
   const handleDisconnectWallet = () => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('apay_manual_disconnect', 'true');
+      localStorage.removeItem('apay_preferred_wallet');
+      (window as any)._apayActiveProvider = null;
     }
     setWalletAddress(null);
     setTokenBalance('0');

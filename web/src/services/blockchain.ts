@@ -805,7 +805,7 @@ export async function ensureNetwork(
   }
 }
 
-export interface EIP6963ProviderDetail {
+interface EIP6963ProviderDetail {
   info: {
     uuid: string;
     name: string;
@@ -842,13 +842,14 @@ export function initEIP6963Discovery(): () => void {
   };
 }
 
-export function getDiscoveredEIP6963Providers(): EIP6963ProviderDetail[] {
+function getDiscoveredEIP6963Providers(): EIP6963ProviderDetail[] {
   return Array.from(eip6963Registry.values());
 }
 
 /**
- * Resolves a specific wallet provider (MetaMask, Coinbase Wallet, Trust Wallet)
- * with zero extension collision. Eliminates issues where Coinbase Wallet overrides window.ethereum.
+ * Resolves a specific wallet provider (MetaMask, Coinbase Wallet, Trust Wallet, Rainbow, etc.)
+ * with zero extension collision. Eliminates issues where Coinbase Wallet overrides window.ethereum,
+ * and ensures non-installed wallets strictly return null instead of falsely falling back to other extensions.
  */
 export function resolveSpecificWalletProvider(walletName: string): any {
   if (typeof window === 'undefined') return null;
@@ -858,25 +859,7 @@ export function resolveSpecificWalletProvider(walletName: string): any {
   // 1. Check EIP-6963 registry first (Highest standard, eliminates extension clobbering)
   const eipList = getDiscoveredEIP6963Providers();
 
-  if (lowerName.includes('meta')) {
-    const metaEip = eipList.find(
-      (p) => p.info.rdns === 'io.metamask' || p.info.name.toLowerCase().includes('metamask'),
-    );
-    if (metaEip?.provider) return metaEip.provider;
-  } else if (lowerName.includes('coinbase')) {
-    const cbEip = eipList.find(
-      (p) =>
-        p.info.rdns === 'com.coinbase.wallet' || p.info.name.toLowerCase().includes('coinbase'),
-    );
-    if (cbEip?.provider) return cbEip.provider;
-  } else if (lowerName.includes('trust')) {
-    const twEip = eipList.find(
-      (p) => p.info.rdns === 'com.trustwallet.app' || p.info.name.toLowerCase().includes('trust'),
-    );
-    if (twEip?.provider) return twEip.provider;
-  }
-
-  // 2. Check multi-provider arrays and global variables
+  // Multi-provider arrays and global handles
   const allProviders: any[] = [];
   if (Array.isArray(w.ethereum?.providers)) {
     allProviders.push(...w.ethereum.providers);
@@ -885,14 +868,25 @@ export function resolveSpecificWalletProvider(walletName: string): any {
   }
   if (w.coinbaseWalletExtension) allProviders.push(w.coinbaseWalletExtension);
   if (w.trustwallet) allProviders.push(w.trustwallet);
+  if (w.rainbow) allProviders.push(w.rainbow);
+  if (w.rabby) allProviders.push(w.rabby);
+  if (w.okxwallet) allProviders.push(w.okxwallet);
+  if (w.phantom?.ethereum) allProviders.push(w.phantom.ethereum);
 
+  // --- A. METAMASK ---
   if (lowerName.includes('meta')) {
-    // Check providerMap
+    // 1. EIP-6963
+    const metaEip = eipList.find(
+      (p) => p.info.rdns === 'io.metamask' || p.info.name.toLowerCase().includes('metamask'),
+    );
+    if (metaEip?.provider) return metaEip.provider;
+
+    // 2. ProviderMap
     if (w.ethereum?.providerMap?.get?.('MetaMask')) {
       return w.ethereum.providerMap.get('MetaMask');
     }
 
-    // Explicit check: true MetaMask provider must have isMetaMask === true and NOT Coinbase, NOT Phantom, NOT Brave
+    // 3. Isolated provider: must be isMetaMask and NOT Coinbase, NOT Phantom, NOT Brave
     const trueMeta = allProviders.find(
       (p) => p.isMetaMask && !p.isCoinbaseWallet && !p.isPhantom && !p.isBraveWallet,
     );
@@ -900,25 +894,136 @@ export function resolveSpecificWalletProvider(walletName: string): any {
 
     const anyMeta = allProviders.find((p) => p.isMetaMask && !p.isCoinbaseWallet);
     if (anyMeta) return anyMeta;
+
+    if (w.ethereum?.isMetaMask && !w.ethereum?.isCoinbaseWallet) {
+      return w.ethereum;
+    }
+
+    return null;
   }
 
+  // --- B. COINBASE WALLET ---
   if (lowerName.includes('coinbase')) {
-    if (w.coinbaseWalletExtension) return w.coinbaseWalletExtension;
+    // 1. EIP-6963
+    const cbEip = eipList.find(
+      (p) =>
+        p.info.rdns === 'com.coinbase.wallet' || p.info.name.toLowerCase().includes('coinbase'),
+    );
+    if (cbEip?.provider) return cbEip.provider;
+
+    // 2. Direct isCoinbaseWallet on window.ethereum (native toolbar extension)
+    if (w.ethereum?.isCoinbaseWallet) return w.ethereum;
+
+    // 3. Multi-providers array
+    const cbMulti = allProviders.find((p) => p.isCoinbaseWallet);
+    if (cbMulti) return cbMulti;
+
+    // 4. ProviderMap
     if (w.ethereum?.providerMap?.get?.('CoinbaseWallet')) {
       return w.ethereum.providerMap.get('CoinbaseWallet');
     }
-    const cb = allProviders.find((p) => p.isCoinbaseWallet);
-    if (cb) return cb;
+
+    // 5. Injected extension handle
+    if (w.coinbaseWalletExtension) return w.coinbaseWalletExtension;
+
+    return null;
   }
 
+  // --- C. TRUST WALLET ---
   if (lowerName.includes('trust')) {
+    // 1. EIP-6963
+    const twEip = eipList.find(
+      (p) => p.info.rdns === 'com.trustwallet.app' || p.info.name.toLowerCase().includes('trust'),
+    );
+    if (twEip?.provider) return twEip.provider;
+
+    // 2. Global handle
     if (w.trustwallet) return w.trustwallet;
+
+    // 3. Multi-providers
     const tw = allProviders.find((p) => p.isTrust || p.isTrustWallet);
     if (tw) return tw;
+
+    return null;
   }
 
-  // 3. Fallback to default window.ethereum
-  return w.ethereum || null;
+  // --- D. RAINBOW ---
+  if (lowerName.includes('rainbow')) {
+    const rainbowEip = eipList.find(
+      (p) => p.info.rdns === 'me.rainbow' || p.info.name.toLowerCase().includes('rainbow'),
+    );
+    if (rainbowEip?.provider) return rainbowEip.provider;
+
+    if (w.rainbow) return w.rainbow;
+
+    const rb = allProviders.find((p) => p.isRainbow);
+    if (rb) return rb;
+
+    return null;
+  }
+
+  // --- E. RABBY ---
+  if (lowerName.includes('rabby')) {
+    const rabbyEip = eipList.find(
+      (p) => p.info.rdns === 'io.rabby' || p.info.name.toLowerCase().includes('rabby'),
+    );
+    if (rabbyEip?.provider) return rabbyEip.provider;
+
+    if (w.rabby) return w.rabby;
+
+    const rby = allProviders.find((p) => p.isRabby);
+    if (rby) return rby;
+
+    return null;
+  }
+
+  // --- F. OKX ---
+  if (lowerName.includes('okx')) {
+    const okxEip = eipList.find(
+      (p) => p.info.rdns === 'com.okex.wallet' || p.info.name.toLowerCase().includes('okx'),
+    );
+    if (okxEip?.provider) return okxEip.provider;
+
+    if (w.okxwallet) return w.okxwallet;
+
+    const ok = allProviders.find((p) => p.isOkxWallet);
+    if (ok) return ok;
+
+    return null;
+  }
+
+  // --- G. PHANTOM ---
+  if (lowerName.includes('phantom')) {
+    const phantomEip = eipList.find(
+      (p) => p.info.rdns === 'app.phantom' || p.info.name.toLowerCase().includes('phantom'),
+    );
+    if (phantomEip?.provider) return phantomEip.provider;
+
+    if (w.phantom?.ethereum) return w.phantom.ethereum;
+
+    const ph = allProviders.find((p) => p.isPhantom);
+    if (ph) return ph;
+
+    return null;
+  }
+
+  // --- H. BROWSER WALLET / OTHER WEB3 ---
+  if (lowerName.includes('browser') || lowerName.includes('other')) {
+    const alternativeProvider =
+      allProviders.find((p) => !p.isMetaMask && !p.isCoinbaseWallet) ||
+      eipList.find((p) => p.info.rdns !== 'io.metamask' && p.info.rdns !== 'com.coinbase.wallet')
+        ?.provider;
+    if (alternativeProvider) return alternativeProvider;
+
+    return null;
+  }
+
+  // --- I. GENERIC INJECTED FALLBACK ---
+  if (lowerName.includes('injected') || lowerName.includes('default') || lowerName === '') {
+    return w.ethereum || null;
+  }
+
+  return null;
 }
 
 /**
@@ -940,20 +1045,7 @@ export function getActiveEthereum(): any {
     }
   } catch {}
 
-  // If window.ethereum is overridden by Coinbase but user has MetaMask installed
-  if (
-    w.ethereum?.isCoinbaseWallet &&
-    (w.ethereum?.providerMap?.get?.('MetaMask') ||
-      w.ethereum?.providers?.some?.((p: any) => p.isMetaMask && !p.isCoinbaseWallet))
-  ) {
-    const meta = resolveSpecificWalletProvider('MetaMask');
-    if (meta) {
-      w._apayActiveProvider = meta;
-      return meta;
-    }
-  }
-
-  return w.ethereum;
+  return w.ethereum || undefined;
 }
 
 /**
