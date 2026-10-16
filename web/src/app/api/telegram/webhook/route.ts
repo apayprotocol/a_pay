@@ -148,7 +148,7 @@ async function getChatMemberStatus(
 }
 
 // Configurable announcement channel for Community group verification
-let configuredAnnouncementChannel = process.env.TELEGRAM_ANNOUNCEMENT_CHANNEL || '';
+let configuredAnnouncementChannel = process.env.TELEGRAM_ANNOUNCEMENT_CHANNEL || '@apayprotocol';
 
 // Minimal ERC20 ABI for balance checks
 const ERC20_BALANCE_ABI = [
