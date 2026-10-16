@@ -31,6 +31,15 @@ interface TelegramMessage {
     title?: string;
   };
   text?: string;
+  reply_to_message?: {
+    message_id: number;
+    from?: {
+      id: number;
+      is_bot?: boolean;
+      first_name?: string;
+      username?: string;
+    };
+  };
 }
 
 interface TelegramCallbackQuery {
@@ -285,12 +294,17 @@ export async function POST(req: Request) {
       await answerTelegramCallback(callbackQueryId);
     }
 
-    const command = text.split(' ')[0].toLowerCase();
+    const rawCommand = text.split(' ')[0].toLowerCase();
+    const command = rawCommand.split('@')[0];
     const args = text.split(' ').slice(1);
 
     const isGroup =
       update.message?.chat.type === 'group' || update.message?.chat.type === 'supergroup';
     const sender = update.message?.from;
+    const isBotMentioned =
+      text.toLowerCase().includes('@apay_protocol_bot') ||
+      update.message?.reply_to_message?.from?.is_bot === true;
+    const isCommand = rawCommand.startsWith('/');
 
     // ── GROUP CHANNEL SUBSCRIPTION GATE ──────────────────────────────────────
     if (isGroup && sender && !sender.is_bot && configuredAnnouncementChannel) {
@@ -302,8 +316,14 @@ export async function POST(req: Request) {
         // 2. Check if sender is subscribed to the announcements channel
         const channelStatus = await getChatMemberStatus(configuredAnnouncementChannel, sender.id);
 
-        // If explicitly not subscribed (or left/kicked)
-        if (channelStatus === 'left' || channelStatus === 'kicked') {
+        const isSubscribed =
+          channelStatus === 'creator' ||
+          channelStatus === 'administrator' ||
+          channelStatus === 'member' ||
+          channelStatus === 'restricted';
+
+        // If not subscribed to announcements channel, delete message and challenge
+        if (!isSubscribed) {
           // Delete their message from community group
           if (update.message?.message_id) {
             await deleteTelegramMessage(chatId, update.message.message_id);
@@ -383,6 +403,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true });
     }
 
+    // ── GROUP SILENCE GUARD: IGNORE NORMAL CONVERSATION BETWEEN MEMBERS ──────
+    // In Telegram groups, NEVER reply to normal human-to-human chat messages
+    if (isGroup && !isCommand && !isBotMentioned) {
+      return NextResponse.json({ ok: true, ignoredGroupChat: true });
+    }
+
     // ── ADMIN COMMAND: /setchannel ────────────────────────────────────────────
     if (command === '/setchannel') {
       const newChannel = args[0]?.trim();
@@ -454,8 +480,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true });
     }
 
-    // ── 0. AUTO-EVM ADDRESS DETECTOR ──────────────────────────────────────────
-    if (isAddress(text)) {
+    // ── 0. AUTO-EVM ADDRESS DETECTOR (Private Chat Only) ──────────────────────
+    if (!isGroup && isAddress(text)) {
       const targetAddr = text as `0x${string}`;
       const msg =
         `<b>🔍 Base L2 Address Detected!</b>\n\n` +
@@ -481,6 +507,34 @@ export async function POST(req: Request) {
 
     // ── 1. /start OR MAIN MENU ────────────────────────────────────────────────
     if (command === '/start' || text === 'menu_main') {
+      if (isGroup) {
+        const groupStartMsg =
+          `<b>⚡ A-Pay Protocol Assistant</b>\n\n` +
+          `The universal machine-to-machine (M2M) micropayment & autonomous agent economy rail on <b>Base L2</b>.\n\n` +
+          `<b>Available Group Commands:</b>\n` +
+          `• <code>/scan &lt;url&gt;</code> — Audit website for AI bot scrapers\n` +
+          `• <code>/faucet &lt;address&gt;</code> — Claim 50 testnet $APAY\n` +
+          `• <code>/balance &lt;address&gt;</code> — Check live Base balance\n` +
+          `• <code>/contracts</code> — View verified Base L2 contracts\n` +
+          `• <code>/chat</code> — Developer community links\n\n` +
+          `<i>To launch the full interactive 6-role selector and integration guides, tap below:</i>`;
+
+        const keyboard = {
+          inline_keyboard: [
+            [
+              {
+                text: '🤖 Open Private Bot Menu',
+                url: 'https://t.me/APay_Protocol_Bot?start=group',
+              },
+            ],
+            [{ text: '🚀 Launch Web Console', url: 'https://apayprotocol.org' }],
+          ],
+        };
+
+        await sendTelegramMessage(chatId, groupStartMsg, keyboard);
+        return NextResponse.json({ ok: true });
+      }
+
       const { welcomeMsg, keyboard } = getMainMenu(userName);
       await sendTelegramMessage(chatId, welcomeMsg, keyboard);
       return NextResponse.json({ ok: true });
@@ -1293,7 +1347,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true });
     }
 
-    // ── 12. NATURAL LANGUAGE AI Q&A ENGINE ────────────────────────────────────
+    // ── 12. NATURAL LANGUAGE AI Q&A ENGINE (Private Chat or Bot Mentions) ─────
+    if (isGroup && !isBotMentioned) {
+      return NextResponse.json({ ok: true, ignoredGroupChat: true });
+    }
+
     const lower = text.toLowerCase();
     let answer = '';
 
@@ -1324,15 +1382,27 @@ export async function POST(req: Request) {
         `30% of every protocol fee collected from micropayments is automatically swapped on Aerodrome DEX to buy and permanently burn $APAY tokens on Base Mainnet!\n\n` +
         `Fixed Supply: 100,000,000 $APAY (Zero inflation).`;
     } else {
-      answer =
-        `<b>🤖 A-Pay Protocol Assistant:</b>\n\n` +
-        `I received your query: <i>"${text}"</i>\n\n` +
-        `Here are quick ways to explore A-Pay Protocol:\n` +
-        `• <code>/scan &lt;url&gt;</code> — Audit your site for AI crawler vulnerabilities\n` +
-        `• <code>/faucet &lt;address&gt;</code> — Claim 50 testnet tokens\n` +
-        `• <code>/balance &lt;address&gt;</code> — Check live Base balance\n` +
-        `• <code>/contracts</code> — View smart contracts\n\n` +
-        `Tap below to return to the interactive role selector:`;
+      if (isGroup) {
+        answer =
+          `<b>🤖 A-Pay Protocol Assistant:</b>\n\n` +
+          `Namaste ${userName}! Here are available commands for this group:\n` +
+          `• <code>/scan &lt;url&gt;</code> — Audit website for AI bot scrapers\n` +
+          `• <code>/faucet &lt;address&gt;</code> — Claim 50 testnet $APAY\n` +
+          `• <code>/balance &lt;address&gt;</code> — Check live Base balance\n` +
+          `• <code>/contracts</code> — View verified Base L2 contracts\n` +
+          `• <code>/chat</code> — Community links\n\n` +
+          `<i>For private 1-on-1 assistance, message me at @APay_Protocol_Bot!</i>`;
+      } else {
+        answer =
+          `<b>🤖 A-Pay Protocol Assistant:</b>\n\n` +
+          `I received your query: <i>"${text}"</i>\n\n` +
+          `Here are quick ways to explore A-Pay Protocol:\n` +
+          `• <code>/scan &lt;url&gt;</code> — Audit your site for AI crawler vulnerabilities\n` +
+          `• <code>/faucet &lt;address&gt;</code> — Claim 50 testnet tokens\n` +
+          `• <code>/balance &lt;address&gt;</code> — Check live Base balance\n` +
+          `• <code>/contracts</code> — View smart contracts\n\n` +
+          `Tap below to return to the interactive role selector:`;
+      }
     }
 
     await sendTelegramMessage(chatId, answer, {
