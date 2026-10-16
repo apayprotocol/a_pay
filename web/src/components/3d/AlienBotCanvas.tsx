@@ -92,29 +92,29 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
     topGlow.position.set(0, 1.8, 1);
     scene.add(topGlow);
 
-    // ── 5. Materials: Daytime Arctic Ceramic & Nighttime Stealth Obsidian ──
+    // ── 5. Materials: Day = Signature Base Cobalt Blue, Night = Stealth Cyber Obsidian ──
     const armorMat = new THREE.MeshPhysicalMaterial({
-      color: isDark ? 0x0b1120 : 0xf8fafc, // Obsidian Stealth at Night, Arctic Pearl Ceramic at Day
-      metalness: isDark ? 0.88 : 0.32,
-      roughness: isDark ? 0.15 : 0.12,
+      color: isDark ? 0x0b1120 : 0x0052ff, // Night = Stealth Obsidian, Day = High-Contrast Base Cobalt Blue!
+      metalness: isDark ? 0.88 : 0.42,
+      roughness: isDark ? 0.15 : 0.14,
       clearcoat: 1.0,
       clearcoatRoughness: 0.05,
       reflectivity: 0.95,
       envMap,
-      envMapIntensity: isDark ? 1.8 : 1.5,
+      envMapIntensity: isDark ? 1.8 : 2.0,
     });
 
     // Dark sleek titanium bezel trim (Contrasting frame lines for razor sharpness)
     const bezelMat = new THREE.MeshStandardMaterial({
-      color: isDark ? 0x1e293b : 0x0f172a,
+      color: isDark ? 0x1e293b : 0xe2e8f0, // Chrome chamfer on Day, Titanium on Night
       metalness: 0.95,
-      roughness: 0.2,
+      roughness: 0.15,
       envMap,
-      envMapIntensity: 1.5,
+      envMapIntensity: 2.0,
     });
 
     const chromeMat = new THREE.MeshStandardMaterial({
-      color: isDark ? 0xffffff : 0xe2e8f0,
+      color: isDark ? 0xffffff : 0xf1f5f9,
       metalness: 0.98,
       roughness: 0.05,
       envMap,
@@ -122,8 +122,8 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
     });
 
     const suitMat = new THREE.MeshPhysicalMaterial({
-      color: 0x0052ff, // Base Cobalt Blue
-      metalness: 0.55,
+      color: isDark ? 0x0052ff : 0x0f172a, // Base Blue pauldrons on Night, Deep Slate Titanium on Day
+      metalness: isDark ? 0.55 : 0.85,
       roughness: 0.2,
       clearcoat: 0.9,
       clearcoatRoughness: 0.08,

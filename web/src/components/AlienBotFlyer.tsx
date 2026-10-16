@@ -507,7 +507,7 @@ export function AlienBotFlyer() {
           {/* Subtle Dynamic Ambient Radial Glow (Day & Night Balanced) */}
           <div
             className={`absolute inset-0 rounded-full blur-2xl pointer-events-none transition-all duration-500 ${
-              isDark ? 'bg-blue-500/25 opacity-90' : 'bg-blue-600/18 opacity-80'
+              isDark ? 'bg-blue-500/30 opacity-95' : 'bg-blue-500/25 opacity-90'
             } ${isHovered ? 'scale-125 opacity-100' : ''}`}
           />
 
