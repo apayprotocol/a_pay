@@ -23,6 +23,7 @@ import {
   Layers,
   Lock,
   Mail,
+  Menu,
   MessageSquare,
   Package,
   QrCode,
@@ -44,6 +45,7 @@ import {
   Users,
   Wallet,
   Workflow,
+  X,
   Zap,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -81,6 +83,9 @@ export function LandingPage({
   // The 3 Pillars Sub-Nodes Dropdown State
   const [isPillarsDropdownOpen, setIsPillarsDropdownOpen] = useState(false);
   const pillarsDropdownRef = React.useRef<HTMLDivElement>(null);
+
+  // Mobile Navigation Drawer State
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -148,7 +153,7 @@ export function LandingPage({
             </div>
 
             {/* Right: Network Selector, Theme Toggle, Console & Wallet CTAs */}
-            <div className="flex items-center gap-1 sm:gap-3 shrink-0">
+            <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
               {/* Network Pill Indicator */}
               <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-800 text-[11px] font-mono bg-slate-100/70 dark:bg-slate-900/70 text-slate-600 dark:text-slate-300">
                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
@@ -159,6 +164,17 @@ export function LandingPage({
 
               {/* Theme Toggle */}
               <ThemeToggle />
+
+              {/* Mobile Sections Drawer Button (Visible on mobile only) */}
+              <button
+                type="button"
+                onClick={() => setIsMobileNavOpen(true)}
+                className="md:hidden p-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors shrink-0 cursor-pointer"
+                aria-label="Open navigation menu"
+                title="All Protocol Sections"
+              >
+                <Menu className="w-4 h-4" />
+              </button>
 
               {/* Console / Connect Wallet Buttons */}
               {walletAddress ? (
@@ -197,10 +213,10 @@ export function LandingPage({
           </div>
         </div>
 
-        {/* Tier 2: Dedicated Sub-Header Navigation Bar */}
+        {/* Tier 2: Dedicated Sub-Header Navigation Bar (Fluid Responsive Rail) */}
         <div className="w-full border-b border-slate-200/80 dark:border-slate-800/80 bg-slate-50/95 dark:bg-slate-950/90 shadow-sm backdrop-blur-md relative z-30">
-          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 relative">
-            <div className="flex items-center justify-between gap-2 py-1.5 relative min-w-0 max-w-full">
+          <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 relative">
+            <div className="flex items-center gap-1 sm:gap-1.5 py-1.5 relative overflow-x-auto no-scrollbar scroll-smooth touch-pan-x justify-start sm:justify-between min-w-0">
               {/* Left: The 3 Pillars Dropdown & Sub-Nodes Flyout (Unclipped) */}
               <div
                 className="relative shrink-0 overflow-visible"
@@ -214,7 +230,7 @@ export function LandingPage({
                     e.stopPropagation();
                     setIsPillarsDropdownOpen((prev) => !prev);
                   }}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer select-none ${
+                  className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer select-none shrink-0 ${
                     isPillarsDropdownOpen
                       ? 'bg-blue-600/15 text-blue-600 dark:text-sky-400 border border-blue-500/30 shadow-xs'
                       : 'text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-sky-400 hover:bg-white dark:hover:bg-slate-900 border border-transparent hover:border-slate-200 dark:hover:border-slate-800'
@@ -223,7 +239,7 @@ export function LandingPage({
                   aria-haspopup="true"
                 >
                   <Layers className="w-3.5 h-3.5 text-blue-500" />
-                  <span>The 3 Pillars</span>
+                  <span className="whitespace-nowrap">The 3 Pillars</span>
                   <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-blue-500/10 text-blue-600 dark:text-sky-400 font-bold">
                     3 Rails
                   </span>
@@ -326,13 +342,13 @@ export function LandingPage({
               </div>
 
               {/* Separator */}
-              <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 shrink-0 mx-1 hidden sm:block" />
+              <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 shrink-0 mx-0.5 hidden sm:block" />
 
-              {/* Right: Remaining Nav Links (Can scroll on small mobile screens without clipping the dropdown) */}
-              <nav className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar py-0.5 min-w-0 flex-1 justify-end">
+              {/* Remaining Nav Links (Flows smoothly from left to right on all screens) */}
+              <nav className="flex items-center gap-1 sm:gap-1.5 min-w-0 shrink-0 sm:shrink sm:flex-1 justify-start sm:justify-end">
                 <Link
                   href="/blog"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-slate-900 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-all shrink-0"
+                  className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-slate-900 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-all shrink-0 whitespace-nowrap"
                 >
                   <BookOpen className="w-3.5 h-3.5 text-indigo-500" />
                   <span>Research Hub</span>
@@ -343,7 +359,7 @@ export function LandingPage({
 
                 <Link
                   href="/checkout-demo"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-white dark:hover:bg-slate-900 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-all shrink-0"
+                  className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-white dark:hover:bg-slate-900 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-all shrink-0 whitespace-nowrap"
                 >
                   <ShoppingCart className="w-3.5 h-3.5 text-emerald-500" />
                   <span>Demo Store</span>
@@ -355,16 +371,16 @@ export function LandingPage({
 
                 <a
                   href="#telemetry"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-white dark:hover:bg-slate-900 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-all shrink-0"
+                  className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-white dark:hover:bg-slate-900 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-all shrink-0 whitespace-nowrap"
                 >
                   <Activity className="w-3.5 h-3.5 text-amber-500" />
-                  <span>Base L2 Contracts</span>
+                  <span>Contracts</span>
                 </a>
 
                 <button
                   type="button"
                   onClick={() => onEnterConsole('mcphub')}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-sky-400 hover:bg-white dark:hover:bg-slate-900 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-all cursor-pointer shrink-0"
+                  className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-sky-400 hover:bg-white dark:hover:bg-slate-900 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-all cursor-pointer shrink-0 whitespace-nowrap"
                 >
                   <Bot className="w-3.5 h-3.5 text-sky-500" />
                   <span>402 Simulator</span>
@@ -373,7 +389,7 @@ export function LandingPage({
                 <button
                   type="button"
                   onClick={() => onEnterConsole('docs')}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-white dark:hover:bg-slate-900 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-all cursor-pointer shrink-0"
+                  className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-white dark:hover:bg-slate-900 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-all cursor-pointer shrink-0 whitespace-nowrap"
                 >
                   <Code2 className="w-3.5 h-3.5 text-purple-500" />
                   <span>Docs</span>
@@ -382,7 +398,7 @@ export function LandingPage({
                 <button
                   type="button"
                   onClick={() => onEnterConsole('community')}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-white dark:hover:bg-slate-900 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-all cursor-pointer shrink-0"
+                  className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-white dark:hover:bg-slate-900 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-all cursor-pointer shrink-0 whitespace-nowrap"
                 >
                   <MessageSquare className="w-3.5 h-3.5 text-emerald-500" />
                   <span>Community</span>
@@ -394,7 +410,7 @@ export function LandingPage({
                 <button
                   type="button"
                   onClick={() => onEnterConsole('aiguidelines')}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-slate-900 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-all cursor-pointer shrink-0"
+                  className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-slate-900 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-all cursor-pointer shrink-0 whitespace-nowrap"
                 >
                   <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
                   <span>AI Guidelines</span>
@@ -402,11 +418,250 @@ export function LandingPage({
                     llms.txt
                   </span>
                 </button>
+
+                <a
+                  href="https://t.me/+HOkmQo2KuvdlNjU9"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400 hover:bg-white dark:hover:bg-slate-900 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-all shrink-0 whitespace-nowrap"
+                >
+                  <span>💬 Live Chat</span>
+                  <ExternalLink className="w-3 h-3 text-slate-400" />
+                </a>
               </nav>
             </div>
           </div>
         </div>
       </header>
+
+      {/* ========================================================================= */}
+      {/* 1B. MOBILE ALL SECTIONS NAVIGATION DRAWER SHEET */}
+      {/* ========================================================================= */}
+      {isMobileNavOpen && (
+        <div className="fixed inset-0 z-50 md:hidden bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="fixed inset-x-0 top-0 max-h-[90vh] overflow-y-auto bg-white/95 dark:bg-slate-950/95 border-b border-slate-200 dark:border-slate-800 shadow-2xl p-4 sm:p-6 animate-in slide-in-from-top duration-300">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3.5 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <ApayBrandLogo size="sm" withText subtitle="Navigation & Ecosystem" />
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsMobileNavOpen(false)}
+                className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors cursor-pointer"
+                aria-label="Close menu"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Content Categories */}
+            <div className="py-4 space-y-4">
+              {/* Category 1: The 3 Pillars */}
+              <div>
+                <div className="text-[11px] font-mono uppercase tracking-wider text-slate-400 dark:text-slate-500 font-bold mb-2 flex items-center gap-1.5">
+                  <Layers className="w-3.5 h-3.5 text-blue-500" />
+                  <span>The 3 Architecture Rails</span>
+                </div>
+                <div className="grid grid-cols-1 gap-2">
+                  <a
+                    href="#pillar-paywalls"
+                    onClick={() => setIsMobileNavOpen(false)}
+                    className="flex items-center justify-between p-3 rounded-xl bg-slate-100/70 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800/80 hover:border-blue-500/30 transition-all"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-600 dark:text-sky-400 flex items-center justify-center shrink-0">
+                        <Zap className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-slate-900 dark:text-white">
+                          1-Click Paywalls
+                        </div>
+                        <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                          HTTP 402 AI Bot Monetization
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-sky-400 font-bold">
+                      M2M
+                    </span>
+                  </a>
+
+                  <a
+                    href="#pillar-vaults"
+                    onClick={() => setIsMobileNavOpen(false)}
+                    className="flex items-center justify-between p-3 rounded-xl bg-slate-100/70 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800/80 hover:border-indigo-500/30 transition-all"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                        <Lock className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-slate-900 dark:text-white">
+                          Multi-Agent Vaults
+                        </div>
+                        <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                          Zero-Leak Session Escrows
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold">
+                      M2M
+                    </span>
+                  </a>
+
+                  <a
+                    href="#pillar-checkout"
+                    onClick={() => setIsMobileNavOpen(false)}
+                    className="flex items-center justify-between p-3 rounded-xl bg-slate-100/70 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800/80 hover:border-emerald-500/30 transition-all"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                        <CreditCard className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-slate-900 dark:text-white">
+                          A-Pay Checkout
+                        </div>
+                        <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                          2-Sec Web3 Checkout for Stores
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold">
+                      H2M
+                    </span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Category 2: Developer Tools & Runtime */}
+              <div>
+                <div className="text-[11px] font-mono uppercase tracking-wider text-slate-400 dark:text-slate-500 font-bold mb-2 flex items-center gap-1.5">
+                  <Terminal className="w-3.5 h-3.5 text-purple-500" />
+                  <span>Developer Tools & Console</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsMobileNavOpen(false);
+                      onEnterConsole('mcphub');
+                    }}
+                    className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-100/70 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800/80 text-left hover:border-blue-500/30 transition-all cursor-pointer"
+                  >
+                    <Bot className="w-4 h-4 text-sky-500 shrink-0" />
+                    <span className="text-xs font-medium text-slate-800 dark:text-slate-200">
+                      402 Simulator
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsMobileNavOpen(false);
+                      onEnterConsole('docs');
+                    }}
+                    className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-100/70 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800/80 text-left hover:border-purple-500/30 transition-all cursor-pointer"
+                  >
+                    <Code2 className="w-4 h-4 text-purple-500 shrink-0" />
+                    <span className="text-xs font-medium text-slate-800 dark:text-slate-200">
+                      Protocol Docs
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsMobileNavOpen(false);
+                      onEnterConsole('community');
+                    }}
+                    className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-100/70 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800/80 text-left hover:border-emerald-500/30 transition-all cursor-pointer"
+                  >
+                    <MessageSquare className="w-4 h-4 text-emerald-500 shrink-0" />
+                    <span className="text-xs font-medium text-slate-800 dark:text-slate-200">
+                      Dev Forum
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsMobileNavOpen(false);
+                      onEnterConsole('aiguidelines');
+                    }}
+                    className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-100/70 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800/80 text-left hover:border-indigo-500/30 transition-all cursor-pointer"
+                  >
+                    <Sparkles className="w-4 h-4 text-indigo-500 shrink-0" />
+                    <span className="text-xs font-medium text-slate-800 dark:text-slate-200">
+                      AI Guidelines
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Category 3: Ecosystem & Community Links */}
+              <div>
+                <div className="text-[11px] font-mono uppercase tracking-wider text-slate-400 dark:text-slate-500 font-bold mb-2 flex items-center gap-1.5">
+                  <Globe className="w-3.5 h-3.5 text-emerald-500" />
+                  <span>Ecosystem & Live Channels</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <Link
+                    href="/blog"
+                    onClick={() => setIsMobileNavOpen(false)}
+                    className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-100/70 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800/80 hover:border-indigo-500/30 transition-all"
+                  >
+                    <BookOpen className="w-4 h-4 text-indigo-500 shrink-0" />
+                    <span className="text-xs font-medium text-slate-800 dark:text-slate-200">
+                      3 Pillar Papers
+                    </span>
+                  </Link>
+
+                  <Link
+                    href="/checkout-demo"
+                    onClick={() => setIsMobileNavOpen(false)}
+                    className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-100/70 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800/80 hover:border-emerald-500/30 transition-all"
+                  >
+                    <ShoppingCart className="w-4 h-4 text-emerald-500 shrink-0" />
+                    <span className="text-xs font-medium text-slate-800 dark:text-slate-200">
+                      Demo Store
+                    </span>
+                  </Link>
+
+                  <a
+                    href="https://t.me/+HOkmQo2KuvdlNjU9"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center justify-between p-2.5 rounded-xl bg-sky-500/10 border border-sky-500/25 text-sky-600 dark:text-sky-400 col-span-2 hover:bg-sky-500/15 transition-all"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span>💬</span>
+                      <span className="text-xs font-bold">Join Developer Group (Live Chat)</span>
+                    </div>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Launch Button */}
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMobileNavOpen(false);
+                  onEnterConsole('overview');
+                }}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-sm shadow-md shadow-blue-600/25 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>Launch Developer Console</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ========================================================================= */}
       {/* 2. HERO SECTION */}

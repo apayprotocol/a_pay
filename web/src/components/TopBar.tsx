@@ -118,16 +118,16 @@ export function TopBar({
   };
 
   return (
-    <header className="sticky top-0 z-30 w-full shrink-0 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl transition-colors duration-300">
-      <div className="w-full px-4 sm:px-6 lg:px-8 h-18 py-3.5 flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-30 w-full shrink-0 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/85 dark:bg-slate-950/85 backdrop-blur-xl transition-colors duration-300">
+      <div className="w-full px-3 sm:px-6 lg:px-8 h-16 sm:h-18 py-2 sm:py-3.5 flex items-center justify-between gap-2 sm:gap-4">
         {/* Left: Mobile Menu Toggle & Dynamic Breadcrumb */}
-        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           <button
             onClick={onOpenMobileSidebar}
-            className="lg:hidden p-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors shrink-0"
+            className="lg:hidden p-1.5 sm:p-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors shrink-0 cursor-pointer"
             aria-label="Open navigation menu"
           >
-            <Menu className="w-5 h-5" />
+            <Menu className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
 
           <div className="lg:hidden shrink-0">
@@ -135,27 +135,27 @@ export function TopBar({
           </div>
 
           <div className="min-w-0 truncate">
-            <div className="flex items-center gap-1.5 text-[11px] font-mono font-medium text-slate-500 dark:text-slate-400">
+            <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-mono font-medium text-slate-500 dark:text-slate-400">
               <span>A-PAY</span>
               <span>/</span>
               <span className="text-blue-600 dark:text-sky-400 font-semibold truncate">
                 {currentTabInfo.category}
               </span>
             </div>
-            <h1 className="text-sm sm:text-lg font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2 truncate">
+            <h1 className="text-xs sm:text-lg font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2 truncate">
               <span className="truncate">{currentTabInfo.title}</span>
             </h1>
           </div>
         </div>
 
         {/* Right: Landing Switcher, Network Switcher Toggle, ThemeToggle & Wallet Connection */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           {/* Landing Homepage Switcher */}
           {onNavigateToLanding && (
             <button
               type="button"
               onClick={onNavigateToLanding}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 hover:bg-blue-50 dark:hover:bg-blue-950/40 text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-sky-400 hover:border-blue-500/30 text-xs font-semibold transition-all duration-150 active:scale-95 shadow-xs cursor-pointer"
+              className="flex items-center gap-1.5 p-1.5 sm:px-3 sm:py-1.5 rounded-xl sm:rounded-full border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 hover:bg-blue-50 dark:hover:bg-blue-950/40 text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-sky-400 hover:border-blue-500/30 text-xs font-semibold transition-all duration-150 active:scale-95 shadow-xs cursor-pointer shrink-0"
               title="Return to Public Landing Page"
             >
               <Home className="w-3.5 h-3.5 text-blue-500" />
@@ -167,7 +167,7 @@ export function TopBar({
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsNetworkDropdownOpen((prev) => !prev)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-mono font-semibold transition-all duration-200 active:scale-95 ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-full border text-xs font-mono font-semibold transition-all duration-200 active:scale-95 shrink-0 ${
                 activeNetwork === 'base-mainnet'
                   ? 'bg-blue-500/10 dark:bg-blue-500/15 border-blue-500/30 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 shadow-sm shadow-blue-500/10'
                   : 'bg-emerald-500/10 dark:bg-emerald-500/15 border-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 shadow-sm shadow-emerald-500/10'
