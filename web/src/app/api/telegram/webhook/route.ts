@@ -21,12 +21,14 @@ interface TelegramMessage {
   message_id: number;
   from?: {
     id: number;
+    is_bot?: boolean;
     first_name?: string;
     username?: string;
   };
   chat: {
     id: number;
     type: string;
+    title?: string;
   };
   text?: string;
 }
@@ -84,7 +86,11 @@ async function sendTelegramMessage(
   }
 }
 
-async function answerTelegramCallback(callbackQueryId: string, alertText?: string) {
+async function answerTelegramCallback(
+  callbackQueryId: string,
+  alertText?: string,
+  showAlert = false,
+) {
   if (!BOT_TOKEN) return;
   const endpoint = `https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`;
   try {
@@ -94,6 +100,7 @@ async function answerTelegramCallback(callbackQueryId: string, alertText?: strin
       body: JSON.stringify({
         callback_query_id: callbackQueryId,
         text: alertText || undefined,
+        show_alert: showAlert,
       }),
       signal: AbortSignal.timeout(4000),
     });
@@ -101,6 +108,47 @@ async function answerTelegramCallback(callbackQueryId: string, alertText?: strin
     console.error('[Telegram Bot] Error answering callback:', err);
   }
 }
+
+async function deleteTelegramMessage(chatId: number, messageId: number) {
+  if (!BOT_TOKEN) return;
+  const endpoint = `https://api.telegram.org/bot${BOT_TOKEN}/deleteMessage`;
+  try {
+    await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, message_id: messageId }),
+      signal: AbortSignal.timeout(4000),
+    });
+  } catch (err) {
+    console.error('[Telegram Bot] Error deleting message:', err);
+  }
+}
+
+async function getChatMemberStatus(
+  chatId: string | number,
+  userId: number,
+): Promise<string | null> {
+  if (!BOT_TOKEN) return null;
+  const endpoint = `https://api.telegram.org/bot${BOT_TOKEN}/getChatMember?chat_id=${encodeURIComponent(
+    chatId,
+  )}&user_id=${userId}`;
+  try {
+    const res = await fetch(endpoint, {
+      signal: AbortSignal.timeout(4000),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data.ok && data.result?.status) {
+      return data.result.status as string;
+    }
+  } catch (err) {
+    console.error('[Telegram Bot] Error getting chat member status:', err);
+  }
+  return null;
+}
+
+// Configurable announcement channel for Community group verification
+let configuredAnnouncementChannel = process.env.TELEGRAM_ANNOUNCEMENT_CHANNEL || '';
 
 // Minimal ERC20 ABI for balance checks
 const ERC20_BALANCE_ABI = [
@@ -233,6 +281,124 @@ export async function POST(req: Request) {
 
     const command = text.split(' ')[0].toLowerCase();
     const args = text.split(' ').slice(1);
+
+    const isGroup =
+      update.message?.chat.type === 'group' || update.message?.chat.type === 'supergroup';
+    const sender = update.message?.from;
+
+    // ── GROUP CHANNEL SUBSCRIPTION GATE ──────────────────────────────────────
+    if (isGroup && sender && !sender.is_bot && configuredAnnouncementChannel) {
+      // 1. Check if sender is admin in this group (admins are exempt)
+      const groupStatus = await getChatMemberStatus(chatId, sender.id);
+      const isGroupAdmin = groupStatus === 'creator' || groupStatus === 'administrator';
+
+      if (!isGroupAdmin) {
+        // 2. Check if sender is subscribed to the announcements channel
+        const channelStatus = await getChatMemberStatus(configuredAnnouncementChannel, sender.id);
+
+        // If explicitly not subscribed (or left/kicked)
+        if (channelStatus === 'left' || channelStatus === 'kicked') {
+          // Delete their message from community group
+          if (update.message?.message_id) {
+            await deleteTelegramMessage(chatId, update.message.message_id);
+          }
+
+          const cleanChannel = configuredAnnouncementChannel.replace('@', '');
+          const channelUrl = `https://t.me/${cleanChannel}`;
+
+          const gateMsg =
+            `<b>⚠️ Namaste ${userName}!</b>\n\n` +
+            `A-Pay Developer Community me participate karne ke liye, please pehle hamare official <b>Announcements Channel</b> ko join karein:\n\n` +
+            `👉 <b>${configuredAnnouncementChannel}</b>\n\n` +
+            `Channel join karne ke baad neeche <b>Verify Membership</b> dabayein!`;
+
+          const keyboard = {
+            inline_keyboard: [
+              [{ text: '📢 Join Announcements Channel', url: channelUrl }],
+              [{ text: '🔄 Verify Membership', callback_data: `verify_sub:${sender.id}` }],
+            ],
+          };
+
+          await sendTelegramMessage(chatId, gateMsg, keyboard);
+          return NextResponse.json({ ok: true, gated: true });
+        }
+      }
+    }
+
+    // ── VERIFY CHANNEL MEMBERSHIP CALLBACK ────────────────────────────────────
+    if (text.startsWith('verify_sub:')) {
+      const targetUserId = Number(text.replace('verify_sub:', ''));
+      const clickerId = update.callback_query?.from.id;
+
+      if (clickerId !== targetUserId) {
+        if (callbackQueryId) {
+          await answerTelegramCallback(
+            callbackQueryId,
+            '⚠️ Yeh verification button sirf usi member ke liye hai jinhone message kiya tha.',
+            true,
+          );
+        }
+        return NextResponse.json({ ok: true });
+      }
+
+      if (configuredAnnouncementChannel) {
+        const status = await getChatMemberStatus(configuredAnnouncementChannel, targetUserId);
+        const isSubscribed =
+          status === 'creator' ||
+          status === 'administrator' ||
+          status === 'member' ||
+          status === 'restricted';
+
+        if (isSubscribed) {
+          if (callbackQueryId) {
+            await answerTelegramCallback(
+              callbackQueryId,
+              '✅ Verification Successful! Aapka welcome hai A-Pay Developer Community me!',
+              true,
+            );
+          }
+          if (update.callback_query?.message?.message_id) {
+            await deleteTelegramMessage(chatId, update.callback_query.message.message_id);
+          }
+        } else {
+          if (callbackQueryId) {
+            await answerTelegramCallback(
+              callbackQueryId,
+              '⚠️ Aapne abhi tak Announcements channel join nahi kiya hai. Pehle channel join karein fir verify dabayein!',
+              true,
+            );
+          }
+        }
+      } else {
+        if (callbackQueryId) {
+          await answerTelegramCallback(callbackQueryId, '✅ Verified!', false);
+        }
+      }
+      return NextResponse.json({ ok: true });
+    }
+
+    // ── ADMIN COMMAND: /setchannel ────────────────────────────────────────────
+    if (command === '/setchannel') {
+      const newChannel = args[0]?.trim();
+      if (!newChannel) {
+        await sendTelegramMessage(
+          chatId,
+          `<b>Usage:</b> <code>/setchannel @YourChannelUsername</code>\n\n` +
+            `Current Channel Gate: <b>${configuredAnnouncementChannel || 'None (Disabled)'}</b>\n\n` +
+            `<i>Set an official channel so community group members must join it before messaging.</i>`,
+        );
+        return NextResponse.json({ ok: true });
+      }
+
+      configuredAnnouncementChannel = newChannel;
+      await sendTelegramMessage(
+        chatId,
+        `<b>✅ Channel Gate Activated!</b>\n\n` +
+          `Official Announcements Channel set to: <b>${newChannel}</b>.\n` +
+          `All non-admin community group members will be prompted to join this channel before sending messages.`,
+      );
+      return NextResponse.json({ ok: true });
+    }
 
     // ── 0. AUTO-EVM ADDRESS DETECTOR ──────────────────────────────────────────
     if (isAddress(text)) {

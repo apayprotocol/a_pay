@@ -1107,6 +1107,42 @@ async function main() {
     assert(addrRes.status === 200, `Expected status 200 for EVM address detect, got ${addrRes.status}`);
     const addrData = await addrRes.json();
     assert(addrData.ok === true, 'Expected auto-EVM detect ok: true');
+
+    // Test /setchannel command
+    const channelRes = await fetch(`${BASE_URL}/api/telegram/webhook`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        update_id: 1004,
+        message: {
+          message_id: 4,
+          chat: { id: 999999, type: 'private' },
+          from: { id: 999999, first_name: 'Admin' },
+          text: '/setchannel @apay_announcements',
+        },
+      }),
+    });
+    assert(channelRes.status === 200, `Expected status 200 for /setchannel, got ${channelRes.status}`);
+    const channelData = await channelRes.json();
+    assert(channelData.ok === true, 'Expected /setchannel ok: true');
+
+    // Test group message handling
+    const groupMsgRes = await fetch(`${BASE_URL}/api/telegram/webhook`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        update_id: 1005,
+        message: {
+          message_id: 5,
+          chat: { id: -100123456789, type: 'supergroup', title: 'Community' },
+          from: { id: 888888, is_bot: false, first_name: 'NewDev' },
+          text: 'Hello everyone!',
+        },
+      }),
+    });
+    assert(groupMsgRes.status === 200, `Expected status 200 for group message, got ${groupMsgRes.status}`);
+    const groupMsgData = await groupMsgRes.json();
+    assert(groupMsgData.ok === true, 'Expected groupMsg ok: true');
   });
 
   await runStep('GET /telegram redirects to telegram.me/APay_Protocol_Bot', async () => {
