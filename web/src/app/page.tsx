@@ -28,6 +28,14 @@ export default function DashboardPage() {
   const [tokenBalance, setTokenBalance] = useState<string>('0');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const mainScrollRef = React.useRef<HTMLDivElement>(null);
+
+  // Reset main scroll container to top when switching tabs
+  useEffect(() => {
+    if (mainScrollRef.current) {
+      mainScrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [activeTab]);
 
   // Hydrate active network and tab preference from client storage / URL
   useEffect(() => {
@@ -298,7 +306,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen flex bg-background text-foreground transition-colors duration-300">
+    <div className="h-screen flex bg-background text-foreground transition-colors duration-300 overflow-hidden">
       {/* High-Tech Left Sidebar (Desktop Fixed + Mobile Slide-over Drawer) */}
       <Sidebar
         activeTab={activeTab}
@@ -310,7 +318,7 @@ export default function DashboardPage() {
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col h-screen min-w-0 overflow-hidden">
         {/* TopBar with Dynamic Breadcrumbs, Base L2 Network Switcher, ThemeToggle & Wallet */}
         <TopBar
           activeTab={activeTab}
@@ -325,94 +333,97 @@ export default function DashboardPage() {
           onNavigateToLanding={handleNavigateToLanding}
         />
 
-        {/* Dynamic Tab Views */}
-        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          {activeTab === 'overview' && (
-            <OverviewTab
-              walletAddress={walletAddress}
-              tokenBalance={tokenBalance}
-              isFounder={isFounder}
-              onConnect={handleConnectWallet}
-              activeNetwork={activeNetwork}
-            />
-          )}
-          {activeTab === 'marketplace' && (
-            <MarketplaceTab
-              walletAddress={walletAddress}
-              activeNetwork={activeNetwork}
-              onNavigateToTab={setActiveTab}
-            />
-          )}
-          {activeTab === 'playground' && (
-            <PlaygroundTab
-              walletAddress={walletAddress}
-              activeNetwork={activeNetwork}
-              onNavigateToTab={setActiveTab}
-            />
-          )}
-          {activeTab === 'mcphub' && (
-            <McpHubTab walletAddress={walletAddress} activeNetwork={activeNetwork} />
-          )}
-          {activeTab === 'paywalls' && (
-            <PaywallsTab
-              walletAddress={walletAddress}
-              onConnect={handleConnectWallet}
-              activeNetwork={activeNetwork}
-            />
-          )}
-          {activeTab === 'docs' && (
-            <DocsTab activeNetwork={activeNetwork} onNavigateToTab={setActiveTab} />
-          )}
-          {activeTab === 'apikeys' && (
-            <ApiKeysTab walletAddress={walletAddress} activeNetwork={activeNetwork} />
-          )}
-          {activeTab === 'vaults' && (
-            <AgentVaultsTab
-              walletAddress={walletAddress}
-              activeNetwork={activeNetwork}
-              onConnect={handleConnectWallet}
-            />
-          )}
-          {activeTab === 'staking' && (
-            <StakingTab
-              tokenBalance={tokenBalance}
-              walletAddress={walletAddress}
-              activeNetwork={activeNetwork}
-            />
-          )}
-          {activeTab === 'blog' && (
-            <BlogTab activeNetwork={activeNetwork} onNavigateToTab={setActiveTab} />
-          )}
-          {activeTab === 'community' && (
-            <CommunityTab
-              walletAddress={walletAddress}
-              isFounder={isFounder}
-              onConnect={handleConnectWallet}
-              activeNetwork={activeNetwork}
-            />
-          )}
-          {activeTab === 'aiguidelines' && (
-            <AiGuidelinesTab activeNetwork={activeNetwork} onNavigateToTab={setActiveTab} />
-          )}
-        </main>
+        {/* Scrollable Container for Page Content & Footer */}
+        <div ref={mainScrollRef} className="flex-1 overflow-y-auto min-w-0 flex flex-col">
+          {/* Dynamic Tab Views */}
+          <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+            {activeTab === 'overview' && (
+              <OverviewTab
+                walletAddress={walletAddress}
+                tokenBalance={tokenBalance}
+                isFounder={isFounder}
+                onConnect={handleConnectWallet}
+                activeNetwork={activeNetwork}
+              />
+            )}
+            {activeTab === 'marketplace' && (
+              <MarketplaceTab
+                walletAddress={walletAddress}
+                activeNetwork={activeNetwork}
+                onNavigateToTab={setActiveTab}
+              />
+            )}
+            {activeTab === 'playground' && (
+              <PlaygroundTab
+                walletAddress={walletAddress}
+                activeNetwork={activeNetwork}
+                onNavigateToTab={setActiveTab}
+              />
+            )}
+            {activeTab === 'mcphub' && (
+              <McpHubTab walletAddress={walletAddress} activeNetwork={activeNetwork} />
+            )}
+            {activeTab === 'paywalls' && (
+              <PaywallsTab
+                walletAddress={walletAddress}
+                onConnect={handleConnectWallet}
+                activeNetwork={activeNetwork}
+              />
+            )}
+            {activeTab === 'docs' && (
+              <DocsTab activeNetwork={activeNetwork} onNavigateToTab={setActiveTab} />
+            )}
+            {activeTab === 'apikeys' && (
+              <ApiKeysTab walletAddress={walletAddress} activeNetwork={activeNetwork} />
+            )}
+            {activeTab === 'vaults' && (
+              <AgentVaultsTab
+                walletAddress={walletAddress}
+                activeNetwork={activeNetwork}
+                onConnect={handleConnectWallet}
+              />
+            )}
+            {activeTab === 'staking' && (
+              <StakingTab
+                tokenBalance={tokenBalance}
+                walletAddress={walletAddress}
+                activeNetwork={activeNetwork}
+              />
+            )}
+            {activeTab === 'blog' && (
+              <BlogTab activeNetwork={activeNetwork} onNavigateToTab={setActiveTab} />
+            )}
+            {activeTab === 'community' && (
+              <CommunityTab
+                walletAddress={walletAddress}
+                isFounder={isFounder}
+                onConnect={handleConnectWallet}
+                activeNetwork={activeNetwork}
+              />
+            )}
+            {activeTab === 'aiguidelines' && (
+              <AiGuidelinesTab activeNetwork={activeNetwork} onNavigateToTab={setActiveTab} />
+            )}
+          </main>
 
-        {/* Protocol Footer */}
-        <footer className="border-t border-slate-200/80 dark:border-slate-800/80 bg-white/50 dark:bg-slate-950/50 py-5">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
-            <div className="flex items-center gap-2">
-              <span className="font-spatial font-bold text-slate-900 dark:text-white">
-                A-PAY PROTOCOL
-              </span>
-              <span>
-                • {NETWORKS[activeNetwork].chain.chainName} (ChainID:{' '}
-                {NETWORKS[activeNetwork].chain.chainId})
-              </span>
+          {/* Protocol Footer */}
+          <footer className="border-t border-slate-200/80 dark:border-slate-800/80 bg-white/50 dark:bg-slate-950/50 py-5 shrink-0">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
+              <div className="flex items-center gap-2">
+                <span className="font-spatial font-bold text-slate-900 dark:text-white">
+                  A-PAY PROTOCOL
+                </span>
+                <span>
+                  • {NETWORKS[activeNetwork].chain.chainName} (ChainID:{' '}
+                  {NETWORKS[activeNetwork].chain.chainId})
+                </span>
+              </div>
+              <div className="font-mono text-[11px]">
+                Audited ERC-20 • Non-Custodial Architecture • 100M Cap
+              </div>
             </div>
-            <div className="font-mono text-[11px]">
-              Audited ERC-20 • Non-Custodial Architecture • 100M Cap
-            </div>
-          </div>
-        </footer>
+          </footer>
+        </div>
       </div>
 
       {/* Connect Wallet Modal */}

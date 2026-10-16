@@ -59,20 +59,20 @@ export function CoinCanvas() {
     keyLight.position.set(4, 5, 4.5);
     scene.add(keyLight);
 
-    const cyanRim = new THREE.DirectionalLight(0x00e5ff, 4.2);
-    cyanRim.position.set(-5, -4, 2);
+    const cyanRim = new THREE.DirectionalLight(0x0052ff, 3.0);
+    cyanRim.position.set(-5, -4, -3);
     scene.add(cyanRim);
 
-    const purpleFill = new THREE.DirectionalLight(0x818cf8, 3.0);
+    const purpleFill = new THREE.DirectionalLight(0x818cf8, 2.5);
     purpleFill.position.set(-3, 4, 3);
     scene.add(purpleFill);
 
     // Signature Base Cobalt Blue Front Point Light (Accentuates Blue Depth, Zero White Washout)
-    const frontReactorLight = new THREE.PointLight(0x0052ff, 4.2, 7);
+    const frontReactorLight = new THREE.PointLight(0x0040ff, 3.2, 7);
     frontReactorLight.position.set(0, 0, 2.2);
     scene.add(frontReactorLight);
 
-    const backReactorLight = new THREE.PointLight(0x0052ff, 4.2, 7);
+    const backReactorLight = new THREE.PointLight(0x0040ff, 3.2, 7);
     backReactorLight.position.set(0, 0, -2.2);
     scene.add(backReactorLight);
 
@@ -115,17 +115,13 @@ export function CoinCanvas() {
       envMap: envMapRt.texture,
     });
 
-    // Official Base Cobalt Blue PBR Material (Left Ascending Rail - Vivid, Pure & Radiant)
-    const baseBlueMat = new THREE.MeshPhysicalMaterial({
+    // Official Base Cobalt Blue Material (Pure Saturated Dielectric Ceramic - Zero White Shadow / Glare)
+    const baseBlueMat = new THREE.MeshStandardMaterial({
       color: 0x0052ff,
-      emissive: 0x0040ee,
-      emissiveIntensity: 0.82,
-      metalness: 0.02,
-      roughness: 0.18,
-      clearcoat: 0.35,
-      clearcoatRoughness: 0.08,
-      reflectivity: 0.8,
-      envMap: envMapRt.texture,
+      emissive: 0x003be8,
+      emissiveIntensity: 0.75,
+      metalness: 0.0,
+      roughness: 0.38,
     });
 
     // Official Pure White Liquid Ceramic PBR Material (Right Loop - Gleaming & Crisp)

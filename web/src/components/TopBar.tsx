@@ -118,7 +118,7 @@ export function TopBar({
   };
 
   return (
-    <header className="sticky top-0 z-30 w-full border-b border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl transition-colors duration-300">
+    <header className="sticky top-0 z-30 w-full shrink-0 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl transition-colors duration-300">
       <div className="w-full px-4 sm:px-6 lg:px-8 h-18 py-3.5 flex items-center justify-between gap-4">
         {/* Left: Mobile Menu Toggle & Dynamic Breadcrumb */}
         <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">

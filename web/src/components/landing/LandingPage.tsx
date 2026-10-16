@@ -127,7 +127,7 @@ export function LandingPage({
     : null;
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground transition-colors duration-300 selection:bg-blue-500/20 selection:text-blue-500 w-full max-w-[100vw] overflow-x-hidden">
+    <div className="min-h-screen flex flex-col bg-background text-foreground transition-colors duration-300 selection:bg-blue-500/20 selection:text-blue-500 w-full max-w-[100vw] overflow-x-clip">
       {/* ========================================================================= */}
       {/* 1. DUAL-TIER GLOBAL HEADER ARCHITECTURE */}
       {/* ========================================================================= */}
