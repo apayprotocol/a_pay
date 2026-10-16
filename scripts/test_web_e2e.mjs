@@ -1025,8 +1025,30 @@ async function main() {
   });
 
   // =====================================================================
-  // RESULTS SUMMARY
+  // 17. TELEGRAM BOT WEBHOOK API (/api/telegram/webhook)
   // =====================================================================
+  console.log('🤖 17. Telegram Bot Webhook API (/api/telegram/webhook):');
+
+  await runStep('GET /api/telegram/webhook returns online bot status', async () => {
+    const res = await fetch(`${BASE_URL}/api/telegram/webhook`);
+    assert(res.status === 200, `Expected status 200, got ${res.status}`);
+    const data = await res.json();
+    assert(data.status === 'online', 'Expected status: online');
+    assert(data.bot === '@APay_Protocol_Bot', 'Expected bot: @APay_Protocol_Bot');
+  });
+
+  await runStep('POST /api/telegram/webhook safely handles empty update', async () => {
+    const res = await fetch(`${BASE_URL}/api/telegram/webhook`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ update_id: 123456 }),
+    });
+    assert(res.status === 200, `Expected status 200, got ${res.status}`);
+    const data = await res.json();
+    assert(data.ok === true, 'Expected ok: true');
+  });
+
+
 
   console.log('\n========================================================================');
   console.log('📊 WEB E2E TEST RESULTS:');
