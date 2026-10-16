@@ -715,10 +715,22 @@ export class APayCheckoutEngine {
     };
 
     if (typeof window === 'undefined' || !(window as any).ethereum) {
-      setStatus(
-        '⚠️ No Web3 wallet detected. Please install MetaMask, Coinbase Wallet, or use the Scan & Pay (QR) tab.',
-        true,
-      );
+      const isMobile =
+        typeof navigator !== 'undefined' &&
+        /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      if (isMobile) {
+        const cleanUrl =
+          typeof window !== 'undefined' ? window.location.href.replace(/^https?:\/\//, '') : '';
+        setStatus(
+          `📱 Mobile browser detected. Tap <a href="https://metamask.app.link/dapp/${cleanUrl}" style="color: #0284c7; text-decoration: underline; font-weight: 700;">Open in MetaMask App ↗</a> to pay directly, or use Scan & Pay (QR) tab.`,
+          false,
+        );
+      } else {
+        setStatus(
+          '⚠️ No Web3 wallet detected. Please install MetaMask, Coinbase Wallet, or use the Scan & Pay (QR) tab.',
+          true,
+        );
+      }
       return;
     }
 

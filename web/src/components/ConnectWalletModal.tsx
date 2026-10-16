@@ -1,6 +1,16 @@
 'use client';
 
-import { AlertCircle, ExternalLink, Loader2, Shield, X, Zap } from 'lucide-react';
+import {
+  AlertCircle,
+  Check,
+  Copy,
+  ExternalLink,
+  Loader2,
+  Shield,
+  Smartphone,
+  X,
+  Zap,
+} from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import type { NetworkId } from '@/config/contracts';
 import { ensureNetwork } from '@/services/blockchain';
@@ -10,6 +20,23 @@ interface ConnectWalletModalProps {
   onClose: () => void;
   onConnected: (address: string) => Promise<void>;
   activeNetwork?: NetworkId;
+}
+
+function getDappDeepLink(wallet: 'metamask' | 'coinbase' | 'trust' | 'rainbow'): string {
+  if (typeof window === 'undefined') return 'https://metamask.io/download/';
+  const fullUrl = window.location.href;
+  const noProtocolUrl = fullUrl.replace(/^https?:\/\//, '');
+
+  switch (wallet) {
+    case 'metamask':
+      return `https://metamask.app.link/dapp/${noProtocolUrl}`;
+    case 'coinbase':
+      return `https://go.cb-w.com/dapp?cb_url=${encodeURIComponent(fullUrl)}`;
+    case 'trust':
+      return `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(fullUrl)}`;
+    case 'rainbow':
+      return `https://rainbow.me/dapp/${noProtocolUrl}`;
+  }
 }
 
 export function ConnectWalletModal({
@@ -22,10 +49,14 @@ export function ConnectWalletModal({
   const [connectingProvider, setConnectingProvider] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [hasInjected, setHasInjected] = useState(false);
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setHasInjected(Boolean((window as any).ethereum));
+      const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+      setIsMobileDevice(mobileRegex.test(navigator.userAgent));
     }
   }, [isOpen]);
 
@@ -46,32 +77,21 @@ export function ConnectWalletModal({
     setIsConnecting(true);
     setConnectingProvider(providerName);
 
-    if (typeof window === 'undefined' || !(window as any).ethereum) {
-      setErrorMessage(
-        'No Web3 wallet extension detected in this browser. Please install MetaMask or use a Web3-compatible browser.',
-      );
-      setIsConnecting(false);
-      setConnectingProvider(null);
-      return;
-    }
-
     const eth = (window as any).ethereum;
 
     try {
       // Standard EIP-1193: Request accounts interactively.
-      // If unlocked and already authorized, resolves immediately.
-      // If locked or unauthorized, opens wallet popup for password/permission.
       const accounts: string[] = await eth.request({ method: 'eth_requestAccounts' });
 
       if (accounts?.[0]) {
-        // 3. Ensure user is routed to the active settlement network
+        // Ensure user is routed to the active settlement network
         try {
           await ensureNetwork(eth, activeNetwork);
         } catch (netErr) {
           console.warn('Network switch warning:', netErr);
         }
 
-        // 4. Callback to app
+        // Callback to app
         await onConnected(accounts[0]);
         onClose();
       } else {
@@ -80,7 +100,7 @@ export function ConnectWalletModal({
     } catch (err: any) {
       if (err.code === -32002) {
         setErrorMessage(
-          'MetaMask approval prompt is already waiting. Look for the Fox (🦊) or Extensions (🧩) icon in your browser toolbar to approve, or click Retry below once approved.',
+          'Approval prompt is already pending. Check your wallet notification or extension popup to approve.',
         );
       } else if (err.code === 4001) {
         setErrorMessage('Connection request was cancelled in your wallet. Click to try again.');
@@ -94,13 +114,98 @@ export function ConnectWalletModal({
     }
   };
 
+  const handleConnect = async (
+    providerName: 'MetaMask' | 'Coinbase Wallet' | 'Trust Wallet' | 'Browser Wallet',
+  ) => {
+    setErrorMessage(null);
+
+    // 1. If an injected provider is available (Desktop extension OR Mobile In-App browser)
+    if (typeof window !== 'undefined' && (window as any).ethereum) {
+      await handleConnectInjected(providerName);
+      return;
+    }
+
+    // 2. If user is on a mobile device outside an in-app browser (e.g. Mobile Chrome or Safari)
+    if (isMobileDevice) {
+      setIsConnecting(true);
+      setConnectingProvider(providerName);
+
+      if (providerName === 'MetaMask') {
+        const link = getDappDeepLink('metamask');
+        window.location.href = link;
+        setTimeout(() => {
+          setIsConnecting(false);
+          setConnectingProvider(null);
+        }, 3500);
+        return;
+      }
+
+      if (providerName === 'Coinbase Wallet') {
+        const link = getDappDeepLink('coinbase');
+        window.location.href = link;
+        setTimeout(() => {
+          setIsConnecting(false);
+          setConnectingProvider(null);
+        }, 3500);
+        return;
+      }
+
+      if (providerName === 'Trust Wallet') {
+        const link = getDappDeepLink('trust');
+        window.location.href = link;
+        setTimeout(() => {
+          setIsConnecting(false);
+          setConnectingProvider(null);
+        }, 3500);
+        return;
+      }
+
+      // Default fallback
+      window.location.href = getDappDeepLink('metamask');
+      setTimeout(() => {
+        setIsConnecting(false);
+        setConnectingProvider(null);
+      }, 3500);
+      return;
+    }
+
+    // 3. Desktop without extension: open download or show instruction
+    if (providerName === 'MetaMask') {
+      window.open('https://metamask.io/download/', '_blank', 'noopener,noreferrer');
+      return;
+    }
+    if (providerName === 'Coinbase Wallet') {
+      window.open('https://www.coinbase.com/wallet/downloads', '_blank', 'noopener,noreferrer');
+      return;
+    }
+    if (providerName === 'Trust Wallet') {
+      window.open('https://trustwallet.com/browser-extension', '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    setErrorMessage(
+      'No Web3 wallet extension detected in this browser. Please install MetaMask from metamask.io or use a Web3-compatible browser like Brave.',
+    );
+  };
+
+  const handleCopyUrl = async () => {
+    if (typeof window === 'undefined') return;
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2500);
+    } catch (err) {
+      console.warn('Failed to copy link:', err);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-md animate-fadeIn">
       {/* Backdrop click to close */}
       <div className="absolute inset-0" onClick={isConnecting ? undefined : onClose} />
 
       {/* Modal Dialog */}
-      <div className="relative z-10 w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-6 sm:p-8 space-y-6 border-t sm:border border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900 transition-all max-h-[90vh] overflow-y-auto">
+      <div className="relative z-10 w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-6 sm:p-8 space-y-5 border-t sm:border border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900 transition-all max-h-[92vh] overflow-y-auto">
         {/* Header */}
         <div className="flex justify-between items-start">
           <div className="space-y-1">
@@ -115,7 +220,7 @@ export function ConnectWalletModal({
           <button
             onClick={onClose}
             disabled={isConnecting}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
+            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />
@@ -128,6 +233,21 @@ export function ConnectWalletModal({
           {activeNetwork === 'base-mainnet' ? 'Base Mainnet' : 'Base Sepolia'}.
         </p>
 
+        {/* Mobile Detection Guidance Notice */}
+        {isMobileDevice && !hasInjected && (
+          <div className="p-3.5 rounded-2xl bg-blue-50/90 dark:bg-blue-950/50 border border-blue-200/80 dark:border-blue-900/60 text-blue-900 dark:text-sky-200 text-xs space-y-1.5 animate-fadeIn">
+            <div className="flex items-center gap-2 font-bold text-blue-700 dark:text-sky-300">
+              <Smartphone className="w-4 h-4 shrink-0" />
+              <span>Mobile Browser Detected</span>
+            </div>
+            <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+              Mobile Chrome/Safari cannot run browser extensions. Tap below to launch A-Pay directly
+              inside your installed wallet app, or copy the link to paste into your wallet&apos;s
+              browser.
+            </p>
+          </div>
+        )}
+
         {/* Error / Pending Notice */}
         {errorMessage && (
           <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-300 text-xs space-y-2 animate-fadeIn">
@@ -136,11 +256,11 @@ export function ConnectWalletModal({
               <div className="flex-1 font-sans leading-normal text-[11px]">{errorMessage}</div>
             </div>
             <button
-              onClick={() => handleConnectInjected('MetaMask')}
+              onClick={() => handleConnect('MetaMask')}
               disabled={isConnecting}
               className="text-[11px] font-mono font-bold text-rose-800 dark:text-rose-200 bg-rose-100 dark:bg-rose-900/50 hover:bg-rose-200 dark:hover:bg-rose-900 px-3 py-1 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
             >
-              🔄 Check Approval / Retry
+              🔄 Retry
             </button>
           </div>
         )}
@@ -149,7 +269,7 @@ export function ConnectWalletModal({
         <div className="space-y-3">
           {/* MetaMask */}
           <button
-            onClick={() => handleConnectInjected('MetaMask')}
+            onClick={() => handleConnect('MetaMask')}
             disabled={isConnecting}
             className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-orange-500 dark:hover:border-orange-500 bg-slate-50/80 dark:bg-slate-950/80 hover:bg-orange-50/30 dark:hover:bg-orange-950/20 flex items-center justify-between text-left transition-all group disabled:opacity-60 cursor-pointer"
           >
@@ -165,9 +285,18 @@ export function ConnectWalletModal({
                       Detected
                     </span>
                   )}
+                  {isMobileDevice && !hasInjected && (
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-400 font-semibold">
+                      App Link
+                    </span>
+                  )}
                 </div>
                 <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Browser extension & mobile dApp browser
+                  {hasInjected
+                    ? 'Injected Web3 Provider ready'
+                    : isMobileDevice
+                      ? 'Launch directly in MetaMask Mobile App'
+                      : 'Browser extension for Chrome, Brave, Firefox'}
                 </div>
               </div>
             </div>
@@ -175,14 +304,14 @@ export function ConnectWalletModal({
               <Loader2 className="w-4 h-4 text-orange-500 animate-spin shrink-0" />
             ) : (
               <span className="text-xs text-slate-400 font-mono group-hover:text-orange-500 group-hover:translate-x-0.5 transition-all">
-                Connect →
+                {hasInjected ? 'Connect →' : isMobileDevice ? 'Open App ↗' : 'Connect →'}
               </span>
             )}
           </button>
 
           {/* Coinbase Wallet */}
           <button
-            onClick={() => handleConnectInjected('Coinbase Wallet')}
+            onClick={() => handleConnect('Coinbase Wallet')}
             disabled={isConnecting}
             className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-500 bg-slate-50/80 dark:bg-slate-950/80 hover:bg-blue-50/30 dark:hover:bg-blue-950/20 flex items-center justify-between text-left transition-all group disabled:opacity-60 cursor-pointer"
           >
@@ -191,11 +320,20 @@ export function ConnectWalletModal({
                 🛡️
               </div>
               <div>
-                <div className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400">
-                  Coinbase Wallet
+                <div className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400 flex items-center gap-1.5">
+                  <span>Coinbase Wallet</span>
+                  {isMobileDevice && !hasInjected && (
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-sky-400 font-semibold">
+                      App Link
+                    </span>
+                  )}
                 </div>
                 <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Base native smart wallet & mobile
+                  {hasInjected
+                    ? 'Base native smart wallet & browser'
+                    : isMobileDevice
+                      ? 'Launch in Coinbase Wallet App'
+                      : 'Base native smart wallet & extension'}
                 </div>
               </div>
             </div>
@@ -203,39 +341,103 @@ export function ConnectWalletModal({
               <Loader2 className="w-4 h-4 text-blue-500 animate-spin shrink-0" />
             ) : (
               <span className="text-xs text-slate-400 font-mono group-hover:text-blue-500 group-hover:translate-x-0.5 transition-all">
-                Connect →
+                {hasInjected ? 'Connect →' : isMobileDevice ? 'Open App ↗' : 'Connect →'}
               </span>
             )}
           </button>
 
-          {/* Injected / Other Web3 */}
+          {/* Trust Wallet */}
           <button
-            onClick={() => handleConnectInjected('Browser Wallet')}
+            onClick={() => handleConnect('Trust Wallet')}
             disabled={isConnecting}
-            className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-purple-500 dark:hover:border-purple-500 bg-slate-50/80 dark:bg-slate-950/80 hover:bg-purple-50/30 dark:hover:bg-purple-950/20 flex items-center justify-between text-left transition-all group disabled:opacity-60 cursor-pointer"
+            className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-sky-500 dark:hover:border-sky-500 bg-slate-50/80 dark:bg-slate-950/80 hover:bg-sky-50/30 dark:hover:bg-sky-950/20 flex items-center justify-between text-left transition-all group disabled:opacity-60 cursor-pointer"
           >
             <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-2xl bg-purple-100 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-900 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
-                ⚡
+              <div className="w-10 h-10 rounded-2xl bg-sky-100 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-900 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+                💎
               </div>
               <div>
-                <div className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400">
-                  Browser Web3 Wallet
+                <div className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 flex items-center gap-1.5">
+                  <span>Trust Wallet</span>
+                  {isMobileDevice && !hasInjected && (
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-400 font-semibold">
+                      App Link
+                    </span>
+                  )}
                 </div>
                 <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Brave, Rabby, Rainbow, OKX
+                  {hasInjected
+                    ? 'Trust Wallet Web3 injected'
+                    : isMobileDevice
+                      ? 'Launch in Trust Wallet App'
+                      : 'Trust Wallet mobile & browser extension'}
                 </div>
               </div>
             </div>
-            {isConnecting && connectingProvider === 'Browser Wallet' ? (
-              <Loader2 className="w-4 h-4 text-purple-500 animate-spin shrink-0" />
+            {isConnecting && connectingProvider === 'Trust Wallet' ? (
+              <Loader2 className="w-4 h-4 text-sky-500 animate-spin shrink-0" />
             ) : (
-              <span className="text-xs text-slate-400 font-mono group-hover:text-purple-500 group-hover:translate-x-0.5 transition-all">
-                Connect →
+              <span className="text-xs text-slate-400 font-mono group-hover:text-sky-500 group-hover:translate-x-0.5 transition-all">
+                {hasInjected ? 'Connect →' : isMobileDevice ? 'Open App ↗' : 'Connect →'}
               </span>
             )}
           </button>
+
+          {/* Browser Web3 Wallet (if injected) */}
+          {hasInjected && (
+            <button
+              onClick={() => handleConnect('Browser Wallet')}
+              disabled={isConnecting}
+              className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-purple-500 dark:hover:border-purple-500 bg-slate-50/80 dark:bg-slate-950/80 hover:bg-purple-50/30 dark:hover:bg-purple-950/20 flex items-center justify-between text-left transition-all group disabled:opacity-60 cursor-pointer"
+            >
+              <div className="flex items-center gap-3.5">
+                <div className="w-10 h-10 rounded-2xl bg-purple-100 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-900 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+                  ⚡
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400">
+                    Other Browser Web3 Wallet
+                  </div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Brave, Rabby, Rainbow, OKX
+                  </div>
+                </div>
+              </div>
+              {isConnecting && connectingProvider === 'Browser Wallet' ? (
+                <Loader2 className="w-4 h-4 text-purple-500 animate-spin shrink-0" />
+              ) : (
+                <span className="text-xs text-slate-400 font-mono group-hover:text-purple-500 group-hover:translate-x-0.5 transition-all">
+                  Connect →
+                </span>
+              )}
+            </button>
+          )}
         </div>
+
+        {/* Copy Link helper for Mobile In-App Browsers */}
+        {isMobileDevice && !hasInjected && (
+          <div className="pt-2 space-y-2">
+            <button
+              type="button"
+              onClick={handleCopyUrl}
+              className="w-full py-2.5 px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-mono font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-98 shadow-xs"
+            >
+              {copiedLink ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-500" />
+                  <span className="text-emerald-600 dark:text-emerald-400">
+                    URL Copied! Paste in Wallet In-App Browser
+                  </span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3.5 h-3.5 text-blue-500" />
+                  <span>Copy URL for Wallet Browser</span>
+                </>
+              )}
+            </button>
+          </div>
+        )}
 
         {/* Footer / Helper notice */}
         {!hasInjected && (
@@ -244,9 +446,13 @@ export function ConnectWalletModal({
               href="https://metamask.io/download/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs text-blue-600 dark:text-sky-400 font-semibold hover:underline"
+              className="inline-flex items-center gap-1.5 text-xs text-blue-600 dark:text-sky-400 font-semibold hover:underline cursor-pointer"
             >
-              <span>Don't have a wallet? Install MetaMask</span>
+              <span>
+                {isMobileDevice
+                  ? "Don't have MetaMask installed on your phone? Get the App"
+                  : "Don't have a wallet? Install MetaMask Extension"}
+              </span>
               <ExternalLink className="w-3 h-3" />
             </a>
           </div>
