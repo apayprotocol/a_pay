@@ -269,16 +269,16 @@ export function CoinCanvas() {
       rightLoopShape.closePath();
 
       const leftExtrude = {
-        depth: 0.088,
+        depth: 0.065,
         bevelEnabled: true,
-        bevelSegments: 5,
+        bevelSegments: 4,
         steps: 1,
-        bevelSize: 0.016,
-        bevelThickness: 0.016,
+        bevelSize: 0.01,
+        bevelThickness: 0.01,
       };
 
       const rightExtrude = {
-        depth: 0.082,
+        depth: 0.085,
         bevelEnabled: true,
         bevelSegments: 5,
         steps: 1,
@@ -286,32 +286,16 @@ export function CoinCanvas() {
         bevelThickness: 0.015,
       };
 
-      // 3D Left Ascending Rail (Base Cobalt Blue - Proud 3D Elevation)
+      // 3D Left Ascending Rail (Base Cobalt Blue - Recessed Under-Layer)
       const leftRailGeo = new THREE.ExtrudeGeometry(leftRailShape, leftExtrude);
       const leftRailMesh = new THREE.Mesh(leftRailGeo, baseBlueMat);
-      leftRailMesh.position.set(0, 0, 0.008);
+      leftRailMesh.position.set(0, 0, 0.004); // Sits recessed behind the white loop
       emblemGroup.add(leftRailMesh);
 
-      // Inner Luminous Cobalt Energy Core (Guarantees Vivid Blue Radiance)
-      const leftGlowGeo = new THREE.ExtrudeGeometry(leftRailShape, {
-        depth: 0.09,
-        bevelEnabled: false,
-        steps: 1,
-      });
-      const leftGlowMat = new THREE.MeshBasicMaterial({
-        color: 0x0052ff,
-        transparent: true,
-        opacity: 0.35,
-      });
-      const leftGlowMesh = new THREE.Mesh(leftGlowGeo, leftGlowMat);
-      leftGlowMesh.scale.set(0.94, 0.94, 1.0);
-      leftGlowMesh.position.set(sx(-1.2), sy(1.2), 0.007);
-      emblemGroup.add(leftGlowMesh);
-
-      // 3D Right Rail & Infinite M2M Loop (Crisp Pure White - Intertwined 3D Relief)
+      // 3D Right Rail & Infinite M2M Loop (Crisp Pure White - Foreground Layer, Covers Blue)
       const rightLoopGeo = new THREE.ExtrudeGeometry(rightLoopShape, rightExtrude);
       const rightLoopMesh = new THREE.Mesh(rightLoopGeo, pureWhiteMat);
-      rightLoopMesh.position.set(0, 0, 0.01); // Intertwined in physical relief
+      rightLoopMesh.position.set(0, 0, 0.022); // Sits proudly in front, covering the blue rail
       emblemGroup.add(rightLoopMesh);
 
       // 3. Recessed Quantum Energy Conduit behind the M2M Loop (Flush, Open Center Aperture)
