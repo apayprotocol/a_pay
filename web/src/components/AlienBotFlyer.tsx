@@ -17,7 +17,7 @@ const AlienBotCanvas = dynamic(
   },
 );
 
-const TELEGRAM_BOT_URL = 'https://t.me/APay_Protocol_Bot';
+const TELEGRAM_BOT_URL = 'https://telegram.me/APay_Protocol_Bot';
 
 export function AlienBotFlyer() {
   const [isMounted, setIsMounted] = useState(false);

@@ -1048,6 +1048,14 @@ async function main() {
     assert(data.ok === true, 'Expected ok: true');
   });
 
+  await runStep('GET /telegram redirects to telegram.me/APay_Protocol_Bot', async () => {
+    const res = await fetch(`${BASE_URL}/telegram`, { redirect: 'manual' });
+    assert(res.status === 307, `Expected redirect status 307, got ${res.status}`);
+    const location = res.headers.get('location') || '';
+    assert(location.includes('telegram.me/APay_Protocol_Bot'), `Expected telegram.me redirect, got ${location}`);
+  });
+
+
 
 
   console.log('\n========================================================================');
