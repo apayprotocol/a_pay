@@ -278,7 +278,11 @@ export async function GET(request: Request) {
 
       const allMerchants = await registryStore.getMerchants(network);
       const dynamicServices = allMerchants
-        .filter((m) => m.status === 'online')
+        .filter(
+          (m) =>
+            m.status === 'online' ||
+            (!m.targetDomain.includes('e2e-') && !m.targetDomain.includes('127.0.0.1')),
+        )
         .map((m) => ({
           id: m.id,
           name: m.name || `${m.targetDomain.replace(/^https?:\/\//, '').split('/')[0]} M2M API`,
