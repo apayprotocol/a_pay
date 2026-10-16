@@ -39,6 +39,7 @@ import {
   fetchLiveSettlementLogs,
   fetchLiveTokenStats,
   fetchLiveTokenTransferLogs,
+  getActiveEthereum,
   type LiveAerodromePoolStats,
   type LiveRouterStats,
   type LiveTokenStats,
@@ -294,9 +295,10 @@ export function OverviewTab({
       const timestamp = Date.now();
       const message = `A-Pay Protocol: Purge Stale Registry Entries\nAdmin: ${walletAddress.toLowerCase()}\nTimestamp: ${timestamp}`;
 
-      if (typeof window !== 'undefined' && (window as any).ethereum) {
+      const eth = getActiveEthereum();
+      if (typeof window !== 'undefined' && eth) {
         try {
-          signature = await (window as any).ethereum.request({
+          signature = await eth.request({
             method: 'personal_sign',
             params: [message, walletAddress],
           });
@@ -304,7 +306,7 @@ export function OverviewTab({
           setFounderActionFeedback({
             type: 'info',
             title: 'Purge Cancelled',
-            message: 'Signature request was rejected in MetaMask.',
+            message: 'Signature request was rejected in your wallet.',
           });
           return;
         }
@@ -349,9 +351,10 @@ export function OverviewTab({
       const timestamp = Date.now();
       const message = `A-Pay Protocol: Delete Merchant Entry\nDomain: ${cleanDomain}\nWallet: ${walletAddress.toLowerCase()}\nTimestamp: ${timestamp}`;
 
-      if (typeof window !== 'undefined' && (window as any).ethereum) {
+      const eth = getActiveEthereum();
+      if (typeof window !== 'undefined' && eth) {
         try {
-          signature = await (window as any).ethereum.request({
+          signature = await eth.request({
             method: 'personal_sign',
             params: [message, walletAddress],
           });
@@ -359,7 +362,7 @@ export function OverviewTab({
           setFounderActionFeedback({
             type: 'info',
             title: 'Deletion Cancelled',
-            message: 'Signature request was rejected in MetaMask.',
+            message: 'Signature request was rejected in your wallet.',
           });
           setDeletingMerchant(null);
           return;
@@ -465,11 +468,12 @@ export function OverviewTab({
       return;
     }
 
-    if (typeof window === 'undefined' || !(window as any).ethereum) {
+    const eth = getActiveEthereum();
+    if (typeof window === 'undefined' || !eth) {
       setFounderActionFeedback({
         type: 'error',
-        title: 'MetaMask Not Detected',
-        message: 'Please install or connect MetaMask to execute the on-chain transfer.',
+        title: 'Wallet Not Connected',
+        message: 'Please connect your Web3 wallet to execute the on-chain transfer.',
       });
       return;
     }
@@ -478,7 +482,7 @@ export function OverviewTab({
     setActiveFounderAction(actionKey);
     setFounderActionFeedback({
       type: 'info',
-      title: 'Awaiting MetaMask Confirmation...',
+      title: 'Awaiting Wallet Confirmation...',
       message: `Please confirm the 10 $APAY welcome transfer to ${recipient.slice(0, 6)}...${recipient.slice(-4)} in your wallet.`,
     });
 
@@ -487,7 +491,7 @@ export function OverviewTab({
       const amountBaseUnits = 10n * 10n ** 18n;
       const calldata = encodeErc20Transfer(recipient, amountBaseUnits);
 
-      const txHash: string = await (window as any).ethereum.request({
+      const txHash: string = await eth.request({
         method: 'eth_sendTransaction',
         params: [
           {
@@ -545,11 +549,12 @@ export function OverviewTab({
       return;
     }
 
-    if (typeof window === 'undefined' || !(window as any).ethereum) {
+    const eth = getActiveEthereum();
+    if (typeof window === 'undefined' || !eth) {
       setFounderActionFeedback({
         type: 'error',
-        title: 'MetaMask Not Detected',
-        message: 'Please install or connect MetaMask to execute the test payment.',
+        title: 'Wallet Not Connected',
+        message: 'Please connect your Web3 wallet to execute the test payment.',
       });
       return;
     }
@@ -559,7 +564,7 @@ export function OverviewTab({
     setActiveFounderAction(actionKey);
     setFounderActionFeedback({
       type: 'info',
-      title: 'Awaiting MetaMask Confirmation...',
+      title: 'Awaiting Wallet Confirmation...',
       message: `Please confirm the ${payAmount} $APAY paywall test payment to ${recipient.slice(0, 6)}...${recipient.slice(-4)}.`,
     });
 
@@ -568,7 +573,7 @@ export function OverviewTab({
       const amountBaseUnits = BigInt(Math.floor(payAmount * 1e6)) * 10n ** 12n;
       const calldata = encodeErc20Transfer(recipient, amountBaseUnits);
 
-      const txHash: string = await (window as any).ethereum.request({
+      const txHash: string = await eth.request({
         method: 'eth_sendTransaction',
         params: [
           {

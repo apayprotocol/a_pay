@@ -33,6 +33,7 @@ import {
   ensureNetwork,
   fetchLiveEscrowBalances,
   fetchLiveWalletBalances,
+  getActiveEthereum,
 } from '@/services/blockchain';
 
 function parseSafeAmount(value: string | number, decimals: number): bigint {
@@ -513,16 +514,17 @@ APAY_USDC_ADDRESS="${contracts.USDC.address}"
       return;
     }
 
-    if (typeof window === 'undefined' || !(window as any).ethereum) {
+    const eth = getActiveEthereum();
+    if (typeof window === 'undefined' || !eth) {
       alert(
-        `Please install MetaMask or an EVM wallet to authorize sub-agents on ${chainConfig.chainName}.`,
+        `Please connect MetaMask or an EVM wallet to authorize sub-agents on ${chainConfig.chainName}.`,
       );
       return;
     }
 
     setIsDelegating(true);
     try {
-      await ensureNetwork((window as any).ethereum, activeNetwork);
+      await ensureNetwork(eth, activeNetwork);
       // Encode calldata for EscrowVault.authorizeAgent(agent, token, dailyLimit, expiresAt)
       // selector: 0xe0ad3ad9
       const cleanAgent = newAgentAddress.toLowerCase().replace(/^0x/, '').padStart(64, '0');
@@ -538,11 +540,11 @@ APAY_USDC_ADDRESS="${contracts.USDC.address}"
         .padStart(64, '0');
       const calldata = `0xe0ad3ad9${cleanAgent}${cleanToken}${dailyLimitUnits}${expiresAtSec}`;
 
-      const txHash = await (window as any).ethereum.request({
+      const txHash = await eth.request({
         method: 'eth_sendTransaction',
         params: [
           {
-            from: (window as any).ethereum.selectedAddress || walletAddress,
+            from: eth.selectedAddress || walletAddress,
             to: contracts.EscrowVault.address,
             data: calldata,
           },
@@ -593,8 +595,11 @@ APAY_USDC_ADDRESS="${contracts.USDC.address}"
       return;
     }
 
-    if (typeof window === 'undefined' || !(window as any).ethereum) {
-      alert(`Please install MetaMask to deposit to EscrowVault.sol on ${chainConfig.chainName}.`);
+    const eth = getActiveEthereum();
+    if (typeof window === 'undefined' || !eth) {
+      alert(
+        `Please connect your Web3 wallet to deposit to EscrowVault.sol on ${chainConfig.chainName}.`,
+      );
       return;
     }
 
@@ -620,7 +625,7 @@ APAY_USDC_ADDRESS="${contracts.USDC.address}"
       `Initiating deposit of ${amountStr} ${token} to EscrowVault.sol on ${chainConfig.chainName}...`,
     );
     try {
-      await ensureNetwork((window as any).ethereum, activeNetwork);
+      await ensureNetwork(eth, activeNetwork);
       const targetToken = token === 'USDC' ? contracts.USDC.address : contracts.APAYToken.address;
       const cleanVault = contracts.EscrowVault.address
         .toLowerCase()
@@ -628,12 +633,12 @@ APAY_USDC_ADDRESS="${contracts.USDC.address}"
         .padStart(64, '0');
       const cleanToken = targetToken.toLowerCase().replace(/^0x/, '').padStart(64, '0');
 
-      const sender = (window as any).ethereum.selectedAddress || walletAddress;
+      const sender = eth.selectedAddress || walletAddress;
 
       // Step 1: Approve EscrowVault to transfer tokens
       setDepositMsg(`Step 1/2: Approving EscrowVault for ${amountStr} ${token}...`);
       const approveCalldata = `0x095ea7b3${cleanVault}${amountUnits}`;
-      await (window as any).ethereum.request({
+      await eth.request({
         method: 'eth_sendTransaction',
         params: [
           {
@@ -647,7 +652,7 @@ APAY_USDC_ADDRESS="${contracts.USDC.address}"
       // Step 2: EscrowVault.deposit(token, amount)
       setDepositMsg(`Step 2/2: Depositing ${amountStr} ${token} into EscrowVault.sol...`);
       const depositCalldata = `0x47e7ef24${cleanToken}${amountUnits}`;
-      const txHash = await (window as any).ethereum.request({
+      const txHash = await eth.request({
         method: 'eth_sendTransaction',
         params: [
           {
@@ -688,8 +693,9 @@ APAY_USDC_ADDRESS="${contracts.USDC.address}"
       return;
     }
 
-    if (typeof window === 'undefined' || !(window as any).ethereum) {
-      setFundStatus('Please install MetaMask to fund this agent wallet.');
+    const eth = getActiveEthereum();
+    if (typeof window === 'undefined' || !eth) {
+      setFundStatus('Please connect your Web3 wallet to fund this agent wallet.');
       return;
     }
     if (!agentAddress) return;
@@ -706,16 +712,16 @@ APAY_USDC_ADDRESS="${contracts.USDC.address}"
 
     setIsFundingSubwallet(true);
     try {
-      await ensureNetwork((window as any).ethereum, activeNetwork);
+      await ensureNetwork(eth, activeNetwork);
       const cleanTo = agentAddress.toLowerCase().replace(/^0x/, '').padStart(64, '0');
-      const sender = (window as any).ethereum.selectedAddress;
+      const sender = eth.selectedAddress || walletAddress;
 
       if (subwalletFundCurrency === 'ETH') {
         setFundStatus(
           `Sending ${subwalletFundAmount} ${chainConfig.currency} gas to sub-wallet...`,
         );
         const valueWei = parseSafeAmount(subwalletFundAmount, 18);
-        const txHash = await (window as any).ethereum.request({
+        const txHash = await eth.request({
           method: 'eth_sendTransaction',
           params: [
             {
@@ -736,7 +742,7 @@ APAY_USDC_ADDRESS="${contracts.USDC.address}"
         const amountHex = amountWei.toString(16).padStart(64, '0');
         const calldata = `0xa9059cbb${cleanTo}${amountHex}`;
 
-        const txHash = await (window as any).ethereum.request({
+        const txHash = await eth.request({
           method: 'eth_sendTransaction',
           params: [
             {
@@ -757,7 +763,7 @@ APAY_USDC_ADDRESS="${contracts.USDC.address}"
         const amountHex = amountUnits.toString(16).padStart(64, '0');
         const calldata = `0xa9059cbb${cleanTo}${amountHex}`;
 
-        const txHash = await (window as any).ethereum.request({
+        const txHash = await eth.request({
           method: 'eth_sendTransaction',
           params: [
             {

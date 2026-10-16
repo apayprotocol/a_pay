@@ -18,7 +18,11 @@ import { StakingTab } from '@/components/modules/StakingTab';
 import { Sidebar } from '@/components/Sidebar';
 import { TopBar } from '@/components/TopBar';
 import { CONTRACTS, getNetworkContracts, NETWORKS, type NetworkId } from '@/config/contracts';
-import { fetchLiveWalletBalances } from '@/services/blockchain';
+import {
+  fetchLiveWalletBalances,
+  getActiveEthereum,
+  initEIP6963Discovery,
+} from '@/services/blockchain';
 
 export default function DashboardPage() {
   const [viewMode, setViewMode] = useState<'landing' | 'console'>('landing');
@@ -105,7 +109,8 @@ export default function DashboardPage() {
 
   // Active session check function (verifies accounts authorized under EIP-1193)
   const checkWalletSession = React.useCallback(async () => {
-    if (typeof window === 'undefined' || !(window as any).ethereum) {
+    const eth = getActiveEthereum();
+    if (typeof window === 'undefined' || !eth) {
       setWalletAddress((prev) => {
         if (prev !== null) {
           setTokenBalance('0');
@@ -120,7 +125,6 @@ export default function DashboardPage() {
     isCheckingSessionRef.current = true;
 
     try {
-      const eth = (window as any).ethereum;
       eth?.setMaxListeners?.(100);
       eth?._events?.setMaxListeners?.(100);
 
@@ -178,8 +182,11 @@ export default function DashboardPage() {
   handleNetworkChangeRef.current = handleNetworkChange;
 
   useEffect(() => {
-    if (typeof window === 'undefined' || !(window as any).ethereum) return;
-    const eth = (window as any).ethereum;
+    const cleanupEIP6963 = initEIP6963Discovery();
+    const eth = getActiveEthereum();
+    if (typeof window === 'undefined' || !eth) {
+      return cleanupEIP6963;
+    }
 
     // Set listener cap to prevent MetaMask multiplex warnings
     eth?.setMaxListeners?.(100);
@@ -229,6 +236,7 @@ export default function DashboardPage() {
     document.addEventListener('visibilitychange', handleVisibilityOrFocus);
 
     return () => {
+      cleanupEIP6963();
       if (eth.removeListener) {
         eth.removeListener('accountsChanged', handleAccountsChanged);
         eth.removeListener('chainChanged', handleChainChanged);

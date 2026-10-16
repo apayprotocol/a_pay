@@ -17,7 +17,12 @@ import {
 import React, { useEffect, useRef, useState } from 'react';
 import { ApayBrandLogo } from '@/components/ApayBrandLogo';
 import { NETWORKS, type NetworkId } from '@/config/contracts';
-import { addApayTokenToWallet, ensureNetwork, getBasename } from '@/services/blockchain';
+import {
+  addApayTokenToWallet,
+  ensureNetwork,
+  getActiveEthereum,
+  getBasename,
+} from '@/services/blockchain';
 import { ThemeToggle } from './ThemeToggle';
 
 interface TopBarProps {
@@ -112,8 +117,9 @@ export function TopBar({
       onSelectNetwork(newNet);
     }
     // Also request chain switch in browser wallet if connected
-    if (typeof window !== 'undefined' && (window as any).ethereum) {
-      await ensureNetwork((window as any).ethereum, newNet);
+    const eth = getActiveEthereum();
+    if (eth) {
+      await ensureNetwork(eth, newNet);
     }
   };
 

@@ -13,7 +13,12 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import type { NetworkId } from '@/config/contracts';
-import { ensureNetwork } from '@/services/blockchain';
+import {
+  ensureNetwork,
+  initEIP6963Discovery,
+  resolveSpecificWalletProvider,
+  setActiveEthereum,
+} from '@/services/blockchain';
 
 interface ConnectWalletModalProps {
   isOpen: boolean;
@@ -50,13 +55,37 @@ export function ConnectWalletModal({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [hasInjected, setHasInjected] = useState(false);
   const [isMobileDevice, setIsMobileDevice] = useState(false);
+  const [isMetaMaskDetected, setIsMetaMaskDetected] = useState(false);
+  const [isCoinbaseDetected, setIsCoinbaseDetected] = useState(false);
+  const [isTrustDetected, setIsTrustDetected] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setHasInjected(Boolean((window as any).ethereum));
+      const cleanup = initEIP6963Discovery();
       const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
-      setIsMobileDevice(mobileRegex.test(navigator.userAgent));
+      const isMob = mobileRegex.test(navigator.userAgent);
+      setIsMobileDevice(isMob);
+
+      const checkProviders = () => {
+        const meta = resolveSpecificWalletProvider('MetaMask');
+        const cb = resolveSpecificWalletProvider('Coinbase Wallet');
+        const tw = resolveSpecificWalletProvider('Trust Wallet');
+        const any = Boolean((window as any).ethereum);
+
+        setHasInjected(any);
+        setIsMetaMaskDetected(Boolean(meta));
+        setIsCoinbaseDetected(Boolean(cb));
+        setIsTrustDetected(Boolean(tw));
+      };
+
+      checkProviders();
+      const timer = setTimeout(checkProviders, 400);
+
+      return () => {
+        cleanup();
+        clearTimeout(timer);
+      };
     }
   }, [isOpen]);
 
@@ -72,21 +101,22 @@ export function ConnectWalletModal({
 
   if (!isOpen) return null;
 
-  const handleConnectInjected = async (providerName: string) => {
+  const handleConnectInjected = async (providerName: string, ethProvider: any) => {
     setErrorMessage(null);
     setIsConnecting(true);
     setConnectingProvider(providerName);
 
-    const eth = (window as any).ethereum;
-
     try {
-      // Standard EIP-1193: Request accounts interactively.
-      const accounts: string[] = await eth.request({ method: 'eth_requestAccounts' });
+      // 1. Lock the active provider for the entire app session (eliminates collision)
+      setActiveEthereum(ethProvider, providerName);
+
+      // 2. Standard EIP-1193: Request accounts interactively from this specific provider
+      const accounts: string[] = await ethProvider.request({ method: 'eth_requestAccounts' });
 
       if (accounts?.[0]) {
         // Ensure user is routed to the active settlement network
         try {
-          await ensureNetwork(eth, activeNetwork);
+          await ensureNetwork(ethProvider, activeNetwork);
         } catch (netErr) {
           console.warn('Network switch warning:', netErr);
         }
@@ -100,7 +130,7 @@ export function ConnectWalletModal({
     } catch (err: any) {
       if (err.code === -32002) {
         setErrorMessage(
-          'Approval prompt is already pending. Check your wallet notification or extension popup to approve.',
+          `${providerName} approval prompt is already pending. Check your browser toolbar or extension popup to approve.`,
         );
       } else if (err.code === 4001) {
         setErrorMessage('Connection request was cancelled in your wallet. Click to try again.');
@@ -119,9 +149,11 @@ export function ConnectWalletModal({
   ) => {
     setErrorMessage(null);
 
-    // 1. If an injected provider is available (Desktop extension OR Mobile In-App browser)
-    if (typeof window !== 'undefined' && (window as any).ethereum) {
-      await handleConnectInjected(providerName);
+    // 1. Resolve exact target provider (EIP-6963 / providerMap / true provider filtering)
+    const specificProvider = resolveSpecificWalletProvider(providerName);
+
+    if (specificProvider) {
+      await handleConnectInjected(providerName, specificProvider);
       return;
     }
 
@@ -280,7 +312,7 @@ export function ConnectWalletModal({
               <div>
                 <div className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 flex items-center gap-1.5">
                   <span>MetaMask</span>
-                  {hasInjected && (
+                  {isMetaMaskDetected && (
                     <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 font-semibold">
                       Detected
                     </span>
@@ -292,8 +324,8 @@ export function ConnectWalletModal({
                   )}
                 </div>
                 <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                  {hasInjected
-                    ? 'Injected Web3 Provider ready'
+                  {isMetaMaskDetected
+                    ? 'Dedicated MetaMask Extension ready'
                     : isMobileDevice
                       ? 'Launch directly in MetaMask Mobile App'
                       : 'Browser extension for Chrome, Brave, Firefox'}
@@ -304,7 +336,7 @@ export function ConnectWalletModal({
               <Loader2 className="w-4 h-4 text-orange-500 animate-spin shrink-0" />
             ) : (
               <span className="text-xs text-slate-400 font-mono group-hover:text-orange-500 group-hover:translate-x-0.5 transition-all">
-                {hasInjected ? 'Connect →' : isMobileDevice ? 'Open App ↗' : 'Connect →'}
+                {isMetaMaskDetected ? 'Connect →' : isMobileDevice ? 'Open App ↗' : 'Install →'}
               </span>
             )}
           </button>
@@ -322,6 +354,11 @@ export function ConnectWalletModal({
               <div>
                 <div className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-sky-400 flex items-center gap-1.5">
                   <span>Coinbase Wallet</span>
+                  {isCoinbaseDetected && (
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 font-semibold">
+                      Detected
+                    </span>
+                  )}
                   {isMobileDevice && !hasInjected && (
                     <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-sky-400 font-semibold">
                       App Link
@@ -329,8 +366,8 @@ export function ConnectWalletModal({
                   )}
                 </div>
                 <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                  {hasInjected
-                    ? 'Base native smart wallet & browser'
+                  {isCoinbaseDetected
+                    ? 'Coinbase Wallet Extension ready'
                     : isMobileDevice
                       ? 'Launch in Coinbase Wallet App'
                       : 'Base native smart wallet & extension'}
@@ -341,7 +378,7 @@ export function ConnectWalletModal({
               <Loader2 className="w-4 h-4 text-blue-500 animate-spin shrink-0" />
             ) : (
               <span className="text-xs text-slate-400 font-mono group-hover:text-blue-500 group-hover:translate-x-0.5 transition-all">
-                {hasInjected ? 'Connect →' : isMobileDevice ? 'Open App ↗' : 'Connect →'}
+                {isCoinbaseDetected ? 'Connect →' : isMobileDevice ? 'Open App ↗' : 'Get Wallet →'}
               </span>
             )}
           </button>
@@ -359,6 +396,11 @@ export function ConnectWalletModal({
               <div>
                 <div className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 flex items-center gap-1.5">
                   <span>Trust Wallet</span>
+                  {isTrustDetected && (
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 font-semibold">
+                      Detected
+                    </span>
+                  )}
                   {isMobileDevice && !hasInjected && (
                     <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-400 font-semibold">
                       App Link
@@ -366,8 +408,8 @@ export function ConnectWalletModal({
                   )}
                 </div>
                 <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                  {hasInjected
-                    ? 'Trust Wallet Web3 injected'
+                  {isTrustDetected
+                    ? 'Trust Wallet Extension ready'
                     : isMobileDevice
                       ? 'Launch in Trust Wallet App'
                       : 'Trust Wallet mobile & browser extension'}
@@ -378,7 +420,7 @@ export function ConnectWalletModal({
               <Loader2 className="w-4 h-4 text-sky-500 animate-spin shrink-0" />
             ) : (
               <span className="text-xs text-slate-400 font-mono group-hover:text-sky-500 group-hover:translate-x-0.5 transition-all">
-                {hasInjected ? 'Connect →' : isMobileDevice ? 'Open App ↗' : 'Connect →'}
+                {isTrustDetected ? 'Connect →' : isMobileDevice ? 'Open App ↗' : 'Get Wallet →'}
               </span>
             )}
           </button>

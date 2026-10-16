@@ -27,6 +27,7 @@ import {
   fetchLiveDisputes,
   fetchLiveStakingState,
   fetchLiveTokenStats,
+  getActiveEthereum,
   type LiveDisputeRecord,
   type LiveStakingState,
   type LiveTokenStats,
@@ -167,8 +168,9 @@ export function StakingTab({
   }, [loadStaking, activeNetwork]);
 
   const handleStakeBond = async (amountTokens = 500) => {
-    if (typeof window === 'undefined' || !(window as any).ethereum) {
-      setStakingStatus('Please connect MetaMask or Coinbase Wallet.');
+    const eth = getActiveEthereum();
+    if (typeof window === 'undefined' || !eth) {
+      setStakingStatus('Please connect MetaMask or your Web3 wallet.');
       return;
     }
     if (!walletAddress) {
@@ -178,7 +180,6 @@ export function StakingTab({
 
     setIsStaking(true);
     try {
-      const eth = (window as any).ethereum;
       // Ensure wallet is on the active network before sending transactions
       await ensureNetwork(eth, activeNetwork);
 

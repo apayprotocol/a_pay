@@ -805,19 +805,185 @@ export async function ensureNetwork(
   }
 }
 
+export interface EIP6963ProviderDetail {
+  info: {
+    uuid: string;
+    name: string;
+    icon: string;
+    rdns: string;
+  };
+  provider: any;
+}
+
+// In-memory registry of EIP-6963 announced providers
+const eip6963Registry = new Map<string, EIP6963ProviderDetail>();
+let isEIP6963Initialized = false;
+
+export function initEIP6963Discovery(): () => void {
+  if (typeof window === 'undefined') return () => {};
+
+  const onAnnounce = (event: any) => {
+    if (event?.detail?.info?.uuid) {
+      eip6963Registry.set(event.detail.info.uuid, event.detail);
+    }
+  };
+
+  if (!isEIP6963Initialized) {
+    window.addEventListener('eip6963:announceProvider', onAnnounce);
+    isEIP6963Initialized = true;
+  }
+
+  try {
+    window.dispatchEvent(new Event('eip6963:requestProvider'));
+  } catch {}
+
+  return () => {
+    window.removeEventListener('eip6963:announceProvider', onAnnounce);
+  };
+}
+
+export function getDiscoveredEIP6963Providers(): EIP6963ProviderDetail[] {
+  return Array.from(eip6963Registry.values());
+}
+
+/**
+ * Resolves a specific wallet provider (MetaMask, Coinbase Wallet, Trust Wallet)
+ * with zero extension collision. Eliminates issues where Coinbase Wallet overrides window.ethereum.
+ */
+export function resolveSpecificWalletProvider(walletName: string): any {
+  if (typeof window === 'undefined') return null;
+  const w = window as any;
+  const lowerName = walletName.toLowerCase();
+
+  // 1. Check EIP-6963 registry first (Highest standard, eliminates extension clobbering)
+  const eipList = getDiscoveredEIP6963Providers();
+
+  if (lowerName.includes('meta')) {
+    const metaEip = eipList.find(
+      (p) => p.info.rdns === 'io.metamask' || p.info.name.toLowerCase().includes('metamask'),
+    );
+    if (metaEip?.provider) return metaEip.provider;
+  } else if (lowerName.includes('coinbase')) {
+    const cbEip = eipList.find(
+      (p) =>
+        p.info.rdns === 'com.coinbase.wallet' || p.info.name.toLowerCase().includes('coinbase'),
+    );
+    if (cbEip?.provider) return cbEip.provider;
+  } else if (lowerName.includes('trust')) {
+    const twEip = eipList.find(
+      (p) => p.info.rdns === 'com.trustwallet.app' || p.info.name.toLowerCase().includes('trust'),
+    );
+    if (twEip?.provider) return twEip.provider;
+  }
+
+  // 2. Check multi-provider arrays and global variables
+  const allProviders: any[] = [];
+  if (Array.isArray(w.ethereum?.providers)) {
+    allProviders.push(...w.ethereum.providers);
+  } else if (w.ethereum) {
+    allProviders.push(w.ethereum);
+  }
+  if (w.coinbaseWalletExtension) allProviders.push(w.coinbaseWalletExtension);
+  if (w.trustwallet) allProviders.push(w.trustwallet);
+
+  if (lowerName.includes('meta')) {
+    // Check providerMap
+    if (w.ethereum?.providerMap?.get?.('MetaMask')) {
+      return w.ethereum.providerMap.get('MetaMask');
+    }
+
+    // Explicit check: true MetaMask provider must have isMetaMask === true and NOT Coinbase, NOT Phantom, NOT Brave
+    const trueMeta = allProviders.find(
+      (p) => p.isMetaMask && !p.isCoinbaseWallet && !p.isPhantom && !p.isBraveWallet,
+    );
+    if (trueMeta) return trueMeta;
+
+    const anyMeta = allProviders.find((p) => p.isMetaMask && !p.isCoinbaseWallet);
+    if (anyMeta) return anyMeta;
+  }
+
+  if (lowerName.includes('coinbase')) {
+    if (w.coinbaseWalletExtension) return w.coinbaseWalletExtension;
+    if (w.ethereum?.providerMap?.get?.('CoinbaseWallet')) {
+      return w.ethereum.providerMap.get('CoinbaseWallet');
+    }
+    const cb = allProviders.find((p) => p.isCoinbaseWallet);
+    if (cb) return cb;
+  }
+
+  if (lowerName.includes('trust')) {
+    if (w.trustwallet) return w.trustwallet;
+    const tw = allProviders.find((p) => p.isTrust || p.isTrustWallet);
+    if (tw) return tw;
+  }
+
+  // 3. Fallback to default window.ethereum
+  return w.ethereum || null;
+}
+
+/**
+ * Gets currently active Ethereum provider for transactions and network switching.
+ */
+export function getActiveEthereum(): any {
+  if (typeof window === 'undefined') return undefined;
+  const w = window as any;
+  if (w._apayActiveProvider) return w._apayActiveProvider;
+
+  try {
+    const preferred = localStorage.getItem('apay_preferred_wallet');
+    if (preferred) {
+      const specific = resolveSpecificWalletProvider(preferred);
+      if (specific) {
+        w._apayActiveProvider = specific;
+        return specific;
+      }
+    }
+  } catch {}
+
+  // If window.ethereum is overridden by Coinbase but user has MetaMask installed
+  if (
+    w.ethereum?.isCoinbaseWallet &&
+    (w.ethereum?.providerMap?.get?.('MetaMask') ||
+      w.ethereum?.providers?.some?.((p: any) => p.isMetaMask && !p.isCoinbaseWallet))
+  ) {
+    const meta = resolveSpecificWalletProvider('MetaMask');
+    if (meta) {
+      w._apayActiveProvider = meta;
+      return meta;
+    }
+  }
+
+  return w.ethereum;
+}
+
+/**
+ * Sets the active Ethereum provider for the entire application session.
+ */
+export function setActiveEthereum(provider: any, walletName?: string) {
+  if (typeof window === 'undefined') return;
+  const w = window as any;
+  w._apayActiveProvider = provider;
+  if (walletName) {
+    try {
+      localStorage.setItem('apay_preferred_wallet', walletName);
+    } catch {}
+  }
+}
+
 /**
  * Prompts MetaMask or any EIP-747 Web3 wallet to add/watch the $APAY token directly into wallet tokens list.
  */
 export async function addApayTokenToWallet(
   networkId: NetworkId = 'base-mainnet',
 ): Promise<boolean> {
-  if (typeof window === 'undefined' || !(window as any).ethereum) {
+  const eth = getActiveEthereum();
+  if (typeof window === 'undefined' || !eth) {
     console.warn('No Web3 wallet detected for wallet_watchAsset');
     return false;
   }
   const contracts = getNetworkContracts(networkId);
   try {
-    const wasAdded = await (window as any).ethereum.request({
+    const wasAdded = await eth.request({
       method: 'wallet_watchAsset',
       params: {
         type: 'ERC20',
