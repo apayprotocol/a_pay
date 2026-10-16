@@ -1048,6 +1048,67 @@ async function main() {
     assert(data.ok === true, 'Expected ok: true');
   });
 
+  await runStep('POST /api/telegram/webhook handles /start command and role callbacks', async () => {
+    // Test /start command
+    const startRes = await fetch(`${BASE_URL}/api/telegram/webhook`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        update_id: 1001,
+        message: {
+          message_id: 1,
+          chat: { id: 999999, type: 'private' },
+          from: { id: 999999, first_name: 'Tester' },
+          text: '/start',
+        },
+      }),
+    });
+    assert(startRes.status === 200, `Expected status 200, got ${startRes.status}`);
+    const startData = await startRes.json();
+    assert(startData.ok === true, 'Expected /start ok: true');
+
+    // Test callback queries: role_website, role_agent, role_saas, role_blogs
+    for (const callbackData of ['role_website', 'role_agent', 'role_saas', 'role_blogs']) {
+      const cbRes = await fetch(`${BASE_URL}/api/telegram/webhook`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          update_id: 1002,
+          callback_query: {
+            id: 'cb_query_1',
+            from: { id: 999999, first_name: 'Tester' },
+            message: {
+              message_id: 2,
+              chat: { id: 999999, type: 'private' },
+            },
+            data: callbackData,
+          },
+        }),
+      });
+      assert(cbRes.status === 200, `Expected status 200 for ${callbackData}, got ${cbRes.status}`);
+      const cbJson = await cbRes.json();
+      assert(cbJson.ok === true, `Expected ok: true for ${callbackData}`);
+    }
+
+    // Test auto-EVM address detection
+    const addrRes = await fetch(`${BASE_URL}/api/telegram/webhook`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        update_id: 1003,
+        message: {
+          message_id: 3,
+          chat: { id: 999999, type: 'private' },
+          from: { id: 999999, first_name: 'Tester' },
+          text: '0x8dd4ff9035c7d4e0bef30aa64fc30d128a4066c3',
+        },
+      }),
+    });
+    assert(addrRes.status === 200, `Expected status 200 for EVM address detect, got ${addrRes.status}`);
+    const addrData = await addrRes.json();
+    assert(addrData.ok === true, 'Expected auto-EVM detect ok: true');
+  });
+
   await runStep('GET /telegram redirects to telegram.me/APay_Protocol_Bot', async () => {
     const res = await fetch(`${BASE_URL}/telegram`, { redirect: 'manual' });
     assert(res.status === 307, `Expected redirect status 307, got ${res.status}`);
