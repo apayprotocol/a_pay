@@ -147,8 +147,13 @@ async function getChatMemberStatus(
   return null;
 }
 
-// Configurable announcement channel for Community group verification
-let configuredAnnouncementChannel = process.env.TELEGRAM_ANNOUNCEMENT_CHANNEL || '@apayprotocol';
+// Configurable announcement channel and community group for developer engagement & gate
+const DEFAULT_ANNOUNCEMENT_CHANNEL = '@apay_protocol';
+let configuredAnnouncementChannel =
+  process.env.TELEGRAM_ANNOUNCEMENT_CHANNEL || DEFAULT_ANNOUNCEMENT_CHANNEL;
+
+const DEFAULT_COMMUNITY_GROUP_URL = 'https://t.me/+HOkmQo2KuvdlNjU9';
+let configuredCommunityGroup = process.env.TELEGRAM_COMMUNITY_GROUP || DEFAULT_COMMUNITY_GROUP_URL;
 
 // Minimal ERC20 ABI for balance checks
 const ERC20_BALANCE_ABI = [
@@ -231,6 +236,7 @@ function getMainMenu(userName: string) {
         { text: '📚 3 Pillar Research Papers', callback_data: 'role_blogs' },
         { text: '💬 Community & Support', callback_data: 'role_support' },
       ],
+      [{ text: '💬 Join Developer Group (Live Chat) 💬', url: configuredCommunityGroup }],
       [
         { text: '🚀 Launch Web Console', url: 'https://apayprotocol.org' },
         { text: '🛍️ Checkout Demo Store', url: 'https://apayprotocol.org/checkout-demo' },
@@ -397,6 +403,54 @@ export async function POST(req: Request) {
           `Official Announcements Channel set to: <b>${newChannel}</b>.\n` +
           `All non-admin community group members will be prompted to join this channel before sending messages.`,
       );
+      return NextResponse.json({ ok: true });
+    }
+
+    // ── ADMIN COMMAND: /setgroup ──────────────────────────────────────────────
+    if (command === '/setgroup') {
+      const newGroup = args[0]?.trim();
+      if (!newGroup) {
+        await sendTelegramMessage(
+          chatId,
+          `<b>Usage:</b> <code>/setgroup https://t.me/...</code>\n\n` +
+            `Current Community Group Link:\n<b>${configuredCommunityGroup}</b>\n\n` +
+            `<i>Update the developer live chat community group invite link.</i>`,
+        );
+        return NextResponse.json({ ok: true });
+      }
+
+      configuredCommunityGroup = newGroup;
+      await sendTelegramMessage(
+        chatId,
+        `<b>✅ Community Group Updated!</b>\n\n` +
+          `Official Developer Community Group link set to:\n<b>${newGroup}</b>`,
+      );
+      return NextResponse.json({ ok: true });
+    }
+
+    // ── COMMAND: /chat OR /group (LIVE DEVELOPER CHAT) ─────────────────────────
+    if (command === '/chat' || command === '/group') {
+      const groupMsg =
+        `<b>💬 Official A-Pay Developer Community (Live Chat):</b>\n\n` +
+        `Connect directly with the core engineering team and 1,000+ AI builders in our official Telegram supergroup:\n\n` +
+        `👉 <b>A-Pay Protocol | Developers & Community</b>\n` +
+        `• <b>Real-Time Live Chat:</b> Ask integration questions & discuss HTTP 402\n` +
+        `• <b>Architecture & Code Help:</b> Next.js, WordPress, Python FastAPI, MCP\n` +
+        `• <b>Base L2 Micropayments:</b> Session escrows, Gasless permits & RouterV2\n\n` +
+        `<i>Tap below to open the developer group and start chatting:</i>`;
+
+      const keyboard = {
+        inline_keyboard: [
+          [{ text: '💬 Join Developer Group (Live Chat) 💬', url: configuredCommunityGroup }],
+          [
+            { text: '📢 Announcements Channel', url: 'https://t.me/apay_protocol' },
+            { text: '💬 Discord Hub', url: 'https://discord.gg/cW2WRSfb35' },
+          ],
+          [{ text: '🏠 Main Menu', callback_data: 'menu_main' }],
+        ],
+      };
+
+      await sendTelegramMessage(chatId, groupMsg, keyboard);
       return NextResponse.json({ ok: true });
     }
 
@@ -1209,6 +1263,8 @@ export async function POST(req: Request) {
     if (text === 'role_support') {
       const supportMsg =
         `<b>💬 Official A-Pay Protocol Channels:</b>\n\n` +
+        `• <b>Telegram Community:</b> Live chat & dev support (<a href="${configuredCommunityGroup}">Join Group</a>)\n` +
+        `• <b>Telegram Announcements:</b> Protocol updates (<a href="https://t.me/apay_protocol">@apay_protocol</a>)\n` +
         `• <b>Discord Community:</b> Join 1,000+ agent builders & developers\n` +
         `• <b>X (Twitter):</b> Daily updates & architecture notes\n` +
         `• <b>Founder Inbox:</b> <code>founder@apayprotocol.org</code>\n` +
@@ -1217,11 +1273,13 @@ export async function POST(req: Request) {
 
       const keyboard = {
         inline_keyboard: [
+          [{ text: '💬 Join Developer Group (Live Chat) 💬', url: configuredCommunityGroup }],
           [
+            { text: '📢 Announcements Channel', url: 'https://t.me/apay_protocol' },
             { text: '💬 Join Discord', url: 'https://discord.gg/cW2WRSfb35' },
-            { text: '🐦 Follow on X', url: 'https://x.com/apayprotocol' },
           ],
           [
+            { text: '🐦 Follow on X', url: 'https://x.com/apayprotocol' },
             {
               text: '🔍 BaseScan Explorer',
               url: 'https://basescan.org/token/0x8dd4ff9035c7d4e0bef30aa64fc30d128a4066c3',
