@@ -131,26 +131,23 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
       envMapIntensity: 1.8,
     });
 
-    // Deep curved cyber glass visor
+    // Deep curved cyber glass visor (Glossy Jet-Black OLED screen in both Day & Night)
     const visorMat = new THREE.MeshPhysicalMaterial({
-      color: isDark ? 0x020617 : 0x071126,
-      metalness: 0.2,
-      roughness: 0.02,
-      transmission: 0.68,
-      thickness: 0.45,
-      ior: 1.55,
-      reflectivity: 1.0,
+      color: 0x050811,
+      metalness: 0.35,
+      roughness: 0.06,
       clearcoat: 1.0,
-      clearcoatRoughness: 0.0,
+      clearcoatRoughness: 0.02,
+      reflectivity: 1.0,
       envMap,
-      envMapIntensity: 2.8,
+      envMapIntensity: 2.2,
     });
 
     // Dynamic Cyber HUD Eye Material (Interactive Color Logic)
     const eyeMat = new THREE.MeshStandardMaterial({
       color: 0x00f5ff,
       emissive: 0x00f5ff,
-      emissiveIntensity: isDark ? 6.0 : 6.8, // Punchy and luminous in daylight
+      emissiveIntensity: isDark ? 6.5 : 7.2, // Punchy and luminous in daylight & night
       roughness: 0.05,
       metalness: 0.2,
     });
@@ -159,7 +156,7 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
     const hudRingMat = new THREE.MeshStandardMaterial({
       color: 0xffffff,
       emissive: 0x38bdf8,
-      emissiveIntensity: isDark ? 5.5 : 6.5,
+      emissiveIntensity: isDark ? 6.0 : 7.0,
       roughness: 0.0,
     });
 
@@ -203,20 +200,13 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
     headMesh.scale.set(1.08, 0.98, 0.98);
     headGroup.add(headMesh);
 
-    // 2. Seamless Deep Cyber Visor (Flush with helmet, no protruding white brow!)
-    const visorGeo = new THREE.SphereGeometry(0.505, 48, 36, 0, Math.PI * 2, 0.3, 1.0);
+    // 2. Glossy OLED Cyber Face Display Screen (Seamless frontal curve, zero clipping)
+    const visorGeo = new THREE.SphereGeometry(0.524, 48, 36, 0, Math.PI * 2, 0.2, 0.82);
     const visorMesh = new THREE.Mesh(visorGeo, visorMat);
-    visorMesh.rotation.x = Math.PI * 0.52;
-    visorMesh.position.set(0, -0.02, 0.06);
-    visorMesh.scale.set(0.92, 0.74, 0.9);
+    visorMesh.rotation.x = Math.PI * 0.48;
+    visorMesh.position.set(0, 0.02, 0.015);
+    visorMesh.scale.set(0.94, 0.78, 1.02);
     headGroup.add(visorMesh);
-
-    // Subtle dark titanium bezel collar (replaces clumsy white chrome rim)
-    const vRimGeo = new THREE.TorusGeometry(0.46, 0.012, 16, 80, Math.PI * 1.1);
-    const vRim = new THREE.Mesh(vRimGeo, bezelMat);
-    vRim.rotation.x = Math.PI * 0.52;
-    vRim.position.set(0, -0.02, 0.06);
-    headGroup.add(vRim);
 
     // =========================================================================
     // 3. UPGRADED EXPRESSIVE CYBER HUD EYE SYSTEM
@@ -224,42 +214,42 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
     const eyeGroup = new THREE.Group();
     headGroup.add(eyeGroup);
 
-    // Left Cyber Eye (Smooth rounded aperture, highly expressive)
+    // Left Cyber Eye (Smooth rounded aperture, highly expressive & luminous)
     const eyeGeo = new THREE.SphereGeometry(0.082, 32, 24);
     const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
-    leftEye.position.set(-0.16, -0.035, 0.45);
-    leftEye.scale.set(1.15, 0.88, 0.35);
+    leftEye.position.set(-0.155, 0.025, 0.535);
+    leftEye.scale.set(1.05, 1.25, 0.32);
     leftEye.rotation.z = -0.06;
     eyeGroup.add(leftEye);
 
     // Left Inner Glowing HUD Reticle Ring
-    const hudRingGeo = new THREE.TorusGeometry(0.046, 0.007, 12, 32);
+    const hudRingGeo = new THREE.TorusGeometry(0.048, 0.007, 16, 32);
     const leftHudRing = new THREE.Mesh(hudRingGeo, hudRingMat);
-    leftHudRing.position.set(-0.16, -0.035, 0.485);
+    leftHudRing.position.set(-0.155, 0.025, 0.545);
     eyeGroup.add(leftHudRing);
 
     // Left Specular Glint (Living spark of intelligence)
-    const glintGeo = new THREE.SphereGeometry(0.016, 12, 12);
+    const glintGeo = new THREE.SphereGeometry(0.018, 14, 14);
     const glintMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
     const leftGlint = new THREE.Mesh(glintGeo, glintMat);
-    leftGlint.position.set(-0.14, -0.015, 0.49);
+    leftGlint.position.set(-0.135, 0.05, 0.55);
     eyeGroup.add(leftGlint);
 
     // Right Cyber Eye
     const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
-    rightEye.position.set(0.16, -0.035, 0.45);
-    rightEye.scale.set(1.15, 0.88, 0.35);
+    rightEye.position.set(0.155, 0.025, 0.535);
+    rightEye.scale.set(1.05, 1.25, 0.32);
     rightEye.rotation.z = 0.06;
     eyeGroup.add(rightEye);
 
     // Right Inner Glowing HUD Reticle Ring
     const rightHudRing = new THREE.Mesh(hudRingGeo, hudRingMat);
-    rightHudRing.position.set(0.16, -0.035, 0.485);
+    rightHudRing.position.set(0.155, 0.025, 0.545);
     eyeGroup.add(rightHudRing);
 
     // Right Specular Glint
     const rightGlint = new THREE.Mesh(glintGeo, glintMat);
-    rightGlint.position.set(0.18, -0.015, 0.49);
+    rightGlint.position.set(0.175, 0.05, 0.55);
     eyeGroup.add(rightGlint);
 
     // 4. Audio Turbine Ear Pods with glowing plasma cores
@@ -549,8 +539,8 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
         eyeMat.emissiveIntensity = 5.5 + Math.sin(elapsed * 6.0) * 1.5;
 
         // Attentive wide eye scale on hover
-        leftEye.scale.set(1.22, 0.96, 0.35);
-        rightEye.scale.set(1.22, 0.96, 0.35);
+        leftEye.scale.set(1.15, 1.35, 0.35);
+        rightEye.scale.set(1.15, 1.35, 0.35);
         leftHudRing.rotation.z += 0.05;
         rightHudRing.rotation.z -= 0.05;
       } else {
@@ -560,10 +550,10 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
         currentEyeColor.lerp(targetColor, 0.08);
         eyeMat.emissive.copy(currentEyeColor);
         eyeMat.color.copy(currentEyeColor);
-        eyeMat.emissiveIntensity = 4.0 + Math.sin(elapsed * 3.0) * 0.8;
+        eyeMat.emissiveIntensity = 4.5 + Math.sin(elapsed * 3.0) * 1.0;
 
-        leftEye.scale.set(1.15, 0.88, 0.35);
-        rightEye.scale.set(1.15, 0.88, 0.35);
+        leftEye.scale.set(1.05, 1.25, 0.32);
+        rightEye.scale.set(1.05, 1.25, 0.32);
         leftHudRing.rotation.z += 0.015;
         rightHudRing.rotation.z -= 0.015;
       }
@@ -573,8 +563,8 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
       if (blinkTimer > 3.6 + Math.sin(elapsed * 0.4) * 0.8) {
         const bProg = (blinkTimer - 3.6) / 0.15;
         const bScale = bProg < 0.5 ? 1 - bProg * 2 : (bProg - 0.5) * 2;
-        leftEye.scale.y = Math.max(0.06, bScale * 0.88);
-        rightEye.scale.y = Math.max(0.06, bScale * 0.88);
+        leftEye.scale.y = Math.max(0.06, bScale * 1.25);
+        rightEye.scale.y = Math.max(0.06, bScale * 1.25);
         leftHudRing.scale.y = Math.max(0.06, bScale);
         rightHudRing.scale.y = Math.max(0.06, bScale);
         leftGlint.visible = bScale > 0.4;

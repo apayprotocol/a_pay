@@ -90,6 +90,30 @@ export function CoinCanvas() {
       ior: 1.8,
     });
 
+    // Official Base Cobalt Blue PBR Material (Left Ascending Rail)
+    const baseBlueMat = new THREE.MeshPhysicalMaterial({
+      color: 0x0052ff,
+      emissive: 0x0033cc,
+      emissiveIntensity: 0.45,
+      metalness: 0.75,
+      roughness: 0.14,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.05,
+      reflectivity: 0.95,
+    });
+
+    // Official Pure White Liquid Platinum PBR Material (Right Loop)
+    const pureWhiteMat = new THREE.MeshPhysicalMaterial({
+      color: 0xffffff,
+      emissive: 0x38bdf8,
+      emissiveIntensity: 0.25,
+      metalness: 0.92,
+      roughness: 0.06,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.04,
+      reflectivity: 1.0,
+    });
+
     // 5. Build Token Assembly
     const tokenGroup = new THREE.Group();
     scene.add(tokenGroup);
@@ -165,125 +189,107 @@ export function CoinCanvas() {
     tokenGroup.add(circuitGroup);
 
     // ----------------------------------------------------------------
-    // G. HYPER-STYLISH ROBOTIC / MECHA "A" GLYPH GENERATOR
+    // G. OFFICIAL A-PAY 3D SCULPTED EMBLEM (True 3D Dual-Mesh Extrusion)
     // ----------------------------------------------------------------
-    const createRoboticAGroup = () => {
-      const roboA = new THREE.Group();
+    const createOfficialLogoGroup = () => {
+      const emblemGroup = new THREE.Group();
 
-      // 1. Left Articulated Robotic Leg (Segmented Pylon)
-      const leftLegShape = new THREE.Shape();
-      leftLegShape.moveTo(-0.07, 0.38);
-      leftLegShape.lineTo(-0.16, 0.36);
-      leftLegShape.lineTo(-0.44, -0.38);
-      leftLegShape.lineTo(-0.28, -0.42);
-      leftLegShape.lineTo(-0.16, -0.12);
-      leftLegShape.lineTo(-0.06, -0.12);
-      leftLegShape.lineTo(-0.04, 0.12);
-      leftLegShape.closePath();
+      const s = 0.0056;
+      const sx = (x: number) => x * s;
+      const sy = (y: number) => -(y + 10) * s; // Invert SVG Y and center vertically
+
+      // 1. Left Ascending Rail (Base Cobalt Blue #0052FF)
+      const leftRailShape = new THREE.Shape();
+      leftRailShape.moveTo(sx(-115), sy(130));
+      leftRailShape.lineTo(sx(-25), sy(-120));
+      leftRailShape.bezierCurveTo(sx(-15), sy(-150), sx(15), sy(-150), sx(25), sy(-120));
+      leftRailShape.lineTo(sx(55), sy(-35));
+      leftRailShape.lineTo(sx(10), sy(-35));
+      leftRailShape.lineTo(sx(-6), sy(-85));
+      leftRailShape.lineTo(sx(-70), sy(105));
+      leftRailShape.lineTo(sx(-115), sy(130));
+      leftRailShape.closePath();
+
+      // 2. Right Descending Rail & Infinite M2M Payment Loop (Crisp Pure White)
+      const rightLoopShape = new THREE.Shape();
+      rightLoopShape.moveTo(sx(115), sy(130));
+      rightLoopShape.lineTo(sx(25), sy(-120));
+      rightLoopShape.bezierCurveTo(sx(18), sy(-140), sx(0), sy(-140), sx(-5), sy(-125));
+      rightLoopShape.lineTo(sx(-25), sy(-65));
+      rightLoopShape.lineTo(sx(20), sy(-65));
+      rightLoopShape.lineTo(sx(60), sy(50));
+      rightLoopShape.lineTo(sx(-40), sy(50));
+      rightLoopShape.bezierCurveTo(sx(-60), sy(50), sx(-75), sy(35), sx(-75), sy(15));
+      rightLoopShape.bezierCurveTo(sx(-75), sy(-5), sx(-60), sy(-20), sx(-40), sy(-20));
+      rightLoopShape.lineTo(sx(-10), sy(-20));
+      rightLoopShape.lineTo(sx(-2), sy(-50));
+      rightLoopShape.lineTo(sx(-40), sy(-50));
+      rightLoopShape.bezierCurveTo(sx(-75), sy(-50), sx(-105), sy(-20), sx(-105), sy(15));
+      rightLoopShape.bezierCurveTo(sx(-105), sy(50), sx(-75), sy(80), sx(-40), sy(80));
+      rightLoopShape.lineTo(sx(70), sy(80));
+      rightLoopShape.lineTo(sx(85), sy(130));
+      rightLoopShape.closePath();
 
       const extrudeSettings = {
-        depth: 0.05,
+        depth: 0.065,
         bevelEnabled: true,
-        bevelSegments: 3,
+        bevelSegments: 4,
         steps: 1,
-        bevelSize: 0.018,
-        bevelThickness: 0.018,
+        bevelSize: 0.016,
+        bevelThickness: 0.016,
       };
 
-      const legGeo = new THREE.ExtrudeGeometry(leftLegShape, extrudeSettings);
-      legGeo.center();
+      // 3D Left Ascending Rail (Base Cobalt Blue)
+      const leftRailGeo = new THREE.ExtrudeGeometry(leftRailShape, extrudeSettings);
+      const leftRailMesh = new THREE.Mesh(leftRailGeo, baseBlueMat);
+      leftRailMesh.position.set(0, 0, 0);
+      emblemGroup.add(leftRailMesh);
 
-      const leftLeg = new THREE.Mesh(legGeo, chromeMat);
-      leftLeg.position.set(-0.21, -0.04, 0);
-      roboA.add(leftLeg);
+      // Inner Glowing Energy Core for Left Rail
+      const leftEnergy = new THREE.Mesh(leftRailGeo, plasmaMat);
+      leftEnergy.scale.set(0.85, 0.85, 1.15);
+      leftEnergy.position.set(0, 0, 0.005);
+      emblemGroup.add(leftEnergy);
 
-      // Inner glowing energy trench on left leg
-      const leftEnergy = new THREE.Mesh(legGeo, plasmaMat);
-      leftEnergy.scale.set(0.7, 0.85, 1.2);
-      leftEnergy.position.set(-0.21, -0.04, 0.01);
-      roboA.add(leftEnergy);
+      // 3D Right Rail & Infinite M2M Loop (Crisp Pure White)
+      const rightLoopGeo = new THREE.ExtrudeGeometry(rightLoopShape, extrudeSettings);
+      const rightLoopMesh = new THREE.Mesh(rightLoopGeo, pureWhiteMat);
+      rightLoopMesh.position.set(0, 0, 0.01); // Intertwines slightly forward
+      emblemGroup.add(rightLoopMesh);
 
-      // 2. Right Articulated Robotic Leg (Mirror)
-      const rightLeg = new THREE.Mesh(legGeo, chromeMat);
-      rightLeg.scale.set(-1, 1, 1);
-      rightLeg.position.set(0.21, -0.04, 0);
-      roboA.add(rightLeg);
+      // Liquid Chrome Bezel Chamfer around Right Loop
+      const rightEnergy = new THREE.Mesh(rightLoopGeo, chromeMat);
+      rightEnergy.scale.set(0.92, 0.92, 1.12);
+      rightEnergy.position.set(0, 0, 0.012);
+      emblemGroup.add(rightEnergy);
 
-      const rightEnergy = new THREE.Mesh(legGeo, plasmaMat);
-      rightEnergy.scale.set(-0.7, 0.85, 1.2);
-      rightEnergy.position.set(0.21, -0.04, 0.01);
-      roboA.add(rightEnergy);
-
-      // 3. Robotic Apex Mecha Crown (Stealth Helmet Cap at Top)
-      const crownShape = new THREE.Shape();
-      crownShape.moveTo(0, 0.58);
-      crownShape.lineTo(0.14, 0.34);
-      crownShape.lineTo(-0.14, 0.34);
-      crownShape.closePath();
-
-      const crownGeo = new THREE.ExtrudeGeometry(crownShape, extrudeSettings);
-      crownGeo.center();
-
-      const crown = new THREE.Mesh(crownGeo, chromeMat);
-      crown.position.set(0, 0.44, 0);
-      roboA.add(crown);
-
-      const crownGlow = new THREE.Mesh(crownGeo, plasmaMat);
-      crownGlow.scale.set(0.65, 0.65, 1.3);
-      crownGlow.position.set(0, 0.44, 0.01);
-      roboA.add(crownGlow);
-
-      // 4. Robotic Power Crossbar (Floating Energy Connector)
-      const barGeo = new THREE.BoxGeometry(0.36, 0.07, 0.06);
-      const crossbar = new THREE.Mesh(barGeo, chromeMat);
-      crossbar.position.set(0, -0.12, 0.015);
-      roboA.add(crossbar);
-
-      const barLaserGeo = new THREE.BoxGeometry(0.26, 0.03, 0.07);
-      const barLaser = new THREE.Mesh(barLaserGeo, plasmaMat);
-      barLaser.position.set(0, -0.12, 0.025);
-      roboA.add(barLaser);
-
-      // 5. Central Floating Quantum Hex Reactor Core (The Heart of A)
-      const hexGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.08, 6);
+      // 3. Central Floating Quantum Hex Reactor Core (Heart of the M2M Loop)
+      const loopCenterX = sx(-40);
+      const loopCenterY = sy(15);
+      const hexGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.08, 6);
       const hexReactor = new THREE.Mesh(hexGeo, crystalMat);
       hexReactor.rotation.x = Math.PI / 2;
-      hexReactor.position.set(0, 0.12, 0.02);
-      roboA.add(hexReactor);
+      hexReactor.position.set(loopCenterX, loopCenterY, 0.04);
+      emblemGroup.add(hexReactor);
 
-      const hexRingGeo = new THREE.TorusGeometry(0.14, 0.015, 8, 6);
+      const hexRingGeo = new THREE.TorusGeometry(0.12, 0.012, 8, 6);
       const hexRing = new THREE.Mesh(hexRingGeo, chromeMat);
-      hexRing.position.set(0, 0.12, 0.03);
-      roboA.add(hexRing);
+      hexRing.position.set(loopCenterX, loopCenterY, 0.05);
+      emblemGroup.add(hexRing);
 
-      // 6. Micro Rivet Joints / Bolt Nodes (4 corners)
-      const boltGeo = new THREE.CylinderGeometry(0.022, 0.022, 0.09, 8);
-      const boltPositions = [
-        [-0.14, 0.32],
-        [0.14, 0.32],
-        [-0.32, -0.36],
-        [0.32, -0.36],
-      ];
-      boltPositions.forEach(([bx, by]) => {
-        const bolt = new THREE.Mesh(boltGeo, chromeMat);
-        bolt.rotation.x = Math.PI / 2;
-        bolt.position.set(bx, by, 0.03);
-        roboA.add(bolt);
-      });
-
-      return roboA;
+      return emblemGroup;
     };
 
-    // Attach Robotic "A" to Front
-    const frontRoboA = createRoboticAGroup();
-    frontRoboA.position.z = thickness / 2 + 0.025;
-    tokenGroup.add(frontRoboA);
+    // Attach Official 3D Logo to Front
+    const frontLogo = createOfficialLogoGroup();
+    frontLogo.position.z = thickness / 2 + 0.01;
+    tokenGroup.add(frontLogo);
 
-    // Attach Robotic "A" to Back (Rotated 180° around Y so it stands upright)
-    const backRoboA = createRoboticAGroup();
-    backRoboA.rotation.y = Math.PI;
-    backRoboA.position.z = -thickness / 2 - 0.025;
-    tokenGroup.add(backRoboA);
+    // Attach Official 3D Logo to Back (Rotated 180° around Y)
+    const backLogo = createOfficialLogoGroup();
+    backLogo.rotation.y = Math.PI;
+    backLogo.position.z = -thickness / 2 - 0.01;
+    tokenGroup.add(backLogo);
 
     // ----------------------------------------------------------------
     // H. Levitating Outer Gyroscope Energy Ring
@@ -423,6 +429,12 @@ export function CoinCanvas() {
       if (currentMount.contains(renderer.domElement)) {
         currentMount.removeChild(renderer.domElement);
       }
+      baseBlueMat.dispose();
+      pureWhiteMat.dispose();
+      titaniumMat.dispose();
+      chromeMat.dispose();
+      plasmaMat.dispose();
+      crystalMat.dispose();
       renderer.dispose();
     };
   }, []);
