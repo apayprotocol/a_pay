@@ -955,47 +955,89 @@ export async function POST(req: Request) {
         return NextResponse.json({ ok: true });
       }
 
-      // Live Robots.txt probe
+      // Live probe: robots.txt and headers
       let robotsTxt = '';
+      let has402Header = false;
       try {
-        const probeRes = await fetch(`https://${parsed.host}/robots.txt`, {
-          signal: AbortSignal.timeout(4000),
-          headers: { 'User-Agent': 'APayAuditBot/1.0 (+https://apayprotocol.org)' },
-        });
-        if (probeRes.ok) {
+        const [probeRes, headRes] = await Promise.all([
+          fetch(`https://${parsed.host}/robots.txt`, {
+            signal: AbortSignal.timeout(4000),
+            headers: { 'User-Agent': 'APayAuditBot/1.0 (+https://apayprotocol.org)' },
+          }).catch(() => null),
+          fetch(`https://${parsed.host}/`, {
+            method: 'HEAD',
+            signal: AbortSignal.timeout(4000),
+            headers: { 'User-Agent': 'GPTBot/1.2 (+https://openai.com/gptbot)' },
+          }).catch(() => null),
+        ]);
+
+        if (probeRes?.ok) {
           robotsTxt = (await probeRes.text()).slice(0, 8000);
+        }
+        if (headRes) {
+          const status = headRes.status;
+          const hasReceiver = headRes.headers.has('x-apay-receiver');
+          has402Header = status === 402 || hasReceiver;
         }
       } catch {
         // Fallback gracefully
       }
 
-      const hasApay = robotsTxt.includes('apay') || robotsTxt.includes('402');
-      const gptBotBlocked = robotsTxt.includes('GPTBot') && robotsTxt.includes('Disallow');
-      const claudeBotBlocked = robotsTxt.includes('ClaudeBot') && robotsTxt.includes('Disallow');
-      const perplexityBlocked =
-        robotsTxt.includes('PerplexityBot') && robotsTxt.includes('Disallow');
+      // Check if crawlers are explicitly blocked with Disallow: /
+      const isCrawlerBlocked = (botName: string) => {
+        const blockPattern = new RegExp(
+          `User-agent:\\s*${botName}[\\s\\S]*?Disallow:\\s*\\/(\\s*|\\r?\\n)`,
+          'i',
+        );
+        const universalBlock = /User-agent:\s*\*[\s\S]*?Disallow:\s*\/(\s*|\r?\n)/i;
+        return blockPattern.test(robotsTxt) || universalBlock.test(robotsTxt);
+      };
 
-      let auditStatus = '';
-      if (hasApay) {
-        auditStatus = `🛡️ <b>Status: Protected by A-Pay Protocol!</b>\nYour site actively issues HTTP 402 payment challenges to scrapers.`;
+      const gptBotBlocked = isCrawlerBlocked('GPTBot');
+      const claudeBotBlocked = isCrawlerBlocked('ClaudeBot') || isCrawlerBlocked('Anthropic-ai');
+      const perplexityBlocked = isCrawlerBlocked('PerplexityBot');
+
+      const isApayProtected =
+        has402Header || (robotsTxt.includes('llms.txt') && robotsTxt.includes('apay'));
+
+      let statusHeading = '';
+      let botList = '';
+      let economics = '';
+      let recommendation = '';
+
+      if (isApayProtected) {
+        statusHeading = `🛡️ <b>Status: Protected by A-Pay Protocol!</b>\nYour domain issues RFC-2068 HTTP 402 payment challenges to AI bots.`;
+        botList =
+          `• <b>OpenAI (GPTBot):</b> ⚡ Monetized via HTTP 402\n` +
+          `• <b>Anthropic (ClaudeBot):</b> ⚡ Monetized via HTTP 402\n` +
+          `• <b>Perplexity AI:</b> ⚡ Monetized via HTTP 402`;
+        economics = `💰 <b>Active Monetization:</b> Receiving automated M2M micro-revenue on Base L2!`;
+        recommendation = `<b>Recommended Action:</b> Your domain is 100% optimized. Track settlement receipts directly in the A-Pay Console.`;
       } else if (gptBotBlocked && claudeBotBlocked && perplexityBlocked) {
-        auditStatus = `⚠️ <b>Status: Crawlers Blocked (0 Revenue)</b>\nAI bots are blocked in robots.txt, preventing you from monetizing your data.`;
+        statusHeading = `⚠️ <b>Status: AI Bots Completely Blocked (0 Revenue)</b>\nYour robots.txt blocks AI crawlers, preventing you from earning from your content.`;
+        botList =
+          `• <b>OpenAI (GPTBot):</b> ⛔ Blocked ($0.00 earned)\n` +
+          `• <b>Anthropic (ClaudeBot):</b> ⛔ Blocked ($0.00 earned)\n` +
+          `• <b>Perplexity AI:</b> ⛔ Blocked ($0.00 earned)`;
+        economics = `💸 <b>Lost Revenue Opportunity:</b> ~$40 - $200 / month in uncollected crawler payments.`;
+        recommendation = `<b>Recommended Fix:</b> Instead of blocking AI scrapers with zero compensation, enable A-Pay HTTP 402 to charge them per page read!`;
       } else {
-        auditStatus =
-          `🚨 <b>Status: VULNERABLE to Uncompensated AI Scraping!</b>\n` +
-          `Major AI training bots (GPTBot, ClaudeBot, Perplexity) have unrestricted free access to your content!`;
+        statusHeading = `🚨 <b>Status: VULNERABLE to Free AI Scraping!</b>\nMajor AI models crawl your site without compensating you or citing full paywalls.`;
+        botList =
+          `• <b>OpenAI (GPTBot):</b> ${gptBotBlocked ? '⛔ Blocked (No revenue)' : '🔓 Scraping for FREE ($0)'}\n` +
+          `• <b>Anthropic (ClaudeBot):</b> ${claudeBotBlocked ? '⛔ Blocked (No revenue)' : '🔓 Scraping for FREE ($0)'}\n` +
+          `• <b>Perplexity AI:</b> ${perplexityBlocked ? '⛔ Blocked (No revenue)' : '🔓 Scraping for FREE ($0)'}`;
+        economics = `💸 <b>Estimated Bandwidth Drain:</b> $30 - $150 / month in unpaid crawler traffic.`;
+        recommendation = `<b>Recommended Fix:</b> Add A-Pay 1-Click Paywall to keep human visitors 100% free while charging AI crawlers per query!`;
       }
 
       const reportMsg =
         `<b>🔍 A-Pay Crawler Audit Report for ${parsed.host}:</b>\n\n` +
-        `${auditStatus}\n\n` +
+        `${statusHeading}\n\n` +
         `<b>Crawler Analysis:</b>\n` +
-        `• <b>OpenAI (GPTBot):</b> ${gptBotBlocked ? '⛔ Blocked (No revenue)' : '🔓 Scraping for FREE'}\n` +
-        `• <b>Anthropic (ClaudeBot):</b> ${claudeBotBlocked ? '⛔ Blocked (No revenue)' : '🔓 Scraping for FREE'}\n` +
-        `• <b>Perplexity AI:</b> ${perplexityBlocked ? '⛔ Blocked (No revenue)' : '🔓 Scraping for FREE'}\n\n` +
-        `💸 <b>Estimated Bandwidth / Revenue Loss:</b> $30 - $150 / month\n\n` +
-        `<b>Recommended Fix:</b>\n` +
-        `Add A-Pay 1-Click Paywall to keep human readers 100% free while charging AI crawlers per article!`;
+        `${botList}\n\n` +
+        `${economics}\n\n` +
+        `${recommendation}`;
 
       const keyboard = {
         inline_keyboard: [
