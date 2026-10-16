@@ -25,7 +25,7 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
     // ── 1. Scene & Camera ──────────────────────────────────────────────────
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(34, W / H, 0.1, 100);
-    camera.position.set(0, 0.15, 4.8);
+    camera.position.set(0, 0.06, 3.95);
 
     // ── 2. WebGL Renderer with High-DPI Clamping ────────────────────────────
     const renderer = new THREE.WebGLRenderer({
@@ -36,7 +36,7 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
     renderer.setSize(W, H);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = isDark ? 1.4 : 1.6;
+    renderer.toneMappingExposure = isDark ? 1.5 : 1.7;
     el.appendChild(renderer.domElement);
 
     // ── 3. Procedural Studio Environment for PBR Reflections ────────────────
@@ -55,9 +55,9 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
             px[i + 1] = Math.round(20 + t * 40);
             px[i + 2] = Math.round(60 + t * 80);
           } else {
-            px[i] = Math.round(180 + t * 50);
-            px[i + 1] = Math.round(200 + t * 45);
-            px[i + 2] = 255;
+            px[i] = Math.round(210 + t * 35);
+            px[i + 1] = Math.round(225 + t * 25);
+            px[i + 2] = Math.round(245 + t * 10);
           }
           px[i + 3] = 255;
         }
@@ -72,41 +72,41 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
     const envMap = buildEnvMap(isDark);
     scene.environment = envMap;
 
-    // ── 4. Cinematic Studio & Rim Lighting ─────────────────────────────────
-    const ambientLight = new THREE.AmbientLight(0xffffff, isDark ? 1.0 : 1.8);
+    // ── 4. Cinematic Studio & Rim Lighting (Day & Night Calibrated) ────────
+    const ambientLight = new THREE.AmbientLight(0xffffff, isDark ? 1.0 : 2.2);
     scene.add(ambientLight);
 
-    const keyLight = new THREE.DirectionalLight(0xffffff, isDark ? 3.8 : 5.0);
-    keyLight.position.set(4, 5, 4);
+    const keyLight = new THREE.DirectionalLight(0xffffff, isDark ? 3.8 : 5.5);
+    keyLight.position.set(4, 5, 4.5);
     scene.add(keyLight);
 
-    const rimLight = new THREE.DirectionalLight(0x0052ff, isDark ? 6.5 : 8.0);
+    const rimLight = new THREE.DirectionalLight(0x0052ff, isDark ? 8.0 : 6.0);
     rimLight.position.set(-4, -2, -3);
     scene.add(rimLight);
 
-    const fillLight = new THREE.DirectionalLight(0x00f0ff, isDark ? 3.5 : 4.5);
+    const fillLight = new THREE.DirectionalLight(0x00f0ff, isDark ? 4.5 : 4.0);
     fillLight.position.set(2, -3, 3);
     scene.add(fillLight);
 
-    const topGlow = new THREE.PointLight(0x00f0ff, isDark ? 4.0 : 3.0, 7);
+    const topGlow = new THREE.PointLight(0x00f0ff, isDark ? 4.5 : 3.5, 7);
     topGlow.position.set(0, 1.8, 1);
     scene.add(topGlow);
 
-    // ── 5. Materials: Contrast-Inverted (Day = Stealth Obsidian, Night = Pearl Ceramic) ──
+    // ── 5. Materials: Daytime Arctic Ceramic & Nighttime Stealth Obsidian ──
     const armorMat = new THREE.MeshPhysicalMaterial({
-      color: isDark ? 0xf1f5f9 : 0x0a0e1a, // Pearl white on night, deep obsidian on day
-      metalness: isDark ? 0.2 : 0.88,
-      roughness: isDark ? 0.12 : 0.16,
+      color: isDark ? 0x0b1120 : 0xf8fafc, // Obsidian Stealth at Night, Arctic Pearl Ceramic at Day
+      metalness: isDark ? 0.88 : 0.32,
+      roughness: isDark ? 0.15 : 0.12,
       clearcoat: 1.0,
-      clearcoatRoughness: 0.06,
-      reflectivity: 0.9,
+      clearcoatRoughness: 0.05,
+      reflectivity: 0.95,
       envMap,
-      envMapIntensity: isDark ? 1.2 : 2.2,
+      envMapIntensity: isDark ? 1.8 : 1.5,
     });
 
-    // Dark sleek titanium bezel trim (Seamlessly integrates with helmet — zero white stripes!)
+    // Dark sleek titanium bezel trim (Contrasting frame lines for razor sharpness)
     const bezelMat = new THREE.MeshStandardMaterial({
-      color: 0x1e293b,
+      color: isDark ? 0x1e293b : 0x0f172a,
       metalness: 0.95,
       roughness: 0.2,
       envMap,
@@ -122,21 +122,21 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
     });
 
     const suitMat = new THREE.MeshPhysicalMaterial({
-      color: 0x0052ff,
-      metalness: 0.45,
-      roughness: 0.25,
-      clearcoat: 0.8,
-      clearcoatRoughness: 0.1,
+      color: 0x0052ff, // Base Cobalt Blue
+      metalness: 0.55,
+      roughness: 0.2,
+      clearcoat: 0.9,
+      clearcoatRoughness: 0.08,
       envMap,
-      envMapIntensity: 1.5,
+      envMapIntensity: 1.8,
     });
 
     // Deep curved cyber glass visor
     const visorMat = new THREE.MeshPhysicalMaterial({
-      color: isDark ? 0x030712 : 0x020617,
-      metalness: 0.15,
+      color: isDark ? 0x020617 : 0x071126,
+      metalness: 0.2,
       roughness: 0.02,
-      transmission: 0.72,
+      transmission: 0.68,
       thickness: 0.45,
       ior: 1.55,
       reflectivity: 1.0,
@@ -148,9 +148,9 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
 
     // Dynamic Cyber HUD Eye Material (Interactive Color Logic)
     const eyeMat = new THREE.MeshStandardMaterial({
-      color: 0x00f0ff,
-      emissive: 0x00f0ff,
-      emissiveIntensity: 4.5,
+      color: 0x00f5ff,
+      emissive: 0x00f5ff,
+      emissiveIntensity: isDark ? 6.0 : 6.8, // Punchy and luminous in daylight
       roughness: 0.05,
       metalness: 0.2,
     });
@@ -159,7 +159,7 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
     const hudRingMat = new THREE.MeshStandardMaterial({
       color: 0xffffff,
       emissive: 0x38bdf8,
-      emissiveIntensity: 5.0,
+      emissiveIntensity: isDark ? 5.5 : 6.5,
       roughness: 0.0,
     });
 
@@ -167,7 +167,7 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
     const plasmaMat = new THREE.MeshStandardMaterial({
       color: 0x00f0ff,
       emissive: 0x00f0ff,
-      emissiveIntensity: isDark ? 3.8 : 4.5,
+      emissiveIntensity: isDark ? 4.8 : 5.2,
       roughness: 0.05,
       metalness: 0.8,
     });
@@ -181,7 +181,7 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
     });
 
     const jointMat = new THREE.MeshStandardMaterial({
-      color: 0x1e293b,
+      color: isDark ? 0x1e293b : 0x334155,
       metalness: 0.92,
       roughness: 0.2,
     });
@@ -458,6 +458,32 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
     mascotGroup.add(drone1);
     mascotGroup.add(drone2);
 
+    // Soft Levitation Ground Shadow Disc
+    const shadowGeo = new THREE.PlaneGeometry(1.3, 1.3);
+    const shadowCanvas = document.createElement('canvas');
+    shadowCanvas.width = 64;
+    shadowCanvas.height = 64;
+    const sCtx = shadowCanvas.getContext('2d');
+    if (sCtx) {
+      const grad = sCtx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      grad.addColorStop(0, isDark ? 'rgba(0, 240, 255, 0.28)' : 'rgba(0, 82, 255, 0.22)');
+      grad.addColorStop(0.35, isDark ? 'rgba(15, 23, 42, 0.45)' : 'rgba(15, 23, 42, 0.16)');
+      grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      sCtx.fillStyle = grad;
+      sCtx.fillRect(0, 0, 64, 64);
+    }
+    const shadowTex = new THREE.CanvasTexture(shadowCanvas);
+    const shadowMat = new THREE.MeshBasicMaterial({
+      map: shadowTex,
+      transparent: true,
+      opacity: isDark ? 0.75 : 0.85,
+      depthWrite: false,
+    });
+    const shadowPlane = new THREE.Mesh(shadowGeo, shadowMat);
+    shadowPlane.rotation.x = -Math.PI / 2;
+    shadowPlane.position.set(0, -0.66, 0);
+    scene.add(shadowPlane);
+
     // ── 7. Interactive Mouse / Pointer Tracker ──────────────────────────────
     let targetX = 0;
     let targetY = 0;
@@ -575,6 +601,10 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
       mascotGroup.position.y = floatHeight;
       mascotGroup.rotation.z = Math.sin(elapsed * 1.4) * 0.015;
 
+      // Dynamic Levitation Shadow Breathing
+      const shadowScale = 1.0 - floatHeight * 1.2;
+      shadowPlane.scale.set(shadowScale, shadowScale, shadowScale);
+
       // Thruster ring pulse
       const thrusterPulse = 1.0 + Math.sin(elapsed * 3.5) * 0.08;
       thrusterRing.scale.setScalar(thrusterPulse);
@@ -636,6 +666,10 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
       pmremGen.dispose();
       envMap.dispose();
       renderer.dispose();
+
+      shadowGeo.dispose();
+      shadowTex.dispose();
+      shadowMat.dispose();
 
       for (const m of [
         armorMat,
