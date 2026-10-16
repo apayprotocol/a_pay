@@ -27,7 +27,7 @@ export function CoinCanvas() {
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.6;
+    renderer.toneMappingExposure = 1.32;
     currentMount.appendChild(renderer.domElement);
 
     // Procedural Studio Environment for Rich Liquid PBR Reflections
@@ -51,28 +51,29 @@ export function CoinCanvas() {
     envTextureSrc.dispose();
     scene.environment = envMapRt.texture;
 
-    // 3. Cinematic Cyber Studio Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 2.2);
+    // 3. Cinematic Cyber Studio Lighting (Calibrated to Prevent Bleaching)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.6);
     scene.add(ambientLight);
 
-    const keyLight = new THREE.DirectionalLight(0xffffff, 4.8);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 3.8);
     keyLight.position.set(4, 5, 4.5);
     scene.add(keyLight);
 
-    const cyanRim = new THREE.DirectionalLight(0x00f0ff, 5.5);
+    const cyanRim = new THREE.DirectionalLight(0x00e5ff, 4.2);
     cyanRim.position.set(-5, -4, 2);
     scene.add(cyanRim);
 
-    const purpleFill = new THREE.DirectionalLight(0x818cf8, 3.8);
+    const purpleFill = new THREE.DirectionalLight(0x818cf8, 3.0);
     purpleFill.position.set(-3, 4, 3);
     scene.add(purpleFill);
 
-    const frontReactorLight = new THREE.PointLight(0x38bdf8, 6.5, 8);
-    frontReactorLight.position.set(0, 0, 1.8);
+    // Signature Base Cobalt Blue Front Point Light (Accentuates Blue Depth, Zero White Washout)
+    const frontReactorLight = new THREE.PointLight(0x0052ff, 4.2, 7);
+    frontReactorLight.position.set(0, 0, 2.2);
     scene.add(frontReactorLight);
 
-    const backReactorLight = new THREE.PointLight(0x38bdf8, 6.5, 8);
-    backReactorLight.position.set(0, 0, -1.8);
+    const backReactorLight = new THREE.PointLight(0x0052ff, 4.2, 7);
+    backReactorLight.position.set(0, 0, -2.2);
     scene.add(backReactorLight);
 
     // 4. Robotic / Mecha Materials
@@ -114,16 +115,16 @@ export function CoinCanvas() {
       envMap: envMapRt.texture,
     });
 
-    // Official Base Cobalt Blue PBR Material (Left Ascending Rail - Vivid & Pure)
+    // Official Base Cobalt Blue PBR Material (Left Ascending Rail - Vivid, Pure & Radiant)
     const baseBlueMat = new THREE.MeshPhysicalMaterial({
       color: 0x0052ff,
-      emissive: 0x002699,
-      emissiveIntensity: 0.4,
-      metalness: 0.18,
-      roughness: 0.12,
-      clearcoat: 1.0,
-      clearcoatRoughness: 0.04,
-      reflectivity: 1.0,
+      emissive: 0x0040ee,
+      emissiveIntensity: 0.82,
+      metalness: 0.02,
+      roughness: 0.18,
+      clearcoat: 0.35,
+      clearcoatRoughness: 0.08,
+      reflectivity: 0.8,
       envMap: envMapRt.texture,
     });
 
@@ -131,12 +132,12 @@ export function CoinCanvas() {
     const pureWhiteMat = new THREE.MeshPhysicalMaterial({
       color: 0xffffff,
       emissive: 0xf8fafc,
-      emissiveIntensity: 0.35,
-      metalness: 0.08,
-      roughness: 0.08,
-      clearcoat: 1.0,
-      clearcoatRoughness: 0.03,
-      reflectivity: 1.0,
+      emissiveIntensity: 0.3,
+      metalness: 0.04,
+      roughness: 0.14,
+      clearcoat: 0.45,
+      clearcoatRoughness: 0.06,
+      reflectivity: 0.95,
       envMap: envMapRt.texture,
     });
 
@@ -224,11 +225,22 @@ export function CoinCanvas() {
       const sx = (x: number) => (x + 3) * s;
       const sy = (y: number) => -(y + 8) * s; // Invert SVG Y and optical balance
 
+      // 0. Official Precision Circular Track Ring (matching 2D vector r=216)
+      const trackGeo = new THREE.TorusGeometry(216 * s, 0.008, 8, 64);
+      const trackMat = new THREE.MeshBasicMaterial({
+        color: 0x00f0ff,
+        transparent: true,
+        opacity: 0.4,
+      });
+      const trackMesh = new THREE.Mesh(trackGeo, trackMat);
+      trackMesh.position.set(0, 0, 0.002);
+      emblemGroup.add(trackMesh);
+
       // 1. Left Ascending Rail (Base Cobalt Blue #0052FF)
       const leftRailShape = new THREE.Shape();
       leftRailShape.moveTo(sx(-115), sy(130));
       leftRailShape.lineTo(sx(-25), sy(-120));
-      leftRailShape.bezierCurveTo(sx(-15), sy(-150), sx(15), sy(-150), sx(25), sy(-120));
+      leftRailShape.bezierCurveTo(sx(-15), sy(-152), sx(15), sy(-152), sx(25), sy(-120));
       leftRailShape.lineTo(sx(55), sy(-35));
       leftRailShape.lineTo(sx(10), sy(-35));
       leftRailShape.lineTo(sx(-6), sy(-85));
@@ -257,48 +269,64 @@ export function CoinCanvas() {
       rightLoopShape.closePath();
 
       const leftExtrude = {
-        depth: 0.075,
+        depth: 0.088,
         bevelEnabled: true,
-        bevelSegments: 4,
+        bevelSegments: 5,
         steps: 1,
-        bevelSize: 0.015,
-        bevelThickness: 0.015,
+        bevelSize: 0.016,
+        bevelThickness: 0.016,
       };
 
       const rightExtrude = {
-        depth: 0.088,
+        depth: 0.082,
         bevelEnabled: true,
-        bevelSegments: 4,
+        bevelSegments: 5,
         steps: 1,
         bevelSize: 0.015,
         bevelThickness: 0.015,
       };
 
-      // 3D Left Ascending Rail (Base Cobalt Blue)
+      // 3D Left Ascending Rail (Base Cobalt Blue - Proud 3D Elevation)
       const leftRailGeo = new THREE.ExtrudeGeometry(leftRailShape, leftExtrude);
       const leftRailMesh = new THREE.Mesh(leftRailGeo, baseBlueMat);
-      leftRailMesh.position.set(0, 0, 0);
+      leftRailMesh.position.set(0, 0, 0.008);
       emblemGroup.add(leftRailMesh);
 
-      // 3D Right Rail & Infinite M2M Loop (Crisp Pure White - Layered 3D Relief)
+      // Inner Luminous Cobalt Energy Core (Guarantees Vivid Blue Radiance)
+      const leftGlowGeo = new THREE.ExtrudeGeometry(leftRailShape, {
+        depth: 0.09,
+        bevelEnabled: false,
+        steps: 1,
+      });
+      const leftGlowMat = new THREE.MeshBasicMaterial({
+        color: 0x0052ff,
+        transparent: true,
+        opacity: 0.35,
+      });
+      const leftGlowMesh = new THREE.Mesh(leftGlowGeo, leftGlowMat);
+      leftGlowMesh.scale.set(0.94, 0.94, 1.0);
+      leftGlowMesh.position.set(sx(-1.2), sy(1.2), 0.007);
+      emblemGroup.add(leftGlowMesh);
+
+      // 3D Right Rail & Infinite M2M Loop (Crisp Pure White - Intertwined 3D Relief)
       const rightLoopGeo = new THREE.ExtrudeGeometry(rightLoopShape, rightExtrude);
       const rightLoopMesh = new THREE.Mesh(rightLoopGeo, pureWhiteMat);
-      rightLoopMesh.position.set(0, 0, 0.012); // Sits forward in physical relief
+      rightLoopMesh.position.set(0, 0, 0.01); // Intertwined in physical relief
       emblemGroup.add(rightLoopMesh);
 
-      // 3. Central Floating Quantum Hex Reactor Core (Heart of the M2M Loop)
+      // 3. Recessed Quantum Energy Conduit behind the M2M Loop (Flush, Open Center Aperture)
       const loopCenterX = sx(-40);
       const loopCenterY = sy(15);
-      const hexGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.09, 6);
-      const hexReactor = new THREE.Mesh(hexGeo, crystalMat);
-      hexReactor.rotation.x = Math.PI / 2;
-      hexReactor.position.set(loopCenterX, loopCenterY, 0.045);
-      emblemGroup.add(hexReactor);
+      const conduitGeo = new THREE.TorusGeometry(0.15, 0.012, 16, 48);
+      const conduit = new THREE.Mesh(conduitGeo, plasmaMat);
+      conduit.position.set(loopCenterX, loopCenterY, 0.004);
+      emblemGroup.add(conduit);
 
-      const hexRingGeo = new THREE.TorusGeometry(0.14, 0.014, 12, 6);
-      const hexRing = new THREE.Mesh(hexRingGeo, chromeMat);
-      hexRing.position.set(loopCenterX, loopCenterY, 0.055);
-      emblemGroup.add(hexRing);
+      const centerCoreGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.01, 16);
+      const centerCore = new THREE.Mesh(centerCoreGeo, crystalMat);
+      centerCore.rotation.x = Math.PI / 2;
+      centerCore.position.set(loopCenterX, loopCenterY, 0.003);
+      emblemGroup.add(centerCore);
 
       return emblemGroup;
     };

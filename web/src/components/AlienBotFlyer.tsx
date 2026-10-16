@@ -8,16 +8,19 @@ import {
   Cpu,
   Droplets,
   ExternalLink,
+  MessageSquare,
   MessageSquareCode,
+  Send,
   ShieldCheck,
   Sparkles,
   Terminal,
+  User,
   X,
   Zap,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 // SSR-safe dynamic import — zero LCP impact
 const AlienBotCanvas = dynamic(
@@ -32,7 +35,31 @@ const AlienBotCanvas = dynamic(
   },
 );
 
-type BotTab = 'quick' | 'faucet' | 'paywall' | 'mcp';
+type BotTab = 'chat' | 'quick' | 'faucet' | 'paywall' | 'mcp';
+
+interface ChatMessage {
+  id: string;
+  sender: 'bot' | 'user';
+  text: string;
+  code?: string;
+  codeLang?: string;
+  link?: { label: string; url: string };
+  timestamp: string;
+}
+
+const DEFAULT_GREETING: ChatMessage = {
+  id: 'msg-0',
+  sender: 'bot',
+  text: 'Hey builder! 👋 I am the official A-Pay Protocol Assistant. Ask me anything about HTTP 402 micro-payments, Base L2 contracts, testnet faucets, or AI agent MCP tools:',
+  timestamp: 'Just now',
+};
+
+const SUGGESTED_QUESTIONS = [
+  '⚡ What is HTTP 402?',
+  '🚰 Claim testnet tokens',
+  '🤖 Setup Claude / Cursor MCP',
+  '⛓️ Base contract addresses',
+];
 
 export function AlienBotFlyer() {
   const [isMounted, setIsMounted] = useState(false);
@@ -40,8 +67,17 @@ export function AlienBotFlyer() {
   const [isOpen, setIsOpen] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
   const [isDark, setIsDark] = useState(false);
-  const [activeTab, setActiveTab] = useState<BotTab>('quick');
+  const [activeTab, setActiveTab] = useState<BotTab>('chat');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  // Chat conversation state
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([DEFAULT_GREETING]);
+  const [inputText, setInputText] = useState('');
+  const [isThinking, setIsThinking] = useState(false);
+
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const chatboxRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
 
   // Deferred mount via requestIdleCallback — keeps initial LCP 100% clean
   useEffect(() => {
@@ -83,6 +119,43 @@ export function AlienBotFlyer() {
     };
   }, []);
 
+  // Handle outside click & Escape key to dismiss chatbox
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handlePointerDown = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node;
+      if (
+        chatboxRef.current &&
+        !chatboxRef.current.contains(target) &&
+        triggerRef.current &&
+        !triggerRef.current.contains(target)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen]);
+
+  // Auto-scroll chat thread to bottom
+  useEffect(() => {
+    if (activeTab === 'chat' && chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [chatMessages, isThinking, activeTab]);
+
   const handleDismiss = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsDismissed(true);
@@ -103,6 +176,136 @@ export function AlienBotFlyer() {
         setCopiedId((curr) => (curr === id ? null : curr));
       }, 2000);
     }
+  };
+
+  // Intelligent Protocol QA Engine
+  const generateBotReply = (query: string): ChatMessage => {
+    const q = query.toLowerCase();
+
+    if (
+      q.includes('402') ||
+      q.includes('paywall') ||
+      q.includes('how it works') ||
+      q.includes('what is')
+    ) {
+      return {
+        id: `msg-${Date.now()}`,
+        sender: 'bot',
+        text: 'A-Pay implements the native **HTTP 402 Payment Required** standard on Base L2. When an AI agent or crawler hits your protected API, A-Pay returns a cryptographic payment challenge. The agent settles sub-cent micro-payments instantly without credit cards or KYC:',
+        code: '@app.get("/data", dependencies=[Depends(APayGate(price_cents=5))])',
+        codeLang: 'python',
+        link: { label: 'Explore HTTP 402 Docs', url: '/docs' },
+        timestamp: 'Just now',
+      };
+    }
+
+    if (
+      q.includes('faucet') ||
+      q.includes('token') ||
+      q.includes('free') ||
+      q.includes('claim') ||
+      q.includes('sepolia')
+    ) {
+      return {
+        id: `msg-${Date.now()}`,
+        sender: 'bot',
+        text: 'You can claim **10 free $APAY** testnet tokens every 24 hours on Base Sepolia! You can use our Telegram Bot or the web faucet:',
+        code: '/faucet 0xYourBaseSepoliaAddress',
+        codeLang: 'bash',
+        link: { label: 'Open Web Faucet', url: '/faucet' },
+        timestamp: 'Just now',
+      };
+    }
+
+    if (
+      q.includes('mcp') ||
+      q.includes('claude') ||
+      q.includes('cursor') ||
+      q.includes('smithery') ||
+      q.includes('agent')
+    ) {
+      return {
+        id: `msg-${Date.now()}`,
+        sender: 'bot',
+        text: 'A-Pay is verified on **Smithery & Glama AI**! Install the MCP Server in Claude Desktop or Cursor with a single command to equip your LLM agents with autonomous micropayment tools:',
+        code: 'npx -y smithery mcp add apayprotocol/apay',
+        codeLang: 'bash',
+        link: {
+          label: 'View Smithery Listing',
+          url: 'https://smithery.ai/servers/apayprotocol/apay',
+        },
+        timestamp: 'Just now',
+      };
+    }
+
+    if (
+      q.includes('contract') ||
+      q.includes('address') ||
+      q.includes('mainnet') ||
+      q.includes('basescan') ||
+      q.includes('escrow')
+    ) {
+      return {
+        id: `msg-${Date.now()}`,
+        sender: 'bot',
+        text: 'A-Pay Protocol is 100% verified on Base Mainnet (Chain ID: 8453):\n• **$APAY Token**: 0x8dd4ff9035c7d4e0bef30aa64fc30d128a4066c3\n• **EscrowVault**: 0xd08c8a337e5339d1c083e06d74a9265956ceea16\n• **Official Basename**: apayprotocol.base.eth',
+        code: '0x8dd4ff9035c7d4e0bef30aa64fc30d128a4066c3',
+        codeLang: 'base mainnet token',
+        link: {
+          label: 'View on BaseScan',
+          url: 'https://basescan.org/token/0x8dd4ff9035c7d4e0bef30aa64fc30d128a4066c3',
+        },
+        timestamp: 'Just now',
+      };
+    }
+
+    if (
+      q.includes('install') ||
+      q.includes('sdk') ||
+      q.includes('pypi') ||
+      q.includes('npm') ||
+      q.includes('python')
+    ) {
+      return {
+        id: `msg-${Date.now()}`,
+        sender: 'bot',
+        text: 'Get started in under 30 seconds! Scaffold a fullstack app or install the EVM micropayment packages:',
+        code: 'npx create-apay-app\n# or for python:\npip install apay',
+        codeLang: 'bash',
+        link: { label: 'Read Getting Started', url: '/docs' },
+        timestamp: 'Just now',
+      };
+    }
+
+    return {
+      id: `msg-${Date.now()}`,
+      sender: 'bot',
+      text: `Thanks for asking! A-Pay Protocol empowers AI agents and creators with non-custodial session escrows, HTTP 402 micro-metering, and instant Base L2 crypto checkouts. Would you like to launch the full Telegram assistant for on-chain commands?`,
+      link: { label: 'Launch Telegram Assistant', url: 'https://t.me/APayProtocolBot' },
+      timestamp: 'Just now',
+    };
+  };
+
+  const handleSendMessage = (textToSend?: string) => {
+    const text = (textToSend || inputText).trim();
+    if (!text || isThinking) return;
+
+    const userMsg: ChatMessage = {
+      id: `user-${Date.now()}`,
+      sender: 'user',
+      text,
+      timestamp: 'Just now',
+    };
+
+    setChatMessages((prev) => [...prev, userMsg]);
+    setInputText('');
+    setIsThinking(true);
+
+    setTimeout(() => {
+      const botReply = generateBotReply(text);
+      setChatMessages((prev) => [...prev, botReply]);
+      setIsThinking(false);
+    }, 450);
   };
 
   const BOT_URL = 'https://t.me/APayProtocolBot';
@@ -143,7 +346,8 @@ export function AlienBotFlyer() {
       {/* Interactive Developer Assistant Chatbox */}
       {isOpen && (
         <div
-          className={`mb-3 w-[310px] sm:w-[350px] max-w-[calc(100vw-24px)] rounded-2xl border shadow-2xl backdrop-blur-2xl overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 ${
+          ref={chatboxRef}
+          className={`mb-3 w-[320px] sm:w-[370px] max-w-[calc(100vw-24px)] rounded-2xl border shadow-2xl backdrop-blur-2xl overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 ${
             isDark
               ? 'bg-[#07080b]/98 border-blue-900/60 shadow-blue-950/80 ring-1 ring-blue-500/20'
               : 'bg-white/98 border-slate-200/90 shadow-[0_20px_50px_rgba(0,82,255,0.14)] ring-1 ring-slate-900/5'
@@ -201,13 +405,14 @@ export function AlienBotFlyer() {
             </div>
           </div>
 
-          {/* Quick Category Navigation Tabs */}
+          {/* Category Navigation Tabs */}
           <div
-            className={`flex items-center px-2 py-1.5 gap-1 border-b text-[11px] font-medium ${
+            className={`flex items-center px-2 py-1.5 gap-1 border-b text-[10.5px] font-medium ${
               isDark ? 'border-slate-800/60 bg-slate-950/60' : 'border-slate-100 bg-white/60'
             }`}
           >
             {[
+              { id: 'chat', label: 'Chat', icon: MessageSquare },
               { id: 'quick', label: 'QuickStart', icon: Terminal },
               { id: 'faucet', label: 'Faucet', icon: Droplets },
               { id: 'paywall', label: 'HTTP 402', icon: Zap },
@@ -217,11 +422,9 @@ export function AlienBotFlyer() {
                 key={id}
                 type="button"
                 onClick={() => setActiveTab(id as BotTab)}
-                className={`flex-1 flex items-center justify-center gap-1 py-1 px-1.5 rounded-lg transition-all duration-150 cursor-pointer ${
+                className={`flex-1 flex items-center justify-center gap-1 py-1 px-1 rounded-lg transition-all duration-150 cursor-pointer ${
                   activeTab === id
-                    ? isDark
-                      ? 'bg-blue-600 text-white font-semibold shadow-sm'
-                      : 'bg-blue-600 text-white font-semibold shadow-sm'
+                    ? 'bg-blue-600 text-white font-semibold shadow-sm'
                     : isDark
                       ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
@@ -234,7 +437,149 @@ export function AlienBotFlyer() {
           </div>
 
           {/* Dynamic Tab Body */}
-          <div className="p-3.5 text-xs">
+          <div className="p-3 text-xs">
+            {activeTab === 'chat' && (
+              <div className="flex flex-col h-[270px]">
+                {/* Scrollable Message History */}
+                <div
+                  ref={chatContainerRef}
+                  className="flex-1 overflow-y-auto space-y-2.5 pr-1 text-[11px] select-text scroll-smooth"
+                >
+                  {chatMessages.map((msg) => (
+                    <div
+                      key={msg.id}
+                      className={`flex gap-2 ${
+                        msg.sender === 'user' ? 'justify-end' : 'justify-start'
+                      }`}
+                    >
+                      {msg.sender === 'bot' && (
+                        <div className="w-5 h-5 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                          <Bot className="w-3 h-3" />
+                        </div>
+                      )}
+
+                      <div
+                        className={`max-w-[85%] rounded-2xl px-3 py-2 leading-relaxed ${
+                          msg.sender === 'user'
+                            ? 'bg-blue-600 text-white rounded-br-xs shadow-sm font-medium'
+                            : isDark
+                              ? 'bg-slate-900/90 border border-slate-800 text-slate-200 rounded-bl-xs'
+                              : 'bg-slate-100 border border-slate-200/80 text-slate-800 rounded-bl-xs'
+                        }`}
+                      >
+                        <p className="whitespace-pre-wrap">{msg.text}</p>
+
+                        {/* Optional Inline Code Snippet */}
+                        {msg.code && (
+                          <div
+                            className={`mt-2 p-2 rounded-xl font-mono text-[10px] border flex items-center justify-between gap-1.5 ${
+                              isDark
+                                ? 'bg-black/50 border-slate-800 text-sky-300'
+                                : 'bg-white border-slate-200 text-blue-700'
+                            }`}
+                          >
+                            <code className="truncate">{msg.code}</code>
+                            <button
+                              type="button"
+                              onClick={() => copyText(msg.code || '', msg.id)}
+                              aria-label="Copy code"
+                              className="p-1 rounded hover:bg-blue-500/10 shrink-0 cursor-pointer text-slate-400 hover:text-white"
+                            >
+                              {copiedId === msg.id ? (
+                                <Check className="w-3 h-3 text-emerald-400" />
+                              ) : (
+                                <Copy className="w-3 h-3" />
+                              )}
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Optional Action Link */}
+                        {msg.link && (
+                          <a
+                            href={msg.link.url}
+                            target={msg.link.url.startsWith('http') ? '_blank' : '_self'}
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-semibold text-blue-500 dark:text-sky-400 hover:underline cursor-pointer"
+                          >
+                            <span>{msg.link.label}</span>
+                            <ExternalLink className="w-2.5 h-2.5 opacity-80" />
+                          </a>
+                        )}
+                      </div>
+
+                      {msg.sender === 'user' && (
+                        <div className="w-5 h-5 rounded-lg bg-slate-700 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                          <User className="w-3 h-3" />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Thinking Pulse */}
+                  {isThinking && (
+                    <div className="flex gap-2 items-center text-slate-400 text-[10px] py-1">
+                      <div className="w-5 h-5 rounded-lg bg-blue-600/40 text-white flex items-center justify-center shrink-0">
+                        <Bot className="w-3 h-3 animate-pulse" />
+                      </div>
+                      <span className="italic">Assistant is typing...</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Quick Suggestion Chips */}
+                <div className="pt-2 pb-1.5 flex items-center gap-1 overflow-x-auto no-scrollbar shrink-0">
+                  {SUGGESTED_QUESTIONS.map((chip) => (
+                    <button
+                      key={chip}
+                      type="button"
+                      onClick={() => handleSendMessage(chip)}
+                      className={`px-2 py-0.5 rounded-full text-[9.5px] border font-medium whitespace-nowrap transition-colors cursor-pointer shrink-0 ${
+                        isDark
+                          ? 'bg-slate-900 border-slate-800 text-slate-300 hover:border-blue-500 hover:text-white'
+                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-blue-500 hover:text-blue-600'
+                      }`}
+                    >
+                      {chip}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Message Input Box */}
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }}
+                  className="mt-1 flex items-center gap-1.5 pt-1.5 border-t border-slate-200/60 dark:border-slate-800 shrink-0"
+                >
+                  <input
+                    type="text"
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    placeholder="Ask about A-Pay, contracts, faucet..."
+                    className={`flex-1 px-3 py-1.5 rounded-xl border text-[11px] outline-none transition-all ${
+                      isDark
+                        ? 'bg-slate-900/80 border-slate-800 text-white placeholder-slate-500 focus:border-blue-500'
+                        : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-blue-500'
+                    }`}
+                  />
+                  <button
+                    type="submit"
+                    disabled={!inputText.trim() || isThinking}
+                    aria-label="Send message"
+                    className={`p-2 rounded-xl transition-all cursor-pointer ${
+                      inputText.trim() && !isThinking
+                        ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-sm active:scale-95'
+                        : 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed opacity-60'
+                    }`}
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                  </button>
+                </form>
+              </div>
+            )}
+
             {activeTab === 'quick' && (
               <div className="space-y-2.5">
                 <p
@@ -455,7 +800,7 @@ export function AlienBotFlyer() {
               href={BOT_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-3.5 w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#229ed9] via-[#0088cc] to-blue-600 hover:from-[#1b8fc7] hover:to-blue-700 text-white text-xs font-semibold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 active:scale-[0.98] transition-all cursor-pointer min-h-[42px]"
+              className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#229ed9] via-[#0088cc] to-blue-600 hover:from-[#1b8fc7] hover:to-blue-700 text-white text-xs font-semibold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 active:scale-[0.98] transition-all cursor-pointer min-h-[40px]"
             >
               <MessageSquareCode className="w-4 h-4" />
               <span>Launch @APayProtocolBot</span>
@@ -464,7 +809,7 @@ export function AlienBotFlyer() {
 
             {/* Micro Telemetry Footer */}
             <div
-              className={`mt-2.5 pt-2 border-t flex items-center justify-between text-[9.5px] font-mono ${
+              className={`mt-2 pt-2 border-t flex items-center justify-between text-[9.5px] font-mono ${
                 isDark ? 'border-slate-800/80 text-slate-500' : 'border-slate-100 text-slate-400'
               }`}
             >
@@ -479,7 +824,7 @@ export function AlienBotFlyer() {
       )}
 
       {/* 3D Alien Mascot Interactive Button */}
-      <div className="relative flex items-center justify-end">
+      <div ref={triggerRef} className="relative flex items-center justify-end">
         {/* Dynamic Notification Badge (Pulse when bubble is closed) */}
         {!isOpen && (
           <span className="absolute top-1 right-2 z-10 flex h-4 w-4 pointer-events-none">
