@@ -21,6 +21,11 @@ export interface APayConfig {
   maxCacheEntries?: number;
   solvencyValidator?: (payer: `0x${string}`, amountBaseUnits: string, currency?: 'USDC' | 'APAY') => Promise<boolean> | boolean;
   onSettlementClaim?: (claim: PaymentClaim) => Promise<void> | void;
+  targetDomain?: string; // Optional domain to auto-register with Global Protocol Registry (e.g. 'https://api.mycompany.com')
+  serviceName?: string;
+  category?: string;
+  description?: string;
+  registryUrl?: string; // Default: 'https://apayprotocol.org/api/registry'
 }
 
 export interface PaymentClaim {
@@ -83,6 +88,7 @@ export class SlidingWindowNonceCache {
 export class APayGateway {
   private config: APayConfig;
   private nonceCache: SlidingWindowNonceCache;
+  private heartbeatTimer?: ReturnType<typeof setInterval>;
 
   constructor(config: APayConfig) {
     if (!isAddress(config.receiverAddress)) {
@@ -100,6 +106,50 @@ export class APayGateway {
       ...config,
     };
     this.nonceCache = new SlidingWindowNonceCache(config.ttlSeconds ?? 60, config.maxCacheEntries ?? 500_000);
+
+    const targetDomain = config.targetDomain || (typeof process !== 'undefined' ? process.env?.APAY_PUBLIC_DOMAIN : undefined);
+    if (targetDomain && !targetDomain.includes('localhost') && !targetDomain.includes('127.0.0.1')) {
+      this.startHeartbeat(targetDomain);
+    }
+  }
+
+  public startHeartbeat(targetDomain: string): void {
+    const regUrl = this.config.registryUrl || 'https://apayprotocol.org/api/registry';
+    const payload = {
+      wallet: this.config.receiverAddress,
+      targetDomain,
+      price: `${this.config.priceUsdc ?? 0.001} ${this.config.currency || 'USDC'}`,
+      network: this.config.network || 'base',
+      version: '0.1.3',
+      name: this.config.serviceName || `${targetDomain.replace(/^https?:\/\//, '').split('/')[0]} M2M API`,
+      category: this.config.category || 'DEVTOOLS',
+      description: this.config.description || 'HTTP 402 Paywalled M2M microservice registered via apay-gateway (0.1.3).',
+    };
+
+    const send = () => {
+      if (typeof fetch !== 'undefined') {
+        fetch(regUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        }).catch(() => {});
+      }
+    };
+
+    send();
+    if (!this.heartbeatTimer) {
+      this.heartbeatTimer = setInterval(send, 240_000);
+      if (this.heartbeatTimer && typeof this.heartbeatTimer.unref === 'function') {
+        this.heartbeatTimer.unref();
+      }
+    }
+  }
+
+  public stopHeartbeat(): void {
+    if (this.heartbeatTimer) {
+      clearInterval(this.heartbeatTimer);
+      this.heartbeatTimer = undefined;
+    }
   }
 
   /**

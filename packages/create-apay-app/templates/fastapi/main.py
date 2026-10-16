@@ -23,6 +23,7 @@ paywall = APayPaywall(
     price_usdc=PRICE_USDC,
     receiver_wallet=RECEIVER_WALLET,
     network=NETWORK,
+    target_domain=os.getenv("APAY_PUBLIC_DOMAIN"),  # Auto-registers in Global Registry when deployed
 )
 
 

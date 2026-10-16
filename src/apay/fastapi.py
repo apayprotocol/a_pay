@@ -7,10 +7,13 @@ Features O(1) sliding-window replay defense, solvency validation, and 1-RTT sess
 
 from __future__ import annotations
 
+import os
+import threading
 import time
 import uuid
 from dataclasses import dataclass
 
+import httpx
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 
@@ -69,6 +72,11 @@ class APayPaywall:
         solvency_validator: BaseSolvencyValidator | None = None,
         session_manager: SessionManager | None = None,
         channel_validator: ChannelReceiverValidator | None = None,
+        target_domain: str | None = None,
+        service_name: str | None = None,
+        category: str = "DEVTOOLS",
+        description: str | None = None,
+        registry_url: str = "https://apayprotocol.org/api/registry",
     ) -> None:
         self.price_usdc = price_usdc
         self.receiver_wallet = receiver_wallet.lower()
@@ -86,6 +94,57 @@ class APayPaywall:
             chain_id=self.chain_id,
             router_address=self.router_address,
         )
+
+        domain = target_domain or os.getenv("APAY_PUBLIC_DOMAIN")
+        if domain and "localhost" not in domain and "127.0.0.1" not in domain:
+            self._start_registry_heartbeat(
+                target=domain,
+                name=service_name,
+                category=category,
+                description=description,
+                registry_url=registry_url,
+            )
+
+    def _start_registry_heartbeat(
+        self,
+        target: str,
+        name: str | None,
+        category: str,
+        description: str | None,
+        registry_url: str,
+    ) -> None:
+        from . import __version__
+
+        clean_name = name or f"{target.replace('http://', '').replace('https://', '').split('/')[0]} M2M API"
+        clean_desc = (
+            description or f"HTTP 402 Paywalled M2M microservice protected via APayPaywall ({__version__})."
+        )
+        price_label = (
+            f"{self.price_apay} APAY / {self.price_usdc} USDC"
+            if self.currency == "DUAL" and self.price_apay
+            else f"{self.price_usdc} {self.currency}"
+        )
+        payload = {
+            "wallet": self.receiver_wallet,
+            "targetDomain": target,
+            "price": price_label,
+            "network": self.network,
+            "version": __version__,
+            "name": clean_name,
+            "category": category,
+            "description": clean_desc,
+        }
+
+        def _worker() -> None:
+            while True:
+                try:
+                    with httpx.Client(timeout=4.0) as client:
+                        client.post(registry_url, json=payload)
+                except Exception:
+                    pass
+                time.sleep(240)
+
+        threading.Thread(target=_worker, daemon=True, name="apay-fastapi-heartbeat").start()
 
     def get_challenge_headers(self, nonce: str) -> dict[str, str]:
         """Generates standard HTTP 402 challenge headers."""

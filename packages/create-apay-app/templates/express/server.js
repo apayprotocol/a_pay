@@ -19,6 +19,7 @@ const paywall = apayMiddleware({
   priceUsdc: PRICE,
   network: NETWORK,
   currency: 'DUAL', // Accepts both USDC and $APAY token
+  targetDomain: process.env.APAY_PUBLIC_DOMAIN, // Auto-registers in Global Registry when deployed
 });
 
 // Monetized AI Agent Endpoint
