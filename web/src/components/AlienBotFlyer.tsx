@@ -62,15 +62,30 @@ export function AlienBotFlyer() {
 
   if (!isMounted) return null;
 
+  const handleOpenTelegram = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (typeof window !== 'undefined') {
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if (isMobile) {
+        // Direct native deep-link into Telegram Mobile App
+        window.location.href = 'tg://resolve?domain=APay_Protocol_Bot';
+        setTimeout(() => {
+          window.open(TELEGRAM_BOT_URL, '_blank', 'noopener,noreferrer');
+        }, 900);
+        e.preventDefault();
+      }
+    }
+  };
+
   return (
     <div
       className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 select-none flex flex-col items-end"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* 3D Alien Mascot Interactive Button — Direct Telegram Landing (No Popup) */}
+      {/* 3D Alien Mascot Interactive Button — Direct Telegram Landing (Zero Popup) */}
       <a
         href={TELEGRAM_BOT_URL}
+        onClick={handleOpenTelegram}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Launch official A-Pay Protocol Assistant on Telegram (@APay_Protocol_Bot)"
