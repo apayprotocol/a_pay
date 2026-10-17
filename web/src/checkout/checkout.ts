@@ -78,6 +78,50 @@ export class APayCheckoutEngine {
   private escListener: ((e: KeyboardEvent) => void) | null = null;
   private currentResolve: ((receipt: PaymentReceipt) => void) | null = null;
   private currentReject: ((error: Error) => void) | null = null;
+  private liveEthPrice = 2500;
+  private isFetchingEthPrice = false;
+
+  private async fetchLiveEthPrice() {
+    if (this.isFetchingEthPrice) return;
+    this.isFetchingEthPrice = true;
+    try {
+      const res = await fetch('https://api.coinbase.com/v2/prices/ETH-USD/spot', {
+        headers: { Accept: 'application/json' },
+        signal: AbortSignal.timeout(3500),
+      });
+      if (res.ok) {
+        const json = await res.json();
+        const price = parseFloat(json?.data?.amount);
+        if (!Number.isNaN(price) && price > 0) {
+          this.liveEthPrice = price;
+          this.updateEthPriceInUi();
+        }
+      }
+    } catch {
+      // Fallback remains this.liveEthPrice (2500)
+    } finally {
+      this.isFetchingEthPrice = false;
+    }
+  }
+
+  private updateEthPriceInUi() {
+    if (!this.activeContainer || !this.currentOptions) return;
+    const { ethPrice } = this.getEffectiveAmounts();
+    if (this.selectedCurrency === 'ETH') {
+      const totalAmountEl = this.activeContainer.querySelector('#apay-total-amount');
+      if (totalAmountEl) totalAmountEl.textContent = `${ethPrice} ETH`;
+      const payActionText = this.activeContainer.querySelector('#apay-pay-action-btn-text');
+      if (payActionText) payActionText.textContent = `Pay ${ethPrice} ETH`;
+      if (this.activeTab === 'qr') {
+        const isDark =
+          this.currentOptions.theme === 'dark' ||
+          (this.currentOptions.theme !== 'light' &&
+            typeof window !== 'undefined' &&
+            window.matchMedia?.('(prefers-color-scheme: dark)').matches);
+        this.loadQrCode('ETH', isDark);
+      }
+    }
+  }
 
   private resolveReceiver(
     opt: CheckoutOptions,
@@ -107,16 +151,13 @@ export class APayCheckoutEngine {
     }
 
     this.currentOptions = options;
-    this.selectedCurrency =
-      options.currency === 'DUAL'
-        ? 'USDC'
-        : options.currency === 'APAY'
-          ? 'APAY'
-          : options.currency === 'ETH'
-            ? 'ETH'
-            : 'USDC';
+    const mode = (options.currency || 'DUAL').toUpperCase();
+    this.selectedCurrency = mode === 'APAY' ? 'APAY' : mode === 'ETH' ? 'ETH' : 'USDC';
     this.activeTab = 'oneclick';
     this.isProcessing = false;
+
+    // Asynchronously fetch live ETH price from Coinbase Base oracle
+    this.fetchLiveEthPrice();
 
     return new Promise((resolve, reject) => {
       this.currentResolve = resolve;
@@ -168,7 +209,8 @@ export class APayCheckoutEngine {
           ? baseAmount
           : Number((baseAmount * 0.75).toFixed(2));
 
-    const ethPrice = Number((baseAmount / 2500).toFixed(4));
+    const ethRate = this.liveEthPrice > 0 ? this.liveEthPrice : 2500;
+    const ethPrice = Number((baseAmount / ethRate).toFixed(5));
 
     return { baseAmount, apayPrice, ethPrice };
   }
@@ -220,6 +262,11 @@ export class APayCheckoutEngine {
 
     const initialDisplayAmount = this.getDisplayAmount(this.selectedCurrency);
     const apayPillLabel = opt.amountApay ? `🔥 $APAY (${apayPrice} APAY)` : '🔥 $APAY (25% OFF)';
+
+    const mode = (opt.currency || 'DUAL').toUpperCase();
+    const showApay = mode === 'DUAL' || mode === 'APAY';
+    const showUsdc = mode === 'DUAL' || mode === 'USDC';
+    const showEth = mode !== 'APAY'; // ETH available in DUAL and USDC modes
 
     const container = document.createElement('div');
     container.id = 'apay-checkout-container';
@@ -394,9 +441,9 @@ export class APayCheckoutEngine {
 
           <!-- Currency Pills -->
           <div style="display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-top: 12px;">
-            <button id="apay-curr-usdc" class="apay-btn apay-curr-pill ${this.selectedCurrency === 'USDC' ? 'apay-curr-active' : 'apay-curr-inactive'}" style="${this.selectedCurrency === 'USDC' ? 'background: #0284c7;' : ''}">USDC</button>
-            <button id="apay-curr-apay" class="apay-btn apay-curr-pill ${this.selectedCurrency === 'APAY' ? 'apay-curr-active' : 'apay-curr-inactive'}" style="${this.selectedCurrency === 'APAY' ? 'background: #e11d48;' : ''}">${apayPillLabel}</button>
-            <button id="apay-curr-eth" class="apay-btn apay-curr-pill ${this.selectedCurrency === 'ETH' ? 'apay-curr-active' : 'apay-curr-inactive'}" style="${this.selectedCurrency === 'ETH' ? 'background: #6366f1;' : ''}">ETH</button>
+            ${showUsdc ? `<button id="apay-curr-usdc" class="apay-btn apay-curr-pill ${this.selectedCurrency === 'USDC' ? 'apay-curr-active' : 'apay-curr-inactive'}" style="${this.selectedCurrency === 'USDC' ? 'background: #0284c7;' : ''}">USDC</button>` : ''}
+            ${showApay ? `<button id="apay-curr-apay" class="apay-btn apay-curr-pill ${this.selectedCurrency === 'APAY' ? 'apay-curr-active' : 'apay-curr-inactive'}" style="${this.selectedCurrency === 'APAY' ? 'background: #e11d48;' : ''}">${apayPillLabel}</button>` : ''}
+            ${showEth ? `<button id="apay-curr-eth" class="apay-btn apay-curr-pill ${this.selectedCurrency === 'ETH' ? 'apay-curr-active' : 'apay-curr-inactive'}" style="${this.selectedCurrency === 'ETH' ? 'background: #6366f1;' : ''}">ETH</button>` : ''}
           </div>
         </div>
 

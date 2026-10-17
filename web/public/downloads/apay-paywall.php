@@ -502,9 +502,15 @@ class APayWordPressPaywall {
             $currency = 'DUAL';
         }
 
-        $btn_text = !empty($atts['button_text'])
-            ? sanitize_text_field($atts['button_text'])
-            : sprintf(__('⚡ Pay with A-Pay ($%s USDC)', 'apay-web3-ai-paywall'), number_format($amount, 2));
+        if (!empty($atts['button_text'])) {
+            $btn_text = sanitize_text_field($atts['button_text']);
+        } elseif ($currency === 'APAY') {
+            $btn_text = sprintf(__('⚡ Pay with A-Pay (%s $APAY)', 'apay-web3-ai-paywall'), $amount);
+        } elseif ($currency === 'ETH') {
+            $btn_text = sprintf(__('⚡ Pay with A-Pay (%s ETH)', 'apay-web3-ai-paywall'), $amount);
+        } else {
+            $btn_text = sprintf(__('⚡ Pay with A-Pay ($%s USDC)', 'apay-web3-ai-paywall'), number_format($amount, 2));
+        }
 
         $title_escaped = esc_js(sanitize_text_field($atts['title']));
         $receiver_escaped = esc_js($receiver);
@@ -709,15 +715,66 @@ class APayWordPressPaywall {
             <p><?php echo esc_html__('Sell physical goods or digital downloads directly with 1-click Web3 payments & QR codes on Base Layer 2 (0% chargeback risk).', 'apay-web3-ai-paywall'); ?></p>
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-top: 15px;">
-                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px 22px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
                     <h3 style="margin-top: 0; color: #0052FF; font-size: 16px;">⚡ <?php echo esc_html__('Method 1: Instant Buy Now Shortcode', 'apay-web3-ai-paywall'); ?></h3>
-                    <p style="font-size: 13px; color: #64748b; line-height: 1.5;">
-                        <?php echo esc_html__('Paste this shortcode anywhere inside any WordPress Page, Blog Post, or Sidebar block to render an instant checkout button:', 'apay-web3-ai-paywall'); ?>
+                    <p style="font-size: 13px; color: #64748b; line-height: 1.5; margin-bottom: 16px;">
+                        <?php echo esc_html__('Paste any of these ready-to-use shortcodes inside any WordPress Page, Blog Post, or Sidebar block to render an instant checkout button:', 'apay-web3-ai-paywall'); ?>
                     </p>
-                    <code style="display: block; background: #0b1528; color: #60a5fa; padding: 10px 14px; border-radius: 6px; font-size: 13px; user-select: all; margin-bottom: 10px;">[apay_button amount="10.00" title="Digital E-Book" currency="DUAL"]</code>
-                    <p style="font-size: 12px; color: #94A3B8; margin: 0;">
-                        <?php echo esc_html__('Attributes: amount (USDC price), title (product name), currency (DUAL / USDC / APAY).', 'apay-web3-ai-paywall'); ?>
-                    </p>
+
+                    <!-- Scenario 1 -->
+                    <div style="margin-bottom: 14px;">
+                        <div style="font-size: 12px; font-weight: 700; color: #1e293b; margin-bottom: 4px;">
+                            1. <?php echo esc_html__('Standard Dual-Currency (USDC + $APAY 25% OFF + Live ETH)', 'apay-web3-ai-paywall'); ?>
+                        </div>
+                        <code style="display: block; background: #0b1528; color: #60a5fa; padding: 8px 12px; border-radius: 6px; font-size: 12px; user-select: all; font-family: monospace;">[apay_button amount="10.00" title="Digital E-Book" currency="DUAL"]</code>
+                        <div style="font-size: 11px; color: #64748b; margin-top: 2px;">
+                            <?php echo esc_html__('Customers can pay with USDC, $APAY (25% off auto-calculated), or real-time live ETH.', 'apay-web3-ai-paywall'); ?>
+                        </div>
+                    </div>
+
+                    <!-- Scenario 2 -->
+                    <div style="margin-bottom: 14px;">
+                        <div style="font-size: 12px; font-weight: 700; color: #1e293b; margin-bottom: 4px;">
+                            2. <?php echo esc_html__('Standard Crypto (USDC & Live ETH only — No $APAY Token)', 'apay-web3-ai-paywall'); ?>
+                        </div>
+                        <code style="display: block; background: #0b1528; color: #34d399; padding: 8px 12px; border-radius: 6px; font-size: 12px; user-select: all; font-family: monospace;">[apay_button amount="25.00" title="Course Access" currency="USDC"]</code>
+                        <div style="font-size: 11px; color: #64748b; margin-top: 2px;">
+                            <?php echo esc_html__('Clean checkout showing only USDC and live real-time ETH. $APAY token pill is hidden.', 'apay-web3-ai-paywall'); ?>
+                        </div>
+                    </div>
+
+                    <!-- Scenario 3 -->
+                    <div style="margin-bottom: 14px;">
+                        <div style="font-size: 12px; font-weight: 700; color: #1e293b; margin-bottom: 4px;">
+                            3. <?php echo esc_html__('Custom Dual Pricing (Independent USDC and $APAY Prices)', 'apay-web3-ai-paywall'); ?>
+                        </div>
+                        <code style="display: block; background: #0b1528; color: #f59e0b; padding: 8px 12px; border-radius: 6px; font-size: 12px; user-select: all; font-family: monospace;">[apay_button amount="20.00" amount_apay="50" title="Software License" currency="DUAL"]</code>
+                        <div style="font-size: 11px; color: #64748b; margin-top: 2px;">
+                            <?php echo esc_html__('Sets explicit price of $20.00 USDC or 50 $APAY tokens instead of 25% discount formula.', 'apay-web3-ai-paywall'); ?>
+                        </div>
+                    </div>
+
+                    <!-- Scenario 4 -->
+                    <div style="margin-bottom: 14px;">
+                        <div style="font-size: 12px; font-weight: 700; color: #1e293b; margin-bottom: 4px;">
+                            4. <?php echo esc_html__('Community Token Exclusive ($APAY Only)', 'apay-web3-ai-paywall'); ?>
+                        </div>
+                        <code style="display: block; background: #0b1528; color: #f43f5e; padding: 8px 12px; border-radius: 6px; font-size: 12px; user-select: all; font-family: monospace;">[apay_button amount="100" title="VIP Community Access" currency="APAY"]</code>
+                        <div style="font-size: 11px; color: #64748b; margin-top: 2px;">
+                            <?php echo esc_html__('Customers pay strictly 100 $APAY tokens. USDC and ETH pills are hidden.', 'apay-web3-ai-paywall'); ?>
+                        </div>
+                    </div>
+
+                    <!-- Scenario 5 -->
+                    <div style="margin-bottom: 8px;">
+                        <div style="font-size: 12px; font-weight: 700; color: #1e293b; margin-bottom: 4px;">
+                            5. <?php echo esc_html__('Custom Button Label & Dark Theme', 'apay-web3-ai-paywall'); ?>
+                        </div>
+                        <code style="display: block; background: #0b1528; color: #a78bfa; padding: 8px 12px; border-radius: 6px; font-size: 12px; user-select: all; font-family: monospace;">[apay_button amount="5.00" title="Creator Tip" button_text="☕ Buy Me a Coffee ($5)" theme="dark"]</code>
+                        <div style="font-size: 11px; color: #64748b; margin-top: 2px;">
+                            <?php echo esc_html__('Customized button CTA text with forced dark mode modal.', 'apay-web3-ai-paywall'); ?>
+                        </div>
+                    </div>
                 </div>
 
                 <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
