@@ -176,6 +176,15 @@ test('WooCommerce WC_Gateway_APay payment gateway class registered', () => {
   assert(phpContent.includes('woocommerce_payment_gateways'), 'Missing woocommerce_payment_gateways filter');
   assert(phpContent.includes('apay_init_woocommerce_gateway'), 'Missing gateway initializer');
   assert(phpContent.includes('apay_wc_complete_order'), 'Missing order completion ajax handler');
+  assert(phpContent.includes("supports = array('products', 'refunds')"), 'Missing refunds in gateway supports');
+  assert(phpContent.includes('process_refund'), 'Missing process_refund implementation');
+});
+
+test('WooCommerce 1-Click Web3 Refund Engine and HPOS compatibility registered', () => {
+  assert(phpContent.includes('register_wc_order_refund_metabox'), 'Missing refund metabox registration');
+  assert(phpContent.includes('render_wc_order_refund_metabox'), 'Missing refund metabox render method');
+  assert(phpContent.includes('ajax_wc_process_admin_refund'), 'Missing admin refund ajax handler');
+  assert(phpContent.includes('declare_compatibility'), 'Missing HPOS custom_order_tables compatibility declaration');
 });
 
 console.log('\n📦 Section 5: ZIP Archive Structure & Parity');

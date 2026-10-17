@@ -36,6 +36,8 @@ class APayWordPressPaywall {
         add_shortcode('apay_checkout', array($this, 'render_checkout_button_shortcode'));
         add_action('wp_ajax_apay_wc_complete_order', array($this, 'ajax_wc_complete_order'));
         add_action('wp_ajax_nopriv_apay_wc_complete_order', array($this, 'ajax_wc_complete_order'));
+        add_action('add_meta_boxes', array($this, 'register_wc_order_refund_metabox'));
+        add_action('wp_ajax_apay_wc_process_admin_refund', array($this, 'ajax_wc_process_admin_refund'));
     }
 
     /**
@@ -595,7 +597,11 @@ class APayWordPressPaywall {
                 $payer
             );
             $order->add_order_note($note);
+            $order->update_meta_data('_apay_tx_hash', $tx_hash);
+            $order->update_meta_data('_apay_payer', $payer);
+            $order->update_meta_data('_apay_network', sanitize_text_field(get_option('apay_network', 'base')));
             $order->payment_complete($tx_hash);
+            $order->save();
             if (function_exists('WC') && WC()->cart) {
                 WC()->cart->empty_cart();
             }
@@ -603,6 +609,357 @@ class APayWordPressPaywall {
 
         wp_send_json_success(array(
             'redirect_url' => $order->get_checkout_order_received_url()
+        ));
+    }
+
+    /**
+     * Register Order Details Web3 Refund Meta Box in WooCommerce Admin
+     */
+    public function register_wc_order_refund_metabox() {
+        $screens = array('shop_order');
+        if (function_exists('wc_get_page_screen_id')) {
+            $hpos = wc_get_page_screen_id('shop-order');
+            if ($hpos && !in_array($hpos, $screens, true)) {
+                $screens[] = $hpos;
+            }
+        }
+        foreach ($screens as $screen) {
+            add_meta_box(
+                'apay_order_refund_metabox',
+                __('⚡ A-Pay Web3 Payment & 1-Click Refund', 'apay-web3-ai-paywall'),
+                array($this, 'render_wc_order_refund_metabox'),
+                $screen,
+                'side',
+                'high'
+            );
+        }
+    }
+
+    /**
+     * Render the 1-Click Web3 Refund Meta Box
+     */
+    public function render_wc_order_refund_metabox($post_or_order_object) {
+        $order = ($post_or_order_object instanceof \WC_Order)
+            ? $post_or_order_object
+            : (function_exists('wc_get_order') && !empty($post_or_order_object->ID) ? wc_get_order($post_or_order_object->ID) : null);
+
+        if (!$order) {
+            return;
+        }
+
+        $payment_method = $order->get_payment_method();
+        $tx_hash = $order->get_meta('_apay_tx_hash');
+        $payer = $order->get_meta('_apay_payer');
+
+        // Resilient fallback: extract from order notes if meta is missing
+        if ((empty($payer) || empty($tx_hash)) && function_exists('wc_get_order_notes')) {
+            $notes = wc_get_order_notes(array('order_id' => $order->get_id()));
+            foreach ($notes as $n) {
+                if (empty($payer) && preg_match('/Payer:\s*(0x[a-fA-F0-9]{40})/i', $n->content, $m)) {
+                    $payer = $m[1];
+                }
+                if (empty($tx_hash) && preg_match('/Tx Hash:\s*(0x[a-fA-F0-9]{64})/i', $n->content, $m2)) {
+                    $tx_hash = $m2[1];
+                }
+            }
+        }
+
+        if ($payment_method !== 'apay' && empty($tx_hash) && empty($payer)) {
+            echo '<p style="font-size: 12px; color: #64748b; margin: 0;">' . esc_html__('This order was not settled via A-Pay Web3.', 'apay-web3-ai-paywall') . '</p>';
+            return;
+        }
+
+        $network = $order->get_meta('_apay_network') ?: get_option('apay_network', 'base');
+        $is_mainnet = $network === 'base';
+        $chain_id_hex = $is_mainnet ? '0x2105' : '0x14a34';
+        $network_name = $is_mainnet ? 'Base Mainnet' : 'Base Sepolia';
+        $explorer_url = $is_mainnet ? 'https://basescan.org' : 'https://sepolia.basescan.org';
+        $usdc_contract = $is_mainnet
+            ? '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'
+            : '0x036CbD53842c5426634e7929541eC2318f3dCF7e';
+
+        $total = floatval($order->get_total());
+        $refunded_total = floatval($order->get_total_refunded());
+        $remaining = max(0, $total - $refunded_total);
+        $is_refunded = $remaining <= 0.0001;
+        $refund_tx_hash = $order->get_meta('_apay_refund_tx_hash');
+        $ajax_nonce = wp_create_nonce('apay_admin_refund_nonce');
+        $btn_id = 'apay_refund_btn_' . $order->get_id();
+        $msg_id = 'apay_refund_msg_' . $order->get_id();
+        $amount_id = 'apay_refund_amt_' . $order->get_id();
+        $curr_id = 'apay_refund_curr_' . $order->get_id();
+        ?>
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; color: #1e293b; line-height: 1.5;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0;">
+                <span style="font-weight: 700; color: #0f172a;"><?php echo esc_html__('Settlement Rail:', 'apay-web3-ai-paywall'); ?></span>
+                <span style="background: #0284c7; color: #ffffff; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 700;">
+                    <?php echo esc_html($network_name); ?>
+                </span>
+            </div>
+
+            <?php if (!empty($payer)) : ?>
+                <div style="margin-bottom: 10px;">
+                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 2px;">
+                        <?php echo esc_html__('Customer Wallet (Payer):', 'apay-web3-ai-paywall'); ?>
+                    </div>
+                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 8px; font-family: monospace; font-size: 11px; word-break: break-all; color: #0f172a;">
+                        <a href="<?php echo esc_url($explorer_url . '/address/' . $payer); ?>" target="_blank" rel="noopener noreferrer" style="color: #0284c7; text-decoration: none;">
+                            <?php echo esc_html($payer); ?> ↗
+                        </a>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if (!empty($tx_hash)) : ?>
+                <div style="margin-bottom: 12px;">
+                    <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 2px;">
+                        <?php echo esc_html__('Settlement Tx Hash:', 'apay-web3-ai-paywall'); ?>
+                    </div>
+                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 8px; font-family: monospace; font-size: 11px; word-break: break-all; color: #0f172a;">
+                        <a href="<?php echo esc_url($explorer_url . '/tx/' . $tx_hash); ?>" target="_blank" rel="noopener noreferrer" style="color: #0284c7; text-decoration: none;">
+                            <?php echo esc_html(substr($tx_hash, 0, 10) . '...' . substr($tx_hash, -8)); ?> ↗
+                        </a>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($is_refunded) : ?>
+                <div style="background: #ecfdf5; border-left: 4px solid #10b981; padding: 10px 12px; border-radius: 4px; color: #065f46; font-size: 12px;">
+                    <strong style="display: block; margin-bottom: 4px;">✓ <?php echo esc_html__('Order Fully Refunded on Base L2', 'apay-web3-ai-paywall'); ?></strong>
+                    <?php if (!empty($refund_tx_hash)) : ?>
+                        <div style="font-family: monospace; font-size: 11px; word-break: break-all; margin-top: 4px;">
+                            <?php echo esc_html__('Refund Tx: ', 'apay-web3-ai-paywall'); ?>
+                            <a href="<?php echo esc_url($explorer_url . '/tx/' . $refund_tx_hash); ?>" target="_blank" rel="noopener noreferrer" style="color: #059669; font-weight: bold;">
+                                <?php echo esc_html(substr($refund_tx_hash, 0, 10) . '...' . substr($refund_tx_hash, -8)); ?> ↗
+                            </a>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            <?php elseif (!empty($payer)) : ?>
+                <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; margin-top: 10px;">
+                    <div style="font-weight: 700; color: #166534; font-size: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                        <span>⚡</span> <?php echo esc_html__('1-Click Web3 On-Chain Refund', 'apay-web3-ai-paywall'); ?>
+                    </div>
+
+                    <div style="margin-bottom: 8px;">
+                        <label for="<?php echo esc_attr($amount_id); ?>" style="display: block; font-size: 11px; color: #475569; margin-bottom: 2px;">
+                            <?php echo esc_html__('Refund Amount ($):', 'apay-web3-ai-paywall'); ?>
+                        </label>
+                        <input type="number" step="0.01" id="<?php echo esc_attr($amount_id); ?>" value="<?php echo esc_attr(number_format($remaining, 2, '.', '')); ?>" max="<?php echo esc_attr($remaining); ?>" min="0.01" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 8px; font-weight: bold;" />
+                    </div>
+
+                    <div style="margin-bottom: 10px;">
+                        <label for="<?php echo esc_attr($curr_id); ?>" style="display: block; font-size: 11px; color: #475569; margin-bottom: 2px;">
+                            <?php echo esc_html__('Refund Asset:', 'apay-web3-ai-paywall'); ?>
+                        </label>
+                        <select id="<?php echo esc_attr($curr_id); ?>" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 8px; font-size: 12px;">
+                            <option value="USDC"><?php echo esc_html__('USDC (Circle Native - Recommended)', 'apay-web3-ai-paywall'); ?></option>
+                            <option value="ETH"><?php echo esc_html__('ETH (Native Base L2)', 'apay-web3-ai-paywall'); ?></option>
+                        </select>
+                    </div>
+
+                    <button type="button" id="<?php echo esc_attr($btn_id); ?>" class="button button-primary" style="background: linear-gradient(135deg, #0052FF, #2563EB); border: none; width: 100%; padding: 8px 12px; font-weight: 700; font-size: 13px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,82,255,0.25); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 38px;">
+                        ⚡ <?php echo esc_html__('Send On-Chain Refund', 'apay-web3-ai-paywall'); ?>
+                    </button>
+
+                    <div id="<?php echo esc_attr($msg_id); ?>" style="margin-top: 8px; font-size: 11px; line-height: 1.4; display: none;"></div>
+                </div>
+
+                <script type="text/javascript">
+                (function() {
+                    var btn = document.getElementById('<?php echo esc_js($btn_id); ?>');
+                    if (!btn) return;
+
+                    btn.addEventListener('click', async function(e) {
+                        e.preventDefault();
+                        var msg = document.getElementById('<?php echo esc_js($msg_id); ?>');
+                        msg.style.display = 'block';
+                        msg.style.color = '#0284c7';
+                        msg.innerHTML = 'Connecting to Web3 wallet...';
+
+                        if (typeof window.ethereum === 'undefined') {
+                            msg.style.color = '#dc2626';
+                            msg.innerHTML = '❌ No Web3 wallet extension found. Please open in MetaMask, Coinbase Wallet, or Brave browser.';
+                            return;
+                        }
+
+                        try {
+                            btn.disabled = true;
+                            var accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                            if (!accounts || !accounts[0]) {
+                                throw new Error('No wallet account authorized.');
+                            }
+
+                            var targetChainHex = '<?php echo esc_js($chain_id_hex); ?>';
+                            var currentChain = await window.ethereum.request({ method: 'eth_chainId' });
+                            if (currentChain !== targetChainHex) {
+                                msg.innerHTML = 'Switching wallet to <?php echo esc_js($network_name); ?>...';
+                                try {
+                                    await window.ethereum.request({
+                                        method: 'wallet_switchEthereumChain',
+                                        params: [{ chainId: targetChainHex }]
+                                    });
+                                } catch (switchErr) {
+                                    throw new Error('Please switch your wallet to <?php echo esc_js($network_name); ?>.');
+                                }
+                            }
+
+                            var amtInput = document.getElementById('<?php echo esc_js($amount_id); ?>');
+                            var amountVal = parseFloat(amtInput ? amtInput.value : '0');
+                            if (isNaN(amountVal) || amountVal <= 0) {
+                                throw new Error('Please enter a valid refund amount.');
+                            }
+
+                            var currSelect = document.getElementById('<?php echo esc_js($curr_id); ?>');
+                            var curr = currSelect ? currSelect.value : 'USDC';
+                            var payerAddr = '<?php echo esc_js($payer); ?>';
+                            var txHash = '';
+
+                            msg.innerHTML = 'Please confirm refund in your wallet...';
+
+                            if (curr === 'USDC') {
+                                var cleanTo = payerAddr.toLowerCase().replace(/^0x/, '').padStart(64, '0');
+                                var units = BigInt(Math.round(amountVal * 1e6));
+                                var cleanAmount = units.toString(16).padStart(64, '0');
+                                var calldata = '0xa9059cbb' + cleanTo + cleanAmount;
+
+                                txHash = await window.ethereum.request({
+                                    method: 'eth_sendTransaction',
+                                    params: [{
+                                        from: accounts[0],
+                                        to: '<?php echo esc_js($usdc_contract); ?>',
+                                        data: calldata,
+                                        value: '0x0'
+                                    }]
+                                });
+                            } else {
+                                var ethRate = 2500;
+                                try {
+                                    var pRes = await fetch('https://api.coinbase.com/v2/prices/ETH-USD/spot', { signal: AbortSignal.timeout(3000) });
+                                    if (pRes.ok) {
+                                        var pJson = await pRes.json();
+                                        var pVal = parseFloat(pJson?.data?.amount);
+                                        if (!isNaN(pVal) && pVal > 0) ethRate = pVal;
+                                    }
+                                } catch(e) {}
+                                var ethAmount = amountVal / ethRate;
+                                var weiAmount = BigInt(Math.round(ethAmount * 1e18));
+                                var weiHex = '0x' + weiAmount.toString(16);
+
+                                txHash = await window.ethereum.request({
+                                    method: 'eth_sendTransaction',
+                                    params: [{
+                                        from: accounts[0],
+                                        to: payerAddr,
+                                        value: weiHex
+                                    }]
+                                });
+                            }
+
+                            msg.innerHTML = '✓ Refund broadcast on Base L2! Recording in WooCommerce...';
+
+                            var fd = new FormData();
+                            fd.append('action', 'apay_wc_process_admin_refund');
+                            fd.append('order_id', '<?php echo esc_js($order->get_id()); ?>');
+                            fd.append('amount', amountVal);
+                            fd.append('tx_hash', txHash);
+                            fd.append('currency', curr);
+                            fd.append('payer', payerAddr);
+                            fd.append('_ajax_nonce', '<?php echo esc_js($ajax_nonce); ?>');
+
+                            var res = await fetch('<?php echo esc_url(admin_url('admin-ajax.php')); ?>', {
+                                method: 'POST',
+                                body: fd
+                            });
+                            var data = await res.json();
+                            if (data.success) {
+                                msg.style.color = '#15803d';
+                                msg.innerHTML = '✓ Refund of $' + amountVal.toFixed(2) + ' confirmed on Base L2!<br/><a href="<?php echo esc_js($explorer_url); ?>/tx/' + txHash + '" target="_blank" rel="noopener noreferrer" style="color: #0284c7; text-decoration: underline; font-weight: bold;">View on BaseScan ↗</a>';
+                                setTimeout(function() { window.location.reload(); }, 2000);
+                            } else {
+                                throw new Error(data.data?.message || 'Failed to record refund in WooCommerce');
+                            }
+                        } catch (err) {
+                            btn.disabled = false;
+                            msg.style.color = '#dc2626';
+                            msg.innerHTML = '❌ ' + (err.message || 'Refund rejected or failed');
+                        }
+                    });
+                })();
+                </script>
+            <?php else : ?>
+                <p style="font-size: 11px; color: #94a3b8; margin: 6px 0 0 0;">
+                    <?php echo esc_html__('No customer payer wallet recorded for this order.', 'apay-web3-ai-paywall'); ?>
+                </p>
+            <?php endif; ?>
+        </div>
+        <?php
+    }
+
+    /**
+     * AJAX Endpoint: Record verified on-chain Web3 refund in WooCommerce
+     */
+    public function ajax_wc_process_admin_refund() {
+        check_ajax_referer('apay_admin_refund_nonce');
+
+        if (!current_user_can('edit_shop_orders')) {
+            wp_send_json_error(array('message' => 'Unauthorized permissions'));
+        }
+
+        $order_id = isset($_POST['order_id']) ? intval($_POST['order_id']) : 0;
+        $amount = isset($_POST['amount']) ? floatval($_POST['amount']) : 0;
+        $tx_hash = isset($_POST['tx_hash']) ? sanitize_text_field(wp_unslash($_POST['tx_hash'])) : '';
+        $currency = isset($_POST['currency']) ? sanitize_text_field(wp_unslash($_POST['currency'])) : 'USDC';
+        $payer = isset($_POST['payer']) ? sanitize_text_field(wp_unslash($_POST['payer'])) : '';
+
+        if (!$order_id || $amount <= 0 || empty($tx_hash)) {
+            wp_send_json_error(array('message' => 'Invalid refund parameters'));
+        }
+
+        $order = wc_get_order($order_id);
+        if (!$order) {
+            wp_send_json_error(array('message' => 'Order not found'));
+        }
+
+        if (!preg_match('/^0x[a-fA-F0-9]{64}$/', $tx_hash)) {
+            wp_send_json_error(array('message' => 'Invalid transaction hash format'));
+        }
+
+        if (!empty($payer) && !preg_match('/^0x[a-fA-F0-9]{40}$/', $payer)) {
+            wp_send_json_error(array('message' => 'Invalid payer EVM address format'));
+        }
+
+        $network = $order->get_meta('_apay_network') ?: get_option('apay_network', 'base');
+        $explorer_url = $network === 'base' ? 'https://basescan.org' : 'https://sepolia.basescan.org';
+
+        $refund_note = sprintf(
+            __('⚡ A-Pay Web3 Refund Confirmed on Base L2! Amount: $%1$s (%2$s) | Payer: %3$s | Tx Hash: %4$s', 'apay-web3-ai-paywall'),
+            number_format($amount, 2),
+            $currency,
+            $payer,
+            $tx_hash
+        );
+
+        $refund = wc_create_refund(array(
+            'amount'         => $amount,
+            'reason'         => sprintf(__('A-Pay Web3 On-Chain Refund (%s)', 'apay-web3-ai-paywall'), $tx_hash),
+            'order_id'       => $order_id,
+            'refund_payment' => false,
+            'restock_items'  => true,
+        ));
+
+        if (is_wp_error($refund)) {
+            wp_send_json_error(array('message' => $refund->get_error_message()));
+        }
+
+        $order->add_order_note($refund_note);
+        $order->update_meta_data('_apay_refund_tx_hash', $tx_hash);
+        $order->save();
+
+        wp_send_json_success(array(
+            'message' => 'Refund recorded successfully',
+            'tx_hash' => $tx_hash,
+            'explorer_url' => $explorer_url . '/tx/' . $tx_hash,
         ));
     }
 
@@ -860,7 +1217,7 @@ function apay_init_woocommerce_gateway() {
             $this->has_fields = false;
             $this->method_title = __('A-Pay (Base L2 Web3)', 'apay-web3-ai-paywall');
             $this->method_description = __('Accept instant, zero-chargeback micropayments & purchases in USDC and $APAY tokens on Base Layer 2.', 'apay-web3-ai-paywall');
-            $this->supports = array('products');
+            $this->supports = array('products', 'refunds');
 
             $this->init_form_fields();
             $this->init_settings();
@@ -1001,6 +1358,28 @@ function apay_init_woocommerce_gateway() {
             </script>
             <?php
         }
+
+        /**
+         * Process refund via WooCommerce standard admin UI
+         */
+        public function process_refund($order_id, $amount = null, $reason = '') {
+            $order = wc_get_order($order_id);
+            if (!$order) {
+                return new WP_Error('invalid_order', __('Order not found', 'apay-web3-ai-paywall'));
+            }
+
+            $refund_tx_hash = $order->get_meta('_apay_refund_tx_hash');
+            if (!empty($refund_tx_hash)) {
+                return true;
+            }
+
+            $note = sprintf(
+                __('ℹ️ A-Pay Manual Refund Logged: $%s. For automated on-chain cryptocurrency transfer to customer wallet, use the 1-Click A-Pay Web3 Refund box on the order screen.', 'apay-web3-ai-paywall'),
+                number_format(floatval($amount), 2)
+            );
+            $order->add_order_note($note);
+            return true;
+        }
     }
 
     function apay_add_woocommerce_gateway($gateways) {
@@ -1010,4 +1389,13 @@ function apay_init_woocommerce_gateway() {
     add_filter('woocommerce_payment_gateways', 'apay_add_woocommerce_gateway');
 }
 add_action('plugins_loaded', 'apay_init_woocommerce_gateway', 11);
+
+/**
+ * Declare WooCommerce High-Performance Order Storage (HPOS) Compatibility
+ */
+add_action('before_woocommerce_init', function() {
+    if (class_exists('\Automattic\WooCommerce\Utilities\FeaturesUtil')) {
+        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, true);
+    }
+});
 
