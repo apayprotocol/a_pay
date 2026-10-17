@@ -439,16 +439,20 @@ export default function TelegramMiniAppPage() {
             {activeNetwork === 'base-mainnet' ? 'Base 8453' : 'Sepolia'}
           </button>
 
-          {/* Full Console Switcher */}
+          {/* Full Console Switcher — Highlighted Pro Button */}
           <button
             onClick={() => {
               setConsoleMode('full');
               haptic.selection();
             }}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-400 hover:text-sky-300 border border-slate-700 text-[11px] font-mono font-medium transition-all shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-400 text-white border border-blue-400/50 text-[11px] font-mono font-bold transition-all shadow-md shadow-blue-600/40 active:scale-95"
+            title="Open complete A-Pay Web Dashboard inside Telegram"
           >
-            <span>🌐</span>
-            <span className="font-semibold">Full Console</span>
+            <span className="text-sm">🌐</span>
+            <span>Full Console</span>
+            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-white/20 text-white font-bold uppercase tracking-tight">
+              12 Tabs
+            </span>
           </button>
         </div>
       </header>
@@ -1060,11 +1064,14 @@ export default function TelegramMiniAppPage() {
         </button>
 
         <button
-          onClick={() => setConsoleMode('full')}
-          className="flex items-center gap-1.5 text-xs font-mono text-slate-400 hover:text-white"
+          onClick={() => {
+            setConsoleMode('full');
+            haptic.selection();
+          }}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-900/40 via-indigo-900/30 to-blue-900/40 hover:from-blue-800/50 hover:to-indigo-800/50 text-sky-300 border border-blue-500/40 hover:border-blue-400 text-xs font-mono font-semibold transition-all shadow-sm"
         >
           <span>🌐</span>
-          <span>Full Console Mode</span>
+          <span>Full Console (12 Tabs) ↗</span>
         </button>
       </footer>
 
