@@ -30,6 +30,11 @@ if [ "${1:-}" == "--dry-run" ]; then
     exit 0
 fi
 
+if [ -z "${UV_PUBLISH_TOKEN:-}" ] && [ -f "$HOME/.pypirc" ]; then
+    UV_PUBLISH_TOKEN=$(python3 -c "import configparser; c = configparser.ConfigParser(); c.read('$HOME/.pypirc'); print(c.get('pypi', 'password', fallback=''))")
+    export UV_PUBLISH_TOKEN
+fi
+
 if [ -z "${UV_PUBLISH_TOKEN:-}" ]; then
     echo ""
     echo "ℹ️ To upload to PyPI, set your API token and run:"
