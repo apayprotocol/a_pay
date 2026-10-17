@@ -269,6 +269,14 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    const webhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
+    if (webhookSecret) {
+      const headerSecret = req.headers.get('x-telegram-bot-api-secret-token');
+      if (headerSecret !== webhookSecret) {
+        return NextResponse.json({ error: 'Unauthorized webhook call' }, { status: 401 });
+      }
+    }
+
     const update: TelegramUpdate = await req.json();
 
     let chatId: number | undefined;
