@@ -143,6 +143,27 @@ test('Search engines (Googlebot, Bingbot) whitelisted for SEO', () => {
   assert(phpContent.includes("'googlebot', 'bingbot', 'slurp'"), 'Missing SEO bot whitelist');
 });
 
+test('Zero-Config Auto Domain Escrow: On-chain EscrowVault bindings', () => {
+  assert(phpContent.includes("ESCROW_MAINNET = '0xd08c8a337e5339d1c083e06d74a9265956ceea16'"), 'Missing Base Mainnet EscrowVault binding');
+  assert(phpContent.includes("ESCROW_SEPOLIA = '0x3E35a9E802627a3D9A86D6554e72b1C446E34aAF'"), 'Missing Base Sepolia EscrowVault binding');
+});
+
+test('Zero-Config Auto Domain Escrow: Default wallet is optional empty string', () => {
+  assert(phpContent.includes("'default' => ''"), 'Default wallet setting must be empty string');
+  assert(!phpContent.includes("name=\"apay_receiver_wallet\" value=\"0x5eC0"), 'Wallet input must not hardcode founder default');
+  assert(!phpContent.includes("name=\"apay_receiver_wallet\" value=\"<?php echo esc_attr(get_option('apay_receiver_wallet', '0x5eC0"), 'Must not fallback to founder wallet');
+});
+
+test('Zero-Config Auto Domain Escrow: Emits domain escrow headers and claim portal', () => {
+  assert(phpContent.includes('X-APay-Domain-Escrow:'), 'Missing X-APay-Domain-Escrow header');
+  assert(phpContent.includes('X-APay-Claim-Portal:'), 'Missing X-APay-Claim-Portal header');
+});
+
+test('Auto Domain Claim Verification: Serves /.well-known/apay-claim.txt and /.apay/status', () => {
+  assert(phpContent.includes("'/.well-known/apay-claim.txt'"), 'Missing /.well-known/apay-claim.txt endpoint');
+  assert(phpContent.includes("'/.apay/status'"), 'Missing /.apay/status endpoint');
+});
+
 console.log('\n📦 Section 5: ZIP Archive Structure & Parity');
 
 test('ZIP file contains canonical directory and files', () => {
