@@ -43,7 +43,7 @@ export async function POST(request: Request) {
       targetDomain: sanitizedDomain,
       price: price || existing?.price || '0.001 USDC',
       network: network || existing?.network || 'base',
-      version: version || existing?.version || '0.1.8',
+      version: version || existing?.version || '0.1.10',
       firstSeen: existing ? existing.firstSeen : now,
       lastHeartbeat: now,
       status: 'online',
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
       description:
         description ||
         existing?.description ||
-        `HTTP 402 Paywalled M2M microservice registered via A-Pay Gateway (${version || existing?.version || '0.1.8'}).`,
+        `HTTP 402 Paywalled M2M microservice registered via A-Pay Gateway (${version || existing?.version || '0.1.10'}).`,
     };
 
     await registryStore.saveMerchant(record);
@@ -134,7 +134,7 @@ export async function GET(request: Request) {
           wallet: '0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc',
           price: '$0.001 USDC',
           network: 'base',
-          version: '0.1.8',
+          version: '0.1.10',
           category: 'FINANCE',
           description:
             'Real-time institutional order-flow analytics, dark-pool prints, and ETF inflow telemetry.',
@@ -159,7 +159,7 @@ export async function GET(request: Request) {
           wallet: '0x79A85DCDd967E0bb03Aba1069B12c4851C570a0C',
           price: '$0.002 USDC',
           network: 'base',
-          version: '0.1.8',
+          version: '0.1.10',
           category: 'AI_INFERENCE',
           description:
             'Ultra low-latency MoE reasoning completions paid per query via HTTP 402 EIP-712 vouchers.',
@@ -184,7 +184,7 @@ export async function GET(request: Request) {
           wallet: '0x96C347AcA81843d3fEA4548708A2453ceaA57a1a',
           price: '$0.0005 USDC',
           network: 'base',
-          version: '0.1.8',
+          version: '0.1.10',
           category: 'SCRAPING',
           description:
             'Headless Chromium proxy with dynamic anti-bot bypass and Markdown DOM conversion.',
@@ -209,7 +209,7 @@ export async function GET(request: Request) {
           wallet: '0x3E35a9E802627a3D9A86D6554e72b1C446E34aAF',
           price: '5.0 $APAY',
           network: 'base',
-          version: '0.1.8',
+          version: '0.1.10',
           category: 'CRYPTO',
           description:
             'Real-time WebSocket and HTTP 402 monitoring of >$100k swaps on Base Aerodrome pools.',
@@ -234,7 +234,7 @@ export async function GET(request: Request) {
           wallet: '0x6ce8C325d1b1b4Cb539B7CdbB72208BF69E4Ff0B',
           price: '$0.005 USDC',
           network: 'base',
-          version: '0.1.8',
+          version: '0.1.10',
           category: 'DEVTOOLS',
           description:
             'Automated Slither, Mythril, and AST security analysis for EVM contracts on Base.',
@@ -258,7 +258,7 @@ export async function GET(request: Request) {
           wallet: '0x8742017B7b3EA4F8AC08BC71f89A099b47B4334E',
           price: '2.0 $APAY',
           network: 'base-sepolia',
-          version: '0.1.8',
+          version: '0.1.10',
           category: 'DATA_FEEDS',
           description:
             'High-frequency Doppler radar, atmospheric pressure, and oceanic temperature telemetry.',

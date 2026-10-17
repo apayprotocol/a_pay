@@ -135,7 +135,7 @@ export async function POST(request: Request) {
       targetDomain: sanitizedDomain,
       price: displayPrice,
       network: network === 'base-mainnet' ? 'base' : 'base-sepolia',
-      version: '0.1.8',
+      version: '0.1.10',
       firstSeen: Date.now(),
       lastHeartbeat: Date.now(),
       status: 'online',

@@ -1,6 +1,6 @@
 {
   "name": "apay-gateway",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Ultra-lightweight HTTP 402 Paywall Middleware for Hono, Express, and Edge APIs",
   "type": "module",
   "main": "dist/index.js",
