@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { ConnectWalletModal } from '@/components/ConnectWalletModal';
+import { FloatingQrScanner } from '@/components/FloatingQrScanner';
 import { LandingPage } from '@/components/landing/LandingPage';
 import { AgentVaultsTab } from '@/components/modules/AgentVaultsTab';
 import { AiGuidelinesTab } from '@/components/modules/AiGuidelinesTab';
@@ -369,6 +370,16 @@ export default function DashboardPage() {
           onConnected={handleWalletConnected}
           activeNetwork={activeNetwork}
         />
+
+        {/* Draggable Free-Flyer Animated QR Scanner */}
+        <FloatingQrScanner
+          walletAddress={walletAddress}
+          activeNetwork={activeNetwork}
+          onNavigateToTab={(tab) => {
+            handleEnterConsole(tab);
+          }}
+          onConnectWallet={handleConnectWallet}
+        />
       </div>
     );
   }
@@ -524,6 +535,14 @@ export default function DashboardPage() {
         onClose={() => setIsModalOpen(false)}
         onConnected={handleWalletConnected}
         activeNetwork={activeNetwork}
+      />
+
+      {/* Draggable Free-Flyer Animated QR Scanner */}
+      <FloatingQrScanner
+        walletAddress={walletAddress}
+        activeNetwork={activeNetwork}
+        onNavigateToTab={handleSelectTab}
+        onConnectWallet={handleConnectWallet}
       />
     </div>
   );
