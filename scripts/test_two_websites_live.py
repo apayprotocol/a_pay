@@ -24,7 +24,7 @@ from apay import AgentWallet, APaySession, create_proxy_app
 # =====================================================================
 # WEBSITE 1: RECEIVER (SELLER API & WEBSITE)
 # =====================================================================
-SELLER_WALLET = "0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc"
+SELLER_WALLET = "0xd08c8a337e5339d1c083e06d74a9265956ceea16"
 PRICE_PER_CALL_USDC = 0.002  # $0.002 USDC per request
 
 

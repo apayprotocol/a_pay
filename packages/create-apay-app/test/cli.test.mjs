@@ -56,3 +56,12 @@ test('create-apay-app scaffolds Express project with custom wallet', () => {
   const envContent = fs.readFileSync(path.join(projPath, '.env'), 'utf8');
   assert.strictEqual(envContent.includes('0x3333333333333333333333333333333333333333'), true);
 });
+
+test('create-apay-app defaults to EscrowVault when no wallet is specified', () => {
+  const projPath = path.join(tempBase, 'test-default-app');
+  execSync(`node "${cliPath}" "${projPath}" --template nextjs --yes`);
+
+  const envContent = fs.readFileSync(path.join(projPath, '.env'), 'utf8');
+  assert.strictEqual(envContent.includes('0xd08c8a337e5339d1c083e06d74a9265956ceea16'), true);
+});
+

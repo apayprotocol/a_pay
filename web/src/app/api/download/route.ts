@@ -8,11 +8,15 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const platform = searchParams.get('platform') || 'cloudflare';
 
+  const network = searchParams.get('network') === 'base-mainnet' ? 'base-mainnet' : 'base-sepolia';
+  const contracts = getNetworkContracts(network as NetworkId);
+  const chainId = contracts.chain.chainId;
+  const router = contracts.APayRouter.address;
+  const networkFlag = network === 'base-mainnet' ? 'base' : 'base-sepolia';
+
   // Strict sanitization & validation to prevent code injection into generated scripts
   const rawWallet = searchParams.get('wallet') || '';
-  const wallet = /^0x[a-fA-F0-9]{40}$/i.test(rawWallet)
-    ? rawWallet
-    : '0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc';
+  const wallet = /^0x[a-fA-F0-9]{40}$/i.test(rawWallet) ? rawWallet : contracts.EscrowVault.address;
 
   const rawTargetUrl = (searchParams.get('targetUrl') || '').replace(/[\r\n"'\\]/g, '').trim();
   const targetUrl = /^https?:\/\/[^\s]+$/i.test(rawTargetUrl)
@@ -27,13 +31,6 @@ export async function GET(request: Request) {
 
   const rawCurrency = (searchParams.get('currency') || 'DUAL').toUpperCase();
   const currency = ['USDC', 'APAY', 'DUAL'].includes(rawCurrency) ? rawCurrency : 'DUAL';
-
-  const network = searchParams.get('network') === 'base-mainnet' ? 'base-mainnet' : 'base-sepolia';
-
-  const contracts = getNetworkContracts(network as NetworkId);
-  const chainId = contracts.chain.chainId;
-  const router = contracts.APayRouter.address;
-  const networkFlag = network === 'base-mainnet' ? 'base' : 'base-sepolia';
 
   if (platform === 'cloudflare') {
     const code = `/**

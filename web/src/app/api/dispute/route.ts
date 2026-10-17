@@ -52,7 +52,7 @@ const seededDisputes: DisputeRecord[] = [
     id: 'disp_seed_2',
     txHash: dispTx2,
     agentAddress: '0x96C347AcA81843d3fEA4548708A2453ceaA57a1a',
-    challengerAddress: '0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc',
+    challengerAddress: '0x70997970C51812dc3A010C7d01b50e0d17dc79C8',
     slashedAmountApay: 250.0,
     challengerBountyApay: 125.0,
     burnedApay: 125.0,

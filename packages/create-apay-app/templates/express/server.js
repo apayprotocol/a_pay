@@ -6,7 +6,7 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const RECEIVER = process.env.APAY_RECEIVER_WALLET || '0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc';
+const RECEIVER = process.env.APAY_RECEIVER_WALLET || '0xd08c8a337e5339d1c083e06d74a9265956ceea16';
 const PRICE = parseFloat(process.env.APAY_PRICE_USDC || '0.002');
 const NETWORK = process.env.APAY_NETWORK || 'base-mainnet';
 

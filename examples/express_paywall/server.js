@@ -23,7 +23,7 @@ app.get('/', (req, res) => {
 app.use(
   '/v1/intel',
   apayExpress({
-    receiverAddress: '0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc',
+    receiverAddress: '0xd08c8a337e5339d1c083e06d74a9265956ceea16',
     priceUsdc: 0.001,
     network: 'base',
   })

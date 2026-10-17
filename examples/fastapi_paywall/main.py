@@ -15,7 +15,7 @@ app = FastAPI(title="FastAPI Paywalled Intelligence Service")
 # 1-Line Drop-in Paywall: $0.002 USDC per request on Base L2
 paywall = APayPaywall(
     price_usdc=0.002,
-    receiver_wallet="0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc",
+    receiver_wallet="0xd08c8a337e5339d1c083e06d74a9265956ceea16",
     network="base",
 )
 

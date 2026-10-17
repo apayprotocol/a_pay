@@ -23,7 +23,7 @@ class MockVectorStoreVendor(BaseHTTPRequestHandler):
         if not auth_header.startswith("APay "):
             self.send_response(402)
             self.send_header("Content-Type", "application/json")
-            self.send_header("X-APay-Receiver", "0x5ec06f4219c6b44cfe7c91463dd65b7b8e0fbefc")
+            self.send_header("X-APay-Receiver", "0xd08c8a337e5339d1c083e06d74a9265956ceea16")
             self.send_header("X-APay-Amount", "1000" if currency == "USDC" else "2000000000000000000")  # $0.001 or 2 APAY
             self.send_header("X-APay-Currency", currency)
             self.send_header("X-APay-Nonce", "llama-vector-nonce-1044")
@@ -44,7 +44,7 @@ class MockVectorStoreVendor(BaseHTTPRequestHandler):
                     },
                     "primaryType": "PaymentAuthorization",
                     "message": {
-                        "receiver": "0x5ec06f4219c6b44cfe7c91463dd65b7b8e0fbefc",
+                        "receiver": "0xd08c8a337e5339d1c083e06d74a9265956ceea16",
                         "amount": 1000 if currency == "USDC" else 2000000000000000000,
                         "nonce": "llama-vector-nonce-1044",
                     },

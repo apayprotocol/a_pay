@@ -51,7 +51,7 @@ class APayPaywall:
         from apay.fastapi import APayPaywall
 
         app = FastAPI()
-        paywall = APayPaywall(price_usdc=0.002, receiver_wallet="0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc")
+        paywall = APayPaywall(price_usdc=0.002, receiver_wallet="0xd08c8a337e5339d1c083e06d74a9265956ceea16")
 
         @app.get("/api/market-alpha")
         async def get_alpha(claim = Depends(paywall)):

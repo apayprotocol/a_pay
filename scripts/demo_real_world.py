@@ -24,7 +24,7 @@ def real_website_data(request):
 backend_app = Starlette(routes=[Route("/api/market-report", real_website_data)])
 
 # 2. A-Pay Protection Layer
-receiver = "0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc"
+receiver = "0xd08c8a337e5339d1c083e06d74a9265956ceea16"
 proxy_app = create_proxy_app(target_url="http://127.0.0.1:8100", receiver_wallet=receiver, price_usdc=0.001)
 
 

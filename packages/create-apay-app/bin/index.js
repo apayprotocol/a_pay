@@ -62,7 +62,7 @@ async function main() {
   let projectName = args[0] && !args[0].startsWith('--') ? args[0] : null;
   
   let template = 'nextjs';
-  let receiver = '0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc';
+  let receiver = '0xd08c8a337e5339d1c083e06d74a9265956ceea16'; // Base Mainnet EscrowVault (Zero-Config Auto Domain Escrow)
   let network = 'base-mainnet';
   let autoYes = false;
 
@@ -80,7 +80,7 @@ async function main() {
     else if (templateChoice === '3' || templateChoice.toLowerCase() === 'express') template = 'express';
     else template = 'nextjs';
 
-    receiver = await prompt('Payout Receiver Wallet (EVM address)', receiver);
+    receiver = await prompt('Payout Receiver Wallet (or press Enter for Auto Domain Escrow)', receiver);
     network = await prompt('Target Network (base-mainnet / base-sepolia)', network);
   }
 

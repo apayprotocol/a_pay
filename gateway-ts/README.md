@@ -177,7 +177,7 @@ All settlement contracts are verified on BaseScan and immutable:
 | Contract | Address | Network | Explorer |
 |---|---|---|---|
 | **EscrowVault** | `0xd08c8a337e5339d1c083e06d74a9265956ceea16` | Base Mainnet | [BaseScan](https://basescan.org/address/0xd08c8a337e5339d1c083e06d74a9265956ceea16) |
-| **APAY Token** | `0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc` | Base Mainnet | [BaseScan](https://basescan.org/token/0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc) |
+| **APAY Token** | `0x8dd4ff9035c7d4e0bef30aa64fc30d128a4066c3` | Base Mainnet | [BaseScan](https://basescan.org/token/0x8dd4ff9035c7d4e0bef30aa64fc30d128a4066c3) |
 | **RouterV2** | `0x1994fa2281896803762ae3eb89fb0ab0ee1d6248` | Base Mainnet | [BaseScan](https://basescan.org/address/0x1994fa2281896803762ae3eb89fb0ab0ee1d6248) |
 | **USDC (Native)** | `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913` | Base Mainnet | [BaseScan](https://basescan.org/token/0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913) |
 

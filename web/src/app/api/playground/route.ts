@@ -23,7 +23,7 @@ const CURATED_SERVICES: CuratedService[] = [
     id: 'm2m_alpha_intel',
     name: 'AlphaMarket Institutional Intelligence',
     targetDomain: 'https://api.alphamarket.io/v1/alpha',
-    wallet: '0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc',
+    wallet: '0xd08c8a337e5339d1c083e06d74a9265956ceea16',
     price: '$0.001 USDC',
     category: 'FINANCE',
     description:

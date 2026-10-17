@@ -14,7 +14,7 @@ app = FastAPI(
 )
 
 # Read configuration from environment
-RECEIVER_WALLET = os.getenv("APAY_RECEIVER_WALLET", "0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc")
+RECEIVER_WALLET = os.getenv("APAY_RECEIVER_WALLET", "0xd08c8a337e5339d1c083e06d74a9265956ceea16")
 PRICE_USDC = float(os.getenv("APAY_PRICE_USDC", "0.002"))
 NETWORK = os.getenv("APAY_NETWORK", "base-mainnet")
 

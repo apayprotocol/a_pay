@@ -27,7 +27,7 @@ class MockOpenAIVendor(BaseHTTPRequestHandler):
         if not auth_header.startswith("APay "):
             self.send_response(402)
             self.send_header("Content-Type", "application/json")
-            self.send_header("X-APay-Receiver", "0x5ec06f4219c6b44cfe7c91463dd65b7b8e0fbefc")
+            self.send_header("X-APay-Receiver", "0xd08c8a337e5339d1c083e06d74a9265956ceea16")
             self.send_header("X-APay-Amount", "2500" if currency == "USDC" else "5000000000000000000")  # $0.0025
             self.send_header("X-APay-Currency", currency)
             self.send_header("X-APay-Nonce", "openai-nonce-9921")
@@ -48,7 +48,7 @@ class MockOpenAIVendor(BaseHTTPRequestHandler):
                     },
                     "primaryType": "PaymentAuthorization",
                     "message": {
-                        "receiver": "0x5ec06f4219c6b44cfe7c91463dd65b7b8e0fbefc",
+                        "receiver": "0xd08c8a337e5339d1c083e06d74a9265956ceea16",
                         "amount": 2500 if currency == "USDC" else 5000000000000000000,
                         "nonce": "openai-nonce-9921",
                     },

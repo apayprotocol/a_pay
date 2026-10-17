@@ -10,7 +10,8 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { wallet, targetDomain, price, network, version, name, category, description, status } = body;
+    const { wallet, targetDomain, price, network, version, name, category, description, status } =
+      body;
 
     if (!wallet || typeof wallet !== 'string') {
       return NextResponse.json({ error: 'Missing or invalid "wallet" parameter' }, { status: 400 });
@@ -131,7 +132,7 @@ export async function GET(request: Request) {
           name: 'AlphaMarket Institutional Intelligence',
           provider: 'AlphaMarket Prime',
           targetDomain: 'https://api.alphamarket.io/v1/alpha',
-          wallet: '0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc',
+          wallet: '0xd08c8a337e5339d1c083e06d74a9265956ceea16',
           price: '$0.001 USDC',
           network: 'base',
           version: '0.1.10',

@@ -123,7 +123,7 @@ from fastapi import FastAPI
 from apay import APayPaywall, VerifiedClaim
 
 app = FastAPI()
-paywall = APayPaywall(receiver_wallet="0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc", price_usdc=0.001)
+paywall = APayPaywall(receiver_wallet="0xd08c8a337e5339d1c083e06d74a9265956ceea16", price_usdc=0.001)
 
 @app.get("/api/ai-research")
 @paywall.protect()
@@ -143,7 +143,7 @@ print(res.json())
 import { createAPayGateway } from '@apay/gateway';
 
 const gateway = createAPayGateway({
-  receiver: '0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc',
+  receiver: '0xd08c8a337e5339d1c083e06d74a9265956ceea16',
   priceUsdc: '0.002',
   allowFreeBrowsers: true,
   network: 'base-mainnet'
@@ -162,7 +162,7 @@ export async function handleRequest(req: Request) {
 ```html
 <script src="https://apay-network.vercel.app/v1.js"></script>
 <button onclick="APay.checkout({
-  receiver: '0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc',
+  receiver: '0xd08c8a337e5339d1c083e06d74a9265956ceea16',
   amountUsdc: 25.00,
   network: 'base-mainnet',
   title: 'Annual AI Membership',
