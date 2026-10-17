@@ -38,6 +38,8 @@
     "contracts:verify:sepolia": "node contracts/scripts/verify-basescan.js --network sepolia",
     "contracts:verify": "node contracts/scripts/generate-verification-json.js && node contracts/scripts/verify-basescan.js",
     "verify": "uv run apay verify",
+    "publish:wp": "bash scripts/publish_wordpress.sh",
+    "publish:py": "bash scripts/publish_pypi.sh",
     "git:save": "node scripts/git_save.mjs",
     "git:save:all": "node scripts/git_save.mjs"
   }

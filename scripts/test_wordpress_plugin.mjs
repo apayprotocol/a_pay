@@ -40,7 +40,7 @@ console.log('📋 Section 1: Readme.txt Standards (WordPress.org Guidelines)');
 test('Requires at least, Tested up to, and Stable tag headers', () => {
   assert(readmeContent.includes('Requires at least: 5.8'), 'Missing Requires at least');
   assert(readmeContent.includes('Tested up to: 7.1'), 'Tested up to must be 7.1');
-  assert(readmeContent.includes('Stable tag: 0.1.8'), 'Stable tag must be 0.1.8');
+  assert(readmeContent.includes('Stable tag: 0.1.9'), 'Stable tag must be 0.1.9');
   assert(readmeContent.includes('License: GPLv2 or later'), 'Missing GPLv2 license');
 });
 

@@ -3,7 +3,7 @@
  * Plugin Name:       A-Pay Web3 AI Paywall
  * Plugin URI:        https://apayprotocol.org
  * Description:       Universal HTTP 402 Web3 AI paywall for WordPress & WooCommerce on Base L2. Monetize GPTBot, ClaudeBot, and AI crawlers with micropayments while humans browse 100% free.
- * Version:           0.1.8
+ * Version:           0.1.9
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            A-Pay Protocol Core Team
@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
 }
 
 class APayWordPressPaywall {
-    const VERSION = '0.1.8';
+    const VERSION = '0.1.9';
     const ROUTER_MAINNET = '0x71434344beEF9C44fF3BC95572bEB7bFB8847ec6';
     const ROUTER_SEPOLIA = '0x71434344beEF9C44fF3BC95572bEB7bFB8847ec6';
     const ESCROW_MAINNET = '0xd08c8a337e5339d1c083e06d74a9265956ceea16';

@@ -4,7 +4,7 @@ Tags: ai-paywall, web3, monetization, gptbot, micropayments
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 0.1.8
+Stable tag: 0.1.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -67,6 +67,12 @@ Yes! You can use the [apay_button amount="10" title="My eBook"] shortcode on any
 2. Live HTTP 402 Machine-to-Machine payment challenge received by automated AI bots.
 
 == Changelog ==
+
+= 0.1.9 =
+* Added Zero-Config Auto Domain Escrow for unconfigured domains (auto-claimable via /.well-known/apay-claim.txt).
+* Added WooCommerce 1-Click Web3 Refund Engine in WordPress admin order metabox.
+* Full High-Performance Order Storage (HPOS) declaration and compatibility for WooCommerce.
+* Verified Base L2 Router & Escrow contract integrations.
 
 = 0.1.8 =
 * Added universal [apay_button] shortcode for 1-click digital product sales on any post or page.
