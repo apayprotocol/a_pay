@@ -2,6 +2,7 @@
 
 import { ExternalLink, Sparkles } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 // SSR-safe dynamic import — zero LCP impact
@@ -20,6 +21,7 @@ const AlienBotCanvas = dynamic(
 const TELEGRAM_BOT_URL = 'https://telegram.me/APay_Protocol_Bot';
 
 export function AlienBotFlyer() {
+  const pathname = usePathname();
   const [isMounted, setIsMounted] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isDark, setIsDark] = useState(false);
@@ -60,7 +62,10 @@ export function AlienBotFlyer() {
     };
   }, []);
 
-  if (!isMounted) return null;
+  if (!isMounted || pathname === '/tma') return null;
+  if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp?.initData) {
+    return null;
+  }
 
   const handleOpenTelegram = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (typeof window !== 'undefined') {

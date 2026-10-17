@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-export interface TelegramUser {
+interface TelegramUser {
   id: number;
   first_name?: string;
   last_name?: string;

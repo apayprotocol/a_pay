@@ -1,23 +1,52 @@
 'use client';
 
-import Image from 'next/image';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPublicClient, formatEther, formatUnits, http, parseAbi } from 'viem';
 import { base, baseSepolia } from 'viem/chains';
 import { ApayBrandLogo } from '@/components/ApayBrandLogo';
 import { ConnectWalletModal } from '@/components/ConnectWalletModal';
+import { AgentVaultsTab } from '@/components/modules/AgentVaultsTab';
+import { AiGuidelinesTab } from '@/components/modules/AiGuidelinesTab';
+import { ApiKeysTab } from '@/components/modules/ApiKeysTab';
+import { BlogTab } from '@/components/modules/BlogTab';
+import { CommunityTab } from '@/components/modules/CommunityTab';
+import { DocsTab } from '@/components/modules/DocsTab';
+import { MarketplaceTab } from '@/components/modules/MarketplaceTab';
+import { McpHubTab } from '@/components/modules/McpHubTab';
+import { OverviewTab } from '@/components/modules/OverviewTab';
+import { PaywallsTab } from '@/components/modules/PaywallsTab';
+import { PlaygroundTab } from '@/components/modules/PlaygroundTab';
+import { StakingTab } from '@/components/modules/StakingTab';
+// Full Console Components
+import { Sidebar } from '@/components/Sidebar';
+import { TopBar } from '@/components/TopBar';
 import { getNetworkContracts, type NetworkId } from '@/config/contracts';
-import { type TelegramUser, useTelegramWebApp } from '@/hooks/useTelegramWebApp';
+import { useTelegramWebApp } from '@/hooks/useTelegramWebApp';
 
-type TmaTab = 'faucet' | 'scanner' | 'checkout' | 'agents' | 'contracts';
+type TmaMiniTab =
+  | 'faucet'
+  | 'scanner'
+  | 'playground'
+  | 'stats'
+  | 'paywall'
+  | 'marketplace'
+  | 'contracts';
 
 const ERC20_ABI = parseAbi(['function balanceOf(address account) external view returns (uint256)']);
 
 export default function TelegramMiniAppPage() {
   const { isAvailable, user, haptic, openTelegramLink, openLink } = useTelegramWebApp();
 
+  // Mode: 'mini' (Quick Mobile Cards) or 'full' (Complete Web Dashboard Console)
+  const [consoleMode, setConsoleMode] = useState<'mini' | 'full'>('mini');
+
   const [activeNetwork, setActiveNetwork] = useState<NetworkId>('base-mainnet');
-  const [activeTab, setActiveTab] = useState<TmaTab>('faucet');
+  const [activeMiniTab, setActiveMiniTab] = useState<TmaMiniTab>('faucet');
+
+  // Full Console Active Tab
+  const [fullConsoleTab, setFullConsoleTab] = useState<string>('overview');
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const mainScrollRef = useRef<HTMLDivElement>(null);
 
   // Wallet State
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
@@ -112,7 +141,6 @@ export default function TelegramMiniAppPage() {
   // Generate Instant Test Session Key
   const handleGenerateSessionKey = () => {
     haptic.impact('medium');
-    // Generate a random 32-byte hex for client-side ephemeral testing
     const array = new Uint8Array(32);
     crypto.getRandomValues(array);
     const privKey =
@@ -121,7 +149,6 @@ export default function TelegramMiniAppPage() {
         .map((b) => b.toString(16).padStart(2, '0'))
         .join('');
 
-    // Generate deterministic placeholder address format for session
     const addrBytes = new Uint8Array(20);
     crypto.getRandomValues(addrBytes);
     const mockAddr =
@@ -219,63 +246,220 @@ export default function TelegramMiniAppPage() {
 
   const displayName = user?.first_name || user?.username || 'Builder';
   const contracts = getNetworkContracts(activeNetwork);
+  const isFounder = Boolean(
+    walletAddress && walletAddress.toLowerCase() === contracts.founder.toLowerCase(),
+  );
 
   // Stripe vs A-Pay Math
   const stripeFee = Number((calcAmount * 0.029 + 0.3).toFixed(3));
   const stripePctLost = Math.min(100, Math.round((stripeFee / calcAmount) * 100));
   const apayFee = Number((calcAmount * 0.01 + 0.0001).toFixed(4));
-  const apayPctLost = Math.max(1, Math.round((apayFee / calcAmount) * 100));
 
+  // ── FULL CONSOLE MODE RENDER ────────────────────────────────────────────────
+  if (consoleMode === 'full') {
+    return (
+      <div className="h-screen flex bg-background text-foreground transition-colors duration-300 overflow-hidden flex-col">
+        {/* Sticky Mobile Telegram Top Banner */}
+        <div className="bg-gradient-to-r from-blue-950 via-slate-900 to-blue-950 border-b border-blue-500/30 px-3 py-2 flex items-center justify-between text-xs font-mono shrink-0 z-50">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+            <span className="text-white font-medium">Full Web Console</span>
+            <span className="text-[10px] text-slate-400 hidden xs:inline">
+              ({activeNetwork === 'base-mainnet' ? 'Mainnet' : 'Sepolia'})
+            </span>
+          </div>
+          <button
+            onClick={() => {
+              setConsoleMode('mini');
+              haptic.selection();
+            }}
+            className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium flex items-center gap-1 text-[11px] shadow-sm transition-all"
+          >
+            <span>📱</span>
+            <span>Quick Mini View</span>
+          </button>
+        </div>
+
+        {/* Console Container with Sidebar and Content */}
+        <div className="flex-1 flex overflow-hidden min-h-0">
+          <Sidebar
+            activeTab={fullConsoleTab}
+            setActiveTab={setFullConsoleTab}
+            isMobileOpen={isMobileSidebarOpen}
+            setIsMobileOpen={setIsMobileSidebarOpen}
+            activeNetwork={activeNetwork}
+            onNavigateToLanding={() => setConsoleMode('mini')}
+          />
+
+          <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
+            <TopBar
+              activeTab={fullConsoleTab}
+              onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
+              walletAddress={walletAddress}
+              connectWallet={() => setIsWalletModalOpen(true)}
+              disconnectWallet={walletAddress ? () => setWalletAddress(null) : undefined}
+              tokenBalance={apayBalance}
+              isFounder={isFounder}
+              activeNetwork={activeNetwork}
+              onSelectNetwork={setActiveNetwork}
+              onNavigateToLanding={() => setConsoleMode('mini')}
+            />
+
+            <div ref={mainScrollRef} className="flex-1 overflow-y-auto min-w-0 flex flex-col">
+              <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
+                {fullConsoleTab === 'overview' && (
+                  <OverviewTab
+                    walletAddress={walletAddress}
+                    tokenBalance={apayBalance}
+                    isFounder={isFounder}
+                    onConnect={() => setIsWalletModalOpen(true)}
+                    activeNetwork={activeNetwork}
+                  />
+                )}
+                {fullConsoleTab === 'marketplace' && (
+                  <MarketplaceTab
+                    walletAddress={walletAddress}
+                    activeNetwork={activeNetwork}
+                    onNavigateToTab={setFullConsoleTab}
+                  />
+                )}
+                {fullConsoleTab === 'playground' && (
+                  <PlaygroundTab
+                    walletAddress={walletAddress}
+                    activeNetwork={activeNetwork}
+                    onNavigateToTab={setFullConsoleTab}
+                  />
+                )}
+                {fullConsoleTab === 'mcphub' && (
+                  <McpHubTab walletAddress={walletAddress} activeNetwork={activeNetwork} />
+                )}
+                {fullConsoleTab === 'paywalls' && (
+                  <PaywallsTab
+                    walletAddress={walletAddress}
+                    onConnect={() => setIsWalletModalOpen(true)}
+                    activeNetwork={activeNetwork}
+                  />
+                )}
+                {fullConsoleTab === 'vaults' && (
+                  <AgentVaultsTab
+                    walletAddress={walletAddress}
+                    activeNetwork={activeNetwork}
+                    onConnect={() => setIsWalletModalOpen(true)}
+                  />
+                )}
+                {fullConsoleTab === 'staking' && (
+                  <StakingTab
+                    walletAddress={walletAddress}
+                    tokenBalance={apayBalance}
+                    activeNetwork={activeNetwork}
+                  />
+                )}
+                {fullConsoleTab === 'docs' && (
+                  <DocsTab activeNetwork={activeNetwork} onNavigateToTab={setFullConsoleTab} />
+                )}
+                {fullConsoleTab === 'aiguidelines' && (
+                  <AiGuidelinesTab
+                    activeNetwork={activeNetwork}
+                    onNavigateToTab={setFullConsoleTab}
+                  />
+                )}
+                {fullConsoleTab === 'community' && (
+                  <CommunityTab
+                    walletAddress={walletAddress}
+                    isFounder={isFounder}
+                    onConnect={() => setIsWalletModalOpen(true)}
+                    activeNetwork={activeNetwork}
+                  />
+                )}
+                {fullConsoleTab === 'apikeys' && <ApiKeysTab walletAddress={walletAddress} />}
+                {fullConsoleTab === 'blog' && (
+                  <BlogTab activeNetwork={activeNetwork} onNavigateToTab={setFullConsoleTab} />
+                )}
+              </main>
+            </div>
+          </div>
+        </div>
+
+        <ConnectWalletModal
+          isOpen={isWalletModalOpen}
+          onClose={() => setIsWalletModalOpen(false)}
+          onConnected={async (addr) => {
+            setWalletAddress(addr);
+            setIsWalletModalOpen(false);
+            haptic.notification('success');
+            await loadBalances(addr, activeNetwork);
+          }}
+          activeNetwork={activeNetwork}
+        />
+      </div>
+    );
+  }
+
+  // ── MINI VIEW MODE RENDER (FAST TOUCH CARDS) ────────────────────────────────
   return (
     <div className="min-h-screen bg-[#07080b] text-slate-100 flex flex-col font-sans selection:bg-blue-500 selection:text-white pb-20">
       {/* ── TOP HEADER ────────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-40 bg-[#07080b]/90 backdrop-blur-md border-b border-slate-800/80 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <ApayBrandLogo size={32} animated={false} withGlow={true} />
+      <header className="sticky top-0 z-40 bg-[#07080b]/95 backdrop-blur-md border-b border-slate-800/80 px-3.5 py-2.5 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <ApayBrandLogo size={30} animated={false} withGlow={true} />
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="font-spatial font-black text-white text-base tracking-wider">
+              <span className="font-spatial font-black text-white text-sm tracking-wider">
                 A-PAY
               </span>
-              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30 font-bold uppercase">
+              <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30 font-bold uppercase">
                 TMA
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 font-mono truncate">
+            <p className="text-[10px] text-slate-400 font-mono truncate max-w-[120px]">
               Namaste, <span className="text-white font-medium">{displayName}</span>
             </p>
           </div>
         </div>
 
-        {/* Network Selector Badge */}
-        <button
-          onClick={() => {
-            const nextNet = activeNetwork === 'base-mainnet' ? 'base-sepolia' : 'base-mainnet';
-            setActiveNetwork(nextNet);
-            haptic.selection();
-          }}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono font-medium border transition-colors ${
-            activeNetwork === 'base-mainnet'
-              ? 'bg-blue-950/60 text-blue-400 border-blue-600/40 hover:border-blue-500'
-              : 'bg-amber-950/60 text-amber-400 border-amber-600/40 hover:border-amber-500'
-          }`}
-        >
-          <span
-            className={`w-2 h-2 rounded-full animate-pulse ${
-              activeNetwork === 'base-mainnet' ? 'bg-blue-400' : 'bg-amber-400'
+        <div className="flex items-center gap-1.5">
+          {/* Network Selector Badge */}
+          <button
+            onClick={() => {
+              const nextNet = activeNetwork === 'base-mainnet' ? 'base-sepolia' : 'base-mainnet';
+              setActiveNetwork(nextNet);
+              haptic.selection();
+            }}
+            className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-mono font-medium border transition-colors ${
+              activeNetwork === 'base-mainnet'
+                ? 'bg-blue-950/60 text-blue-400 border-blue-600/40 hover:border-blue-500'
+                : 'bg-amber-950/60 text-amber-400 border-amber-600/40 hover:border-amber-500'
             }`}
-          />
-          {activeNetwork === 'base-mainnet' ? 'Base 8453' : 'Sepolia 84532'}
-        </button>
+          >
+            <span
+              className={`w-1.5 h-1.5 rounded-full animate-pulse ${
+                activeNetwork === 'base-mainnet' ? 'bg-blue-400' : 'bg-amber-400'
+              }`}
+            />
+            {activeNetwork === 'base-mainnet' ? 'Base 8453' : 'Sepolia'}
+          </button>
+
+          {/* Full Console Switcher */}
+          <button
+            onClick={() => {
+              setConsoleMode('full');
+              haptic.selection();
+            }}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-400 hover:text-sky-300 border border-slate-700 text-[11px] font-mono font-medium transition-all shadow-sm"
+          >
+            <span>🌐</span>
+            <span className="font-semibold">Full Console</span>
+          </button>
+        </div>
       </header>
 
       {/* ── WALLET / SESSION CARD ────────────────────────────────────────────── */}
-      <section className="px-4 pt-4">
-        <div className="p-4 rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-900/40 border border-slate-800/90 shadow-lg relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-40 h-40 bg-blue-600/10 rounded-full blur-2xl pointer-events-none" />
+      <section className="px-3.5 pt-3">
+        <div className="p-3.5 rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-900/40 border border-slate-800/90 shadow-lg relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-36 h-36 bg-blue-600/10 rounded-full blur-2xl pointer-events-none" />
 
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-mono uppercase tracking-wider text-slate-400">
+          <div className="flex items-center justify-between mb-2.5">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400">
               {walletAddress
                 ? 'Connected EVM Wallet'
                 : sessionKey
@@ -283,15 +467,15 @@ export default function TelegramMiniAppPage() {
                   : 'Account Status'}
             </span>
             {walletAddress ? (
-              <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">
                 Active
               </span>
             ) : sessionKey ? (
-              <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20 font-medium">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20 font-medium">
                 Ephemeral
               </span>
             ) : (
-              <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
                 Not Connected
               </span>
             )}
@@ -299,7 +483,7 @@ export default function TelegramMiniAppPage() {
 
           {walletAddress || sessionKey ? (
             <div>
-              <div className="flex items-center justify-between mb-3 bg-black/40 p-2.5 rounded-xl border border-slate-800">
+              <div className="flex items-center justify-between mb-2.5 bg-black/40 p-2 rounded-xl border border-slate-800">
                 <span className="text-xs font-mono text-slate-300 truncate max-w-[200px]">
                   {walletAddress || sessionKey?.address}
                 </span>
@@ -315,26 +499,26 @@ export default function TelegramMiniAppPage() {
 
               {/* Balances Grid */}
               <div className="grid grid-cols-2 gap-2 text-center">
-                <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
+                <div className="bg-slate-950/60 p-2 rounded-xl border border-slate-800/80">
                   <span className="text-[10px] text-slate-400 font-mono uppercase block">
                     $APAY Balance
                   </span>
-                  <span className="text-lg font-bold font-spatial text-white">
+                  <span className="text-base font-bold font-spatial text-white">
                     {isLoadingBalances ? '...' : apayBalance}
                   </span>
                 </div>
-                <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
+                <div className="bg-slate-950/60 p-2 rounded-xl border border-slate-800/80">
                   <span className="text-[10px] text-slate-400 font-mono uppercase block">
                     ETH Balance
                   </span>
-                  <span className="text-lg font-bold font-spatial text-white">
+                  <span className="text-base font-bold font-spatial text-white">
                     {isLoadingBalances ? '...' : ethBalance}
                   </span>
                 </div>
               </div>
 
               {sessionKey && (
-                <div className="mt-3 pt-3 border-t border-slate-800/80 text-[11px] font-mono">
+                <div className="mt-2.5 pt-2.5 border-t border-slate-800/80 text-[11px] font-mono">
                   <div className="flex items-center justify-between text-slate-400">
                     <span>Session Private Key:</span>
                     <button
@@ -366,13 +550,13 @@ export default function TelegramMiniAppPage() {
                     haptic.selection();
                     setIsWalletModalOpen(true);
                   }}
-                  className="w-full py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs text-center shadow-lg shadow-blue-600/30 transition-all font-mono"
+                  className="w-full py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs text-center shadow-md font-mono"
                 >
                   🔗 Connect Wallet
                 </button>
                 <button
                   onClick={handleGenerateSessionKey}
-                  className="w-full py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-400 border border-slate-700 font-medium text-xs text-center transition-all font-mono"
+                  className="w-full py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-400 border border-slate-700 font-medium text-xs text-center font-mono"
                 >
                   ⚡ Instant Session
                 </button>
@@ -383,15 +567,15 @@ export default function TelegramMiniAppPage() {
       </section>
 
       {/* ── TMA NAVIGATION TABS ──────────────────────────────────────────────── */}
-      <nav className="px-4 pt-4">
+      <nav className="px-3.5 pt-3">
         <div className="flex items-center p-1 bg-slate-900/80 rounded-xl border border-slate-800/80 gap-1 overflow-x-auto no-scrollbar">
           <button
             onClick={() => {
-              setActiveTab('faucet');
+              setActiveMiniTab('faucet');
               haptic.selection();
             }}
-            className={`flex-1 min-w-[70px] py-2 text-xs font-mono font-medium rounded-lg transition-all text-center ${
-              activeTab === 'faucet'
+            className={`py-1.5 px-3 text-xs font-mono font-medium rounded-lg whitespace-nowrap transition-all ${
+              activeMiniTab === 'faucet'
                 ? 'bg-blue-600 text-white shadow-md'
                 : 'text-slate-400 hover:text-white'
             }`}
@@ -400,11 +584,24 @@ export default function TelegramMiniAppPage() {
           </button>
           <button
             onClick={() => {
-              setActiveTab('scanner');
+              setActiveMiniTab('playground');
               haptic.selection();
             }}
-            className={`flex-1 min-w-[70px] py-2 text-xs font-mono font-medium rounded-lg transition-all text-center ${
-              activeTab === 'scanner'
+            className={`py-1.5 px-3 text-xs font-mono font-medium rounded-lg whitespace-nowrap transition-all ${
+              activeMiniTab === 'playground'
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            🤖 Playground
+          </button>
+          <button
+            onClick={() => {
+              setActiveMiniTab('scanner');
+              haptic.selection();
+            }}
+            className={`py-1.5 px-3 text-xs font-mono font-medium rounded-lg whitespace-nowrap transition-all ${
+              activeMiniTab === 'scanner'
                 ? 'bg-blue-600 text-white shadow-md'
                 : 'text-slate-400 hover:text-white'
             }`}
@@ -413,11 +610,24 @@ export default function TelegramMiniAppPage() {
           </button>
           <button
             onClick={() => {
-              setActiveTab('checkout');
+              setActiveMiniTab('stats');
               haptic.selection();
             }}
-            className={`flex-1 min-w-[70px] py-2 text-xs font-mono font-medium rounded-lg transition-all text-center ${
-              activeTab === 'checkout'
+            className={`py-1.5 px-3 text-xs font-mono font-medium rounded-lg whitespace-nowrap transition-all ${
+              activeMiniTab === 'stats'
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            📊 Stats
+          </button>
+          <button
+            onClick={() => {
+              setActiveMiniTab('paywall');
+              haptic.selection();
+            }}
+            className={`py-1.5 px-3 text-xs font-mono font-medium rounded-lg whitespace-nowrap transition-all ${
+              activeMiniTab === 'paywall'
                 ? 'bg-blue-600 text-white shadow-md'
                 : 'text-slate-400 hover:text-white'
             }`}
@@ -426,24 +636,24 @@ export default function TelegramMiniAppPage() {
           </button>
           <button
             onClick={() => {
-              setActiveTab('agents');
+              setActiveMiniTab('marketplace');
               haptic.selection();
             }}
-            className={`flex-1 min-w-[70px] py-2 text-xs font-mono font-medium rounded-lg transition-all text-center ${
-              activeTab === 'agents'
+            className={`py-1.5 px-3 text-xs font-mono font-medium rounded-lg whitespace-nowrap transition-all ${
+              activeMiniTab === 'marketplace'
                 ? 'bg-blue-600 text-white shadow-md'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            🤖 Agents
+            🌐 Marketplace
           </button>
           <button
             onClick={() => {
-              setActiveTab('contracts');
+              setActiveMiniTab('contracts');
               haptic.selection();
             }}
-            className={`flex-1 min-w-[70px] py-2 text-xs font-mono font-medium rounded-lg transition-all text-center ${
-              activeTab === 'contracts'
+            className={`py-1.5 px-3 text-xs font-mono font-medium rounded-lg whitespace-nowrap transition-all ${
+              activeMiniTab === 'contracts'
                 ? 'bg-blue-600 text-white shadow-md'
                 : 'text-slate-400 hover:text-white'
             }`}
@@ -454,9 +664,9 @@ export default function TelegramMiniAppPage() {
       </nav>
 
       {/* ── TAB CONTENT ──────────────────────────────────────────────────────── */}
-      <main className="px-4 pt-3 flex-1">
-        {/* ── TAB 1: FAUCET ── */}
-        {activeTab === 'faucet' && (
+      <main className="px-3.5 pt-3 flex-1">
+        {/* ── TAB: FAUCET ── */}
+        {activeMiniTab === 'faucet' && (
           <div className="p-4 rounded-2xl bg-slate-900/40 border border-slate-800/80 space-y-4">
             <div>
               <div className="flex items-center justify-between">
@@ -536,8 +746,34 @@ export default function TelegramMiniAppPage() {
           </div>
         )}
 
-        {/* ── TAB 2: AI CRAWLER SCANNER ── */}
-        {activeTab === 'scanner' && (
+        {/* ── TAB: PLAYGROUND (AI AGENT RUNNER) ── */}
+        {activeMiniTab === 'playground' && (
+          <div className="rounded-2xl overflow-hidden border border-slate-800/80 bg-slate-900/30">
+            <PlaygroundTab
+              walletAddress={walletAddress || sessionKey?.address}
+              activeNetwork={activeNetwork}
+              onNavigateToTab={(tab) => {
+                if (tab === 'faucet') setActiveMiniTab('faucet');
+              }}
+            />
+          </div>
+        )}
+
+        {/* ── TAB: STATS & OVERVIEW ── */}
+        {activeMiniTab === 'stats' && (
+          <div className="rounded-2xl overflow-hidden border border-slate-800/80 bg-slate-900/30">
+            <OverviewTab
+              walletAddress={walletAddress || sessionKey?.address || null}
+              tokenBalance={apayBalance}
+              isFounder={isFounder}
+              onConnect={() => setIsWalletModalOpen(true)}
+              activeNetwork={activeNetwork}
+            />
+          </div>
+        )}
+
+        {/* ── TAB: SCANNER ── */}
+        {activeMiniTab === 'scanner' && (
           <div className="p-4 rounded-2xl bg-slate-900/40 border border-slate-800/80 space-y-4">
             <div>
               <h3 className="font-spatial font-bold text-white text-base">
@@ -633,8 +869,8 @@ export default function TelegramMiniAppPage() {
           </div>
         )}
 
-        {/* ── TAB 3: PAYWALL & CHECKOUT ── */}
-        {activeTab === 'checkout' && (
+        {/* ── TAB: PAYWALL & CHECKOUT ── */}
+        {activeMiniTab === 'paywall' && (
           <div className="p-4 rounded-2xl bg-slate-900/40 border border-slate-800/80 space-y-4">
             <div>
               <h3 className="font-spatial font-bold text-white text-base">
@@ -696,7 +932,6 @@ export default function TelegramMiniAppPage() {
               </div>
             </div>
 
-            {/* Drop-in checkout link */}
             <div className="pt-1">
               <button
                 onClick={() => openLink('https://apayprotocol.org/checkout-demo')}
@@ -708,93 +943,21 @@ export default function TelegramMiniAppPage() {
           </div>
         )}
 
-        {/* ── TAB 4: AGENTS & MCP ── */}
-        {activeTab === 'agents' && (
-          <div className="p-4 rounded-2xl bg-slate-900/40 border border-slate-800/80 space-y-4">
-            <div>
-              <h3 className="font-spatial font-bold text-white text-base">
-                🤖 Autonomous AI Agents (MCP)
-              </h3>
-              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                Connect Claude Desktop, Cursor, or CrewAI to A-Pay Protocol for autonomous EIP-712
-                micro-settlements.
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              <div className="bg-black/50 p-3 rounded-xl border border-slate-800 space-y-1">
-                <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="text-sky-400 font-semibold">
-                    1. Claude Desktop MCP (Python):
-                  </span>
-                  <button
-                    onClick={() => copyToClipboard('uvx apay mcp', 'claude_mcp')}
-                    className="text-blue-400 hover:text-blue-300 text-[11px]"
-                  >
-                    {copiedKey === 'claude_mcp' ? 'Copied ✓' : 'Copy'}
-                  </button>
-                </div>
-                <code className="text-[11px] font-mono text-slate-300 block bg-slate-950 p-2 rounded border border-slate-800/80 overflow-x-auto">
-                  uvx apay mcp
-                </code>
-              </div>
-
-              <div className="bg-black/50 p-3 rounded-xl border border-slate-800 space-y-1">
-                <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="text-sky-400 font-semibold">
-                    2. Cursor IDE MCP (TypeScript):
-                  </span>
-                  <button
-                    onClick={() => copyToClipboard('npx apay-gateway mcp', 'cursor_mcp')}
-                    className="text-blue-400 hover:text-blue-300 text-[11px]"
-                  >
-                    {copiedKey === 'cursor_mcp' ? 'Copied ✓' : 'Copy'}
-                  </button>
-                </div>
-                <code className="text-[11px] font-mono text-slate-300 block bg-slate-950 p-2 rounded border border-slate-800/80 overflow-x-auto">
-                  npx apay-gateway mcp
-                </code>
-              </div>
-
-              <div className="bg-black/50 p-3 rounded-xl border border-slate-800 space-y-1">
-                <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="text-sky-400 font-semibold">
-                    3. Fullstack Agent App Scaffold:
-                  </span>
-                  <button
-                    onClick={() =>
-                      copyToClipboard('npx create-apay-app my-agent-app', 'create_apay')
-                    }
-                    className="text-blue-400 hover:text-blue-300 text-[11px]"
-                  >
-                    {copiedKey === 'create_apay' ? 'Copied ✓' : 'Copy'}
-                  </button>
-                </div>
-                <code className="text-[11px] font-mono text-slate-300 block bg-slate-950 p-2 rounded border border-slate-800/80 overflow-x-auto">
-                  npx create-apay-app my-agent-app
-                </code>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 pt-1">
-              <button
-                onClick={() => openLink('https://smithery.ai/servers/apayprotocol/apay')}
-                className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-center text-slate-300 font-mono hover:border-slate-700"
-              >
-                Smithery.ai Page ↗
-              </button>
-              <button
-                onClick={() => openLink('https://glama.ai/mcp/servers/apayprotocol/a_pay')}
-                className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-center text-slate-300 font-mono hover:border-slate-700"
-              >
-                Glama.ai Listing ↗
-              </button>
-            </div>
+        {/* ── TAB: MARKETPLACE ── */}
+        {activeMiniTab === 'marketplace' && (
+          <div className="rounded-2xl overflow-hidden border border-slate-800/80 bg-slate-900/30">
+            <MarketplaceTab
+              walletAddress={walletAddress || sessionKey?.address}
+              activeNetwork={activeNetwork}
+              onNavigateToTab={(tab) => {
+                if (tab === 'playground') setActiveMiniTab('playground');
+              }}
+            />
           </div>
         )}
 
-        {/* ── TAB 5: ON-CHAIN BASE CONTRACTS ── */}
-        {activeTab === 'contracts' && (
+        {/* ── TAB: ON-CHAIN BASE CONTRACTS ── */}
+        {activeMiniTab === 'contracts' && (
           <div className="p-4 rounded-2xl bg-slate-900/40 border border-slate-800/80 space-y-4">
             <div>
               <div className="flex items-center justify-between">
@@ -897,11 +1060,11 @@ export default function TelegramMiniAppPage() {
         </button>
 
         <button
-          onClick={() => openLink('https://apayprotocol.org')}
+          onClick={() => setConsoleMode('full')}
           className="flex items-center gap-1.5 text-xs font-mono text-slate-400 hover:text-white"
         >
-          <span>🚀</span>
-          <span>Web Console ↗</span>
+          <span>🌐</span>
+          <span>Full Console Mode</span>
         </button>
       </footer>
 
