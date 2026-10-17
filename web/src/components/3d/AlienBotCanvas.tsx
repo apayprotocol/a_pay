@@ -28,16 +28,22 @@ export function AlienBotCanvas({ isHovered = false, isDark = false }: AlienBotCa
     camera.position.set(0, 0.36, 4.35);
 
     // ── 2. WebGL Renderer with High-DPI Clamping ────────────────────────────
-    const renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: true,
-      powerPreference: 'high-performance',
-    });
-    renderer.setSize(W, H);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = isDark ? 1.5 : 1.7;
-    el.appendChild(renderer.domElement);
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+        powerPreference: 'high-performance',
+      });
+      renderer.setSize(W, H);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = isDark ? 1.5 : 1.7;
+      el.appendChild(renderer.domElement);
+    } catch (err) {
+      console.warn('WebGL initialization failed in AlienBotCanvas:', err);
+      return;
+    }
 
     // ── 3. Procedural Studio Environment for PBR Reflections ────────────────
     const pmremGen = new THREE.PMREMGenerator(renderer);

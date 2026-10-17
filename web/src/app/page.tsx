@@ -24,9 +24,31 @@ import {
   initEIP6963Discovery,
 } from '@/services/blockchain';
 
+const VALID_TABS = [
+  'overview',
+  'marketplace',
+  'playground',
+  'mcphub',
+  'paywalls',
+  'docs',
+  'apikeys',
+  'vaults',
+  'staking',
+  'blog',
+  'community',
+  'aiguidelines',
+] as const;
+
+type ValidTab = (typeof VALID_TABS)[number];
+
+function resolveTab(tab: string | null | undefined): ValidTab {
+  if (!tab || tab === 'console') return 'overview';
+  return (VALID_TABS as readonly string[]).includes(tab) ? (tab as ValidTab) : 'overview';
+}
+
 export default function DashboardPage() {
   const [viewMode, setViewMode] = useState<'landing' | 'console'>('landing');
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState<ValidTab>('overview');
   const [activeNetwork, setActiveNetwork] = useState<NetworkId>('base-mainnet');
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [tokenBalance, setTokenBalance] = useState<string>('0');
@@ -41,28 +63,39 @@ export default function DashboardPage() {
     }
   }, [activeTab]);
 
-  // Hydrate active network and tab preference from client storage / URL
+  // Hydrate active network, view mode and tab preference from client storage / URL
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('apay_active_network') as NetworkId | null;
-      if (saved && (saved === 'base-sepolia' || saved === 'base-mainnet')) {
-        setActiveNetwork(saved);
+      const savedNet = localStorage.getItem('apay_active_network') as NetworkId | null;
+      if (savedNet && (savedNet === 'base-sepolia' || savedNet === 'base-mainnet')) {
+        setActiveNetwork(savedNet);
       }
 
       const urlParams = new URLSearchParams(window.location.search);
       const tabParam = urlParams.get('tab');
       const viewParam = urlParams.get('view');
-      if (tabParam) {
-        setActiveTab(tabParam);
+      const savedView = localStorage.getItem('apay_view_mode');
+      const savedTab = localStorage.getItem('apay_active_tab');
+
+      // Resolve tab safely (handles '?tab=console' or unknown tabs by falling back to 'overview')
+      const targetTab = resolveTab(tabParam || savedTab);
+
+      // Check if user requested console view or if saved view is console
+      if (
+        tabParam ||
+        viewParam === 'console' ||
+        savedView === 'console' ||
+        (window.location.hash && window.location.hash !== '#')
+      ) {
+        setActiveTab(targetTab);
         setViewMode('console');
-      } else if (viewParam === 'console') {
-        setViewMode('console');
-      } else if (window.location.hash) {
-        const hash = window.location.hash.replace('#', '');
-        if (hash) {
-          setActiveTab(hash);
-          setViewMode('console');
-        }
+        // Keep URL query string strictly clean and synced with active tab
+        const url = new URL(window.location.href);
+        url.searchParams.set('tab', targetTab);
+        url.searchParams.delete('view');
+        window.history.replaceState(null, '', url.toString());
+      } else {
+        setViewMode('landing');
       }
     }
   }, []);
@@ -276,12 +309,30 @@ export default function DashboardPage() {
     setViewMode('landing');
   };
 
-  const handleEnterConsole = (targetTab?: string) => {
-    if (targetTab) {
-      setActiveTab(targetTab);
+  const handleSelectTab = (tab: string) => {
+    const valid = resolveTab(tab);
+    setActiveTab(valid);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('apay_active_tab', valid);
+      localStorage.setItem('apay_view_mode', 'console');
+      const url = new URL(window.location.href);
+      url.searchParams.set('tab', valid);
+      url.searchParams.delete('view');
+      window.history.replaceState(null, '', url.toString());
     }
+  };
+
+  const handleEnterConsole = (targetTab?: string) => {
+    const valid = resolveTab(targetTab);
+    setActiveTab(valid);
     setViewMode('console');
     if (typeof window !== 'undefined') {
+      localStorage.setItem('apay_view_mode', 'console');
+      localStorage.setItem('apay_active_tab', valid);
+      const url = new URL(window.location.href);
+      url.searchParams.set('tab', valid);
+      url.searchParams.delete('view');
+      window.history.replaceState(null, '', url.toString());
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
@@ -289,6 +340,11 @@ export default function DashboardPage() {
   const handleNavigateToLanding = () => {
     setViewMode('landing');
     if (typeof window !== 'undefined') {
+      localStorage.setItem('apay_view_mode', 'landing');
+      const url = new URL(window.location.href);
+      url.searchParams.delete('tab');
+      url.searchParams.delete('view');
+      window.history.replaceState(null, '', url.pathname + (url.search ? url.search : ''));
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
@@ -316,11 +372,11 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="h-screen flex bg-background text-foreground transition-colors duration-300 overflow-hidden">
+    <div className="min-h-screen h-[100dvh] flex bg-background text-foreground transition-colors duration-300 overflow-hidden">
       {/* High-Tech Left Sidebar (Desktop Fixed + Mobile Slide-over Drawer) */}
       <Sidebar
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={handleSelectTab}
         isMobileOpen={isMobileSidebarOpen}
         setIsMobileOpen={setIsMobileSidebarOpen}
         activeNetwork={activeNetwork}
@@ -328,7 +384,7 @@ export default function DashboardPage() {
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col h-screen min-w-0 overflow-hidden">
+      <div className="flex-1 flex flex-col h-[100dvh] min-w-0 overflow-hidden">
         {/* TopBar with Dynamic Breadcrumbs, Base L2 Network Switcher, ThemeToggle & Wallet */}
         <TopBar
           activeTab={activeTab}
@@ -360,14 +416,14 @@ export default function DashboardPage() {
               <MarketplaceTab
                 walletAddress={walletAddress}
                 activeNetwork={activeNetwork}
-                onNavigateToTab={setActiveTab}
+                onNavigateToTab={handleSelectTab}
               />
             )}
             {activeTab === 'playground' && (
               <PlaygroundTab
                 walletAddress={walletAddress}
                 activeNetwork={activeNetwork}
-                onNavigateToTab={setActiveTab}
+                onNavigateToTab={handleSelectTab}
               />
             )}
             {activeTab === 'mcphub' && (
@@ -381,7 +437,7 @@ export default function DashboardPage() {
               />
             )}
             {activeTab === 'docs' && (
-              <DocsTab activeNetwork={activeNetwork} onNavigateToTab={setActiveTab} />
+              <DocsTab activeNetwork={activeNetwork} onNavigateToTab={handleSelectTab} />
             )}
             {activeTab === 'apikeys' && (
               <ApiKeysTab walletAddress={walletAddress} activeNetwork={activeNetwork} />
@@ -401,7 +457,7 @@ export default function DashboardPage() {
               />
             )}
             {activeTab === 'blog' && (
-              <BlogTab activeNetwork={activeNetwork} onNavigateToTab={setActiveTab} />
+              <BlogTab activeNetwork={activeNetwork} onNavigateToTab={handleSelectTab} />
             )}
             {activeTab === 'community' && (
               <CommunityTab
@@ -412,7 +468,18 @@ export default function DashboardPage() {
               />
             )}
             {activeTab === 'aiguidelines' && (
-              <AiGuidelinesTab activeNetwork={activeNetwork} onNavigateToTab={setActiveTab} />
+              <AiGuidelinesTab activeNetwork={activeNetwork} onNavigateToTab={handleSelectTab} />
+            )}
+
+            {/* Guaranteed Fallback View if tab is unrecognized — ZERO WHITE SCREEN */}
+            {!(VALID_TABS as readonly string[]).includes(activeTab) && (
+              <OverviewTab
+                walletAddress={walletAddress}
+                tokenBalance={tokenBalance}
+                isFounder={isFounder}
+                onConnect={handleConnectWallet}
+                activeNetwork={activeNetwork}
+              />
             )}
           </main>
 

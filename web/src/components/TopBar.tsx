@@ -40,6 +40,8 @@ interface TopBarProps {
 
 const TAB_TITLES: Record<string, { title: string; category: string }> = {
   overview: { title: 'Overview & Contracts', category: 'Core Protocol' },
+  marketplace: { title: 'Global API Marketplace', category: 'Core Protocol' },
+  playground: { title: 'Agent Playground & Chatbot', category: 'Autonomous Runtime' },
   mcphub: { title: 'MCP & 402 Simulator', category: 'Autonomous Runtime' },
   paywalls: { title: '1-Click Paywalls', category: 'Merchant Suite' },
   docs: { title: 'Protocol Docs & API Reference', category: 'Developer Documentation' },

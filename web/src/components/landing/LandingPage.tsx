@@ -48,13 +48,26 @@ import {
   X,
   Zap,
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import React, { useState } from 'react';
 import { APay } from '@/checkout/checkout';
-import { CoinCanvas } from '@/components/3d/CoinCanvas';
 import { ApayBrandLogo } from '@/components/ApayBrandLogo';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { getNetworkContracts, NETWORKS, type NetworkId } from '@/config/contracts';
+
+const CoinCanvas = dynamic(
+  () => import('@/components/3d/CoinCanvas').then((mod) => mod.CoinCanvas),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+        <div className="w-14 h-14 rounded-full border-2 border-blue-500/20 border-t-blue-500 animate-spin" />
+        <span className="text-[10px] font-mono text-slate-400">Loading 3D Reactor...</span>
+      </div>
+    ),
+  },
+);
 
 interface LandingPageProps {
   walletAddress: string | null;

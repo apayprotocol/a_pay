@@ -1,14 +1,17 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 
 export function CoinCanvas() {
   const mountRef = useRef<HTMLDivElement>(null);
+  const [hasWebGLError, setHasWebGLError] = useState(false);
 
   useEffect(() => {
     const currentMount = mountRef.current;
     if (!currentMount) return;
+
+    let renderer: THREE.WebGLRenderer;
 
     const width = currentMount.clientWidth || 340;
     const height = currentMount.clientHeight || 340;
@@ -18,17 +21,23 @@ export function CoinCanvas() {
     const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 1000);
     camera.position.set(0, 0, 4.8);
 
-    // 2. WebGL Renderer
-    const renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: true,
-      powerPreference: 'high-performance',
-    });
-    renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.32;
-    currentMount.appendChild(renderer.domElement);
+    // 2. WebGL Renderer with safe try/catch for mobile GPUs
+    try {
+      renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+        powerPreference: 'high-performance',
+      });
+      renderer.setSize(width, height);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.32;
+      currentMount.appendChild(renderer.domElement);
+    } catch (err) {
+      console.warn('WebGL initialization failed in CoinCanvas, activating safe 2D fallback:', err);
+      setHasWebGLError(true);
+      return;
+    }
 
     // Procedural Studio Environment for Rich Liquid PBR Reflections
     const pmremGen = new THREE.PMREMGenerator(renderer);
@@ -471,6 +480,24 @@ export function CoinCanvas() {
       renderer.dispose();
     };
   }, []);
+
+  if (hasWebGLError) {
+    return (
+      <div className="relative w-full h-[280px] sm:h-[340px] flex flex-col items-center justify-center select-none gap-3">
+        <div className="relative w-32 h-32 sm:w-36 sm:h-36 rounded-full p-2 bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-400 shadow-xl shadow-blue-500/25 flex items-center justify-center animate-pulse">
+          <img
+            src="/brand/apay-official-logo.png"
+            alt="A-Pay Protocol Token"
+            className="w-24 h-24 sm:w-28 sm:h-28 object-contain rounded-full shadow-lg"
+          />
+        </div>
+        <div className="text-[10px] sm:text-[11px] font-mono tracking-wider uppercase font-bold text-sky-700 dark:text-sky-300 flex items-center gap-2 bg-sky-50/90 dark:bg-slate-900/90 px-3.5 py-1.5 rounded-full border border-sky-300/80 dark:border-sky-700/80 shadow-sm backdrop-blur-md">
+          <span className="w-2 h-2 rounded-full bg-sky-400 animate-ping"></span>
+          $APAY Token • Quantum Hex Reactor Core
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full h-[320px] sm:h-[370px] flex items-center justify-center select-none">
