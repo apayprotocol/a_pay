@@ -81,7 +81,9 @@ export const metadata: Metadata = {
     images: ['/brand/apay-official-logo.png'],
   },
   verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
+    google:
+      process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ||
+      'OOeSpoN_cPFHLfF-GeqtqzC6A_qmOs6dJcOxLgd2AVc',
     yandex: process.env.NEXT_PUBLIC_YANDEX_VERIFICATION || undefined,
     other: {
       'msvalidate.01': process.env.NEXT_PUBLIC_BING_VERIFICATION || '',
@@ -111,7 +113,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const gaId = process.env.NEXT_PUBLIC_GA_ID;
+  const gaId = process.env.NEXT_PUBLIC_GA_ID || 'G-QXD8VFYT4J';
 
   return (
     <html lang="en" suppressHydrationWarning>
