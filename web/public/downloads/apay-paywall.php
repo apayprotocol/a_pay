@@ -568,6 +568,45 @@ class APayWordPressPaywall {
         </div>
         <?php
     }
+
+    /**
+     * Lifecycle: Synchronize online status upon plugin activation
+     */
+    public static function on_activate() {
+        $inst = new self();
+        $inst->sync_registry_on_save('', get_option('apay_receiver_wallet', ''));
+    }
+
+    /**
+     * Lifecycle: Synchronize idle status upon plugin deactivation
+     */
+    public static function on_deactivate() {
+        $network = sanitize_text_field(get_option('apay_network', 'base'));
+        $wallet = sanitize_text_field(get_option('apay_receiver_wallet', ''));
+        if (empty($wallet)) {
+            $wallet = $network === 'base' ? self::ESCROW_MAINNET : self::ESCROW_SEPOLIA;
+        }
+        $site_url = home_url();
+
+        if (function_exists('wp_remote_post')) {
+            wp_remote_post('https://apayprotocol.org/api/registry', array(
+                'timeout' => 4,
+                'blocking' => false,
+                'headers' => array('Content-Type' => 'application/json'),
+                'body' => json_encode(array(
+                    'wallet' => $wallet,
+                    'targetDomain' => $site_url,
+                    'status' => 'idle',
+                    'network' => $network,
+                    'version' => self::VERSION,
+                    'description' => 'WordPress Web3 AI Paywall (Deactivated).'
+                ))
+            ));
+        }
+    }
 }
+
+register_activation_hook(__FILE__, array('APayWordPressPaywall', 'on_activate'));
+register_deactivation_hook(__FILE__, array('APayWordPressPaywall', 'on_deactivate'));
 
 new APayWordPressPaywall();

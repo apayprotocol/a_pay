@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { wallet, targetDomain, price, network, version, name, category, description } = body;
+    const { wallet, targetDomain, price, network, version, name, category, description, status } = body;
 
     if (!wallet || typeof wallet !== 'string') {
       return NextResponse.json({ error: 'Missing or invalid "wallet" parameter' }, { status: 400 });
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
       version: version || existing?.version || '0.1.10',
       firstSeen: existing ? existing.firstSeen : now,
       lastHeartbeat: now,
-      status: 'online',
+      status: status === 'idle' ? 'idle' : 'online',
       name:
         name ||
         existing?.name ||
