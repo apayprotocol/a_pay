@@ -4,17 +4,12 @@ import {
   AlertCircle,
   ArrowUpRight,
   Camera,
-  Check,
   CheckCircle2,
-  Coins,
   ExternalLink,
   GripVertical,
-  Move,
-  QrCode,
   RefreshCw,
   ScanLine,
   Send,
-  Sparkles,
   Wallet,
   X,
   Zap,
@@ -44,7 +39,7 @@ export function FloatingQrScanner({
   const contracts = getNetworkContracts(activeNetwork);
 
   const [isMounted, setIsMounted] = useState(false);
-  const [position, setPosition] = useState<{ x: number; y: number }>({ x: 24, y: 320 });
+  const [position, setPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isIdle, setIsIdle] = useState(false);
@@ -72,34 +67,20 @@ export function FloatingQrScanner({
   const dragRef = useRef<HTMLDivElement>(null);
   const pointerStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const initialPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const isPointerDownRef = useRef(false);
   const hasMovedRef = useRef(false);
   const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Safe Mount & Load Saved Position
+  // Safe Mount & Calculate Centered Position on First Load / Refresh
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // Load saved coordinates if available
-    try {
-      const saved = localStorage.getItem('apay_floating_scanner_pos');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (typeof parsed.x === 'number' && typeof parsed.y === 'number') {
-          const clampedX = Math.max(12, Math.min(window.innerWidth - 76, parsed.x));
-          const clampedY = Math.max(68, Math.min(window.innerHeight - 76, parsed.y));
-          setPosition({ x: clampedX, y: clampedY });
-        }
-      } else {
-        // Default starting position: Left side middle, easy to reach without colliding with bottom-right Telegram bot
-        setPosition({
-          x: 20,
-          y: Math.max(140, Math.round(window.innerHeight * 0.42)),
-        });
-      }
-    } catch {
-      // ignore JSON error
-    }
+    // Centered default position: predictable and easy to locate on every visit / refresh
+    const flyerSize = 64;
+    const centerX = Math.max(16, Math.round((window.innerWidth - flyerSize) / 2));
+    const centerY = Math.max(76, Math.round((window.innerHeight - flyerSize) / 2));
 
+    setPosition({ x: centerX, y: centerY });
     setIsMounted(true);
 
     const handleResize = () => {
@@ -113,7 +94,7 @@ export function FloatingQrScanner({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Idle Timer — automatically dims opacity after 3.5s of no interaction
+  // Idle Timer — automatically dims opacity after 3.8s of no interaction
   const resetIdleTimer = () => {
     setIsIdle(false);
     if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
@@ -156,7 +137,11 @@ export function FloatingQrScanner({
 
   // ── Drag & Click Pointer Handlers ─────────────────────────────────────
   const handlePointerDown = (e: React.PointerEvent) => {
+    // Only accept primary click (left mouse button) or touch
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+
     resetIdleTimer();
+    isPointerDownRef.current = true;
     hasMovedRef.current = false;
     pointerStartRef.current = { x: e.clientX, y: e.clientY };
     initialPosRef.current = { ...position };
@@ -170,6 +155,9 @@ export function FloatingQrScanner({
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
+    // STRICT GUARD: If pointer is NOT actively pressed down, do not move (prevents mouse hover runaway bug)
+    if (!isPointerDownRef.current) return;
+
     const deltaX = e.clientX - pointerStartRef.current.x;
     const deltaY = e.clientY - pointerStartRef.current.y;
     const dist = Math.hypot(deltaX, deltaY);
@@ -191,6 +179,9 @@ export function FloatingQrScanner({
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
+    if (!isPointerDownRef.current) return;
+    isPointerDownRef.current = false;
+
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);
     } catch {
@@ -199,12 +190,6 @@ export function FloatingQrScanner({
 
     if (isDragging) {
       setIsDragging(false);
-      // Persist newly dragged coordinates in local storage
-      try {
-        localStorage.setItem('apay_floating_scanner_pos', JSON.stringify(position));
-      } catch {
-        // ignore
-      }
     } else if (!hasMovedRef.current) {
       // Clean click / tap: Open the Camera QR Scanner!
       try {
@@ -217,6 +202,18 @@ export function FloatingQrScanner({
       setIsScannerOpen(true);
     }
 
+    resetIdleTimer();
+  };
+
+  const handlePointerCancel = (e: React.PointerEvent) => {
+    if (!isPointerDownRef.current) return;
+    isPointerDownRef.current = false;
+    setIsDragging(false);
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      // ignore
+    }
     resetIdleTimer();
   };
 
@@ -294,6 +291,7 @@ export function FloatingQrScanner({
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerCancel}
         onMouseEnter={() => {
           setIsHovered(true);
           resetIdleTimer();
@@ -305,7 +303,7 @@ export function FloatingQrScanner({
         style={{
           transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
         }}
-        className={`fixed top-0 left-0 z-40 touch-none select-none flex flex-col items-center cursor-grab active:cursor-grabbing transition-opacity duration-500 ${
+        className={`fixed top-0 left-0 z-[45] touch-none select-none flex flex-col items-center cursor-grab active:cursor-grabbing transition-opacity duration-500 ${
           isDragging ? 'scale-110' : ''
         } ${isIdle && !isHovered && !isDragging ? 'opacity-35 hover:opacity-100' : 'opacity-100'}`}
         role="button"
@@ -382,7 +380,7 @@ export function FloatingQrScanner({
 
       {/* ── 3. QUICK ON-CHAIN PAYMENT SHEET MODAL ───────────────────────── */}
       {isQuickPayOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
           <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col">
             {/* Modal Header */}
             <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
