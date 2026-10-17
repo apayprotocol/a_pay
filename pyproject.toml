@@ -71,6 +71,10 @@ packages = ["src/apay"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::starlette.exceptions.StarletteDeprecationWarning",
+]
 
 [dependency-groups]
 dev = [
