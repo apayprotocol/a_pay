@@ -1,11 +1,14 @@
 import {
   createPublicClient,
+  encodeFunctionData,
   fallback,
   formatEther,
   formatUnits,
   http,
   namehash,
   parseAbi,
+  parseEther,
+  parseUnits,
 } from 'viem';
 import { base, baseSepolia } from 'viem/chains';
 import { getNetworkContracts, type NetworkId } from '@/config/contracts';
@@ -93,6 +96,7 @@ const TOKEN_ABI = parseAbi([
   'function decimals() external view returns (uint8)',
   'function totalSupply() external view returns (uint256)',
   'function balanceOf(address account) external view returns (uint256)',
+  'function transfer(address to, uint256 amount) external returns (bool)',
 ]);
 
 const ROUTER_ABI = parseAbi([
@@ -1325,4 +1329,76 @@ export async function resolveBasename(name: string | null | undefined): Promise<
       return null;
     }
   });
+}
+
+/**
+ * Direct P2P & M2M on-chain transfer of either $APAY ERC-20 tokens or Native ETH on Base L2.
+ * Executes via the connected browser wallet provider (MetaMask, Coinbase, Rabby, etc.).
+ */
+export async function transferTokensOrEth({
+  recipient,
+  amount,
+  asset,
+  networkId,
+  fromAddress,
+}: {
+  recipient: `0x${string}`;
+  amount: string;
+  asset: 'APAY' | 'ETH';
+  networkId: NetworkId;
+  fromAddress: `0x${string}`;
+}): Promise<{ txHash: string; explorerUrl: string }> {
+  const eth = getActiveEthereum();
+  if (!eth) {
+    throw new Error('No active Web3 wallet provider detected. Please connect your wallet first.');
+  }
+
+  if (!recipient || !/^0x[a-fA-F0-9]{40}$/.test(recipient)) {
+    throw new Error('Invalid recipient EVM address format.');
+  }
+
+  const numAmount = Number(amount);
+  if (!numAmount || numAmount <= 0 || Number.isNaN(numAmount)) {
+    throw new Error('Please enter a valid transfer amount greater than 0.');
+  }
+
+  await ensureNetwork(eth, networkId);
+  const contracts = getNetworkContracts(networkId);
+
+  let txHash: string;
+
+  if (asset === 'ETH') {
+    const valueHex = `0x${parseEther(amount).toString(16)}`;
+    txHash = await eth.request({
+      method: 'eth_sendTransaction',
+      params: [
+        {
+          from: fromAddress,
+          to: recipient,
+          value: valueHex,
+        },
+      ],
+    });
+  } else {
+    // APAY ERC-20 token transfer
+    const data = encodeFunctionData({
+      abi: TOKEN_ABI,
+      functionName: 'transfer',
+      args: [recipient, parseUnits(amount, 18)],
+    });
+
+    txHash = await eth.request({
+      method: 'eth_sendTransaction',
+      params: [
+        {
+          from: fromAddress,
+          to: contracts.APAYToken.address,
+          data,
+        },
+      ],
+    });
+  }
+
+  const explorerUrl = `${contracts.chain.explorerUrl}/tx/${txHash}`;
+  return { txHash, explorerUrl };
 }

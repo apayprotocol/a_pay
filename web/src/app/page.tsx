@@ -14,6 +14,7 @@ import { McpHubTab } from '@/components/modules/McpHubTab';
 import { OverviewTab } from '@/components/modules/OverviewTab';
 import { PaywallsTab } from '@/components/modules/PaywallsTab';
 import { PlaygroundTab } from '@/components/modules/PlaygroundTab';
+import { ProfileTab } from '@/components/modules/ProfileTab';
 import { StakingTab } from '@/components/modules/StakingTab';
 import { Sidebar } from '@/components/Sidebar';
 import { TopBar } from '@/components/TopBar';
@@ -26,6 +27,7 @@ import {
 
 const VALID_TABS = [
   'overview',
+  'profile',
   'marketplace',
   'playground',
   'mcphub',
@@ -397,6 +399,7 @@ export default function DashboardPage() {
           activeNetwork={activeNetwork}
           onSelectNetwork={handleNetworkChange}
           onNavigateToLanding={handleNavigateToLanding}
+          onNavigateToTab={handleSelectTab}
         />
 
         {/* Scrollable Container for Page Content & Footer */}
@@ -410,6 +413,18 @@ export default function DashboardPage() {
                 isFounder={isFounder}
                 onConnect={handleConnectWallet}
                 activeNetwork={activeNetwork}
+              />
+            )}
+            {activeTab === 'profile' && (
+              <ProfileTab
+                walletAddress={walletAddress}
+                tokenBalance={tokenBalance}
+                isFounder={isFounder}
+                onConnect={handleConnectWallet}
+                onDisconnect={walletAddress ? handleDisconnectWallet : undefined}
+                activeNetwork={activeNetwork}
+                onSelectNetwork={handleNetworkChange}
+                onNavigateToTab={handleSelectTab}
               />
             )}
             {activeTab === 'marketplace' && (

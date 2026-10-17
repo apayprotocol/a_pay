@@ -14,6 +14,7 @@ import {
   Lock,
   MessageSquare,
   Newspaper,
+  QrCode,
   Search,
   Sparkles,
   X,
@@ -71,6 +72,15 @@ export function Sidebar({
           badge: 'Live',
           badgeColor:
             'bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/25',
+        },
+        {
+          id: 'profile',
+          label: 'Identity & Profile',
+          description: 'QR Pay & EVM Balances',
+          icon: QrCode,
+          badge: 'EVM ID',
+          badgeColor:
+            'bg-blue-500/10 dark:bg-blue-500/15 text-blue-600 dark:text-sky-300 border-blue-500/25',
         },
         {
           id: 'marketplace',

@@ -565,6 +565,13 @@ async function main() {
     assert(text.includes('AI AGENT') || text.includes('A-Pay'), 'Expected console markup');
   });
 
+  await runStep('GET /?tab=profile renders Identity & Profile Hub with QR rail', async () => {
+    const res = await fetch(`${BASE_URL}/?tab=profile`);
+    assert(res.status === 200, `Expected status 200, got ${res.status}`);
+    const text = await res.text();
+    assert(text.includes('Profile') || text.includes('Identity') || text.includes('A-Pay'), 'Expected profile markup');
+  });
+
   // =====================================================================
   // 11. PILLAR 1: M2M AI PAYWALL END-TO-END PUBLISHING & DOWNLOADS
   // =====================================================================

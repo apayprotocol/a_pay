@@ -1,28 +1,10 @@
 'use client';
 
-import {
-  Briefcase,
-  ChevronDown,
-  Crown,
-  ExternalLink,
-  Globe,
-  Home,
-  LogOut,
-  Menu,
-  ShieldAlert,
-  ShieldCheck,
-  Sparkles,
-  Wallet,
-} from 'lucide-react';
+import { ChevronDown, Crown, Globe, Home, Menu, Wallet } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { ApayBrandLogo } from '@/components/ApayBrandLogo';
 import { NETWORKS, type NetworkId } from '@/config/contracts';
-import {
-  addApayTokenToWallet,
-  ensureNetwork,
-  getActiveEthereum,
-  getBasename,
-} from '@/services/blockchain';
+import { ensureNetwork, getActiveEthereum, getBasename } from '@/services/blockchain';
 import { ThemeToggle } from './ThemeToggle';
 
 interface TopBarProps {
@@ -36,6 +18,7 @@ interface TopBarProps {
   activeNetwork?: NetworkId;
   onSelectNetwork?: (networkId: NetworkId) => void;
   onNavigateToLanding?: () => void;
+  onNavigateToTab?: (tab: string) => void;
 }
 
 const TAB_TITLES: Record<string, { title: string; category: string }> = {
@@ -51,6 +34,7 @@ const TAB_TITLES: Record<string, { title: string; category: string }> = {
   community: { title: 'Community Support & Dev Forum', category: 'Developer Ecosystem' },
   aiguidelines: { title: 'AI Agent Guidelines & System Prompts', category: 'Developer Ecosystem' },
   blog: { title: 'Research & Editorial', category: 'Deep Dives' },
+  profile: { title: 'Identity & Profile Hub', category: 'Operator Identity' },
 };
 
 export function TopBar({
@@ -64,6 +48,7 @@ export function TopBar({
   activeNetwork = 'base-sepolia',
   onSelectNetwork,
   onNavigateToLanding,
+  onNavigateToTab,
 }: TopBarProps) {
   const [isNetworkDropdownOpen, setIsNetworkDropdownOpen] = useState(false);
   const [resolvedBasename, setResolvedBasename] = useState<string | null>(null);
@@ -285,77 +270,38 @@ export function TopBar({
           <ThemeToggle />
 
           {shortAddr ? (
-            <div
-              className={`flex items-center gap-2 p-1.5 pr-3 rounded-2xl border transition-all ${
-                isFounder
-                  ? 'bg-amber-50/90 dark:bg-amber-950/20 border-amber-300 dark:border-amber-500/40 shadow-sm shadow-amber-500/10'
-                  : 'bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-800'
+            <button
+              type="button"
+              onClick={() => onNavigateToTab?.('profile')}
+              className={`relative p-0.5 rounded-full transition-all duration-200 active:scale-95 focus:outline-none shrink-0 group cursor-pointer ${
+                activeTab === 'profile'
+                  ? 'ring-2 ring-blue-500 shadow-lg shadow-blue-500/30'
+                  : 'ring-2 ring-transparent hover:ring-blue-500/50'
               }`}
+              title={`Open Identity & QR Terminal (${resolvedBasename || shortAddr}) • ${tokenBalance} $APAY`}
+              aria-label="Open Profile and Payment Terminal"
             >
               <div
-                className={`w-8 h-8 rounded-xl flex items-center justify-center font-mono text-xs font-bold ${
+                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-spatial font-bold text-xs shadow-md transition-transform duration-200 group-hover:scale-105 ${
                   isFounder
-                    ? 'bg-amber-500/20 text-amber-600 dark:text-amber-300'
-                    : 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                    ? 'bg-gradient-to-tr from-amber-500 via-orange-600 to-yellow-400 text-amber-950 shadow-amber-500/20'
+                    : 'bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-400 text-white shadow-blue-500/20'
                 }`}
               >
-                {isFounder ? <Crown className="w-4 h-4" /> : <Briefcase className="w-4 h-4" />}
-              </div>
-              <div className="text-left">
-                <div className="flex items-center gap-1.5">
-                  {resolvedBasename ? (
-                    <a
-                      href={`https://base.org/name/${resolvedBasename.replace('.base.eth', '').replace('.basetest.eth', '')}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[11px] font-mono font-bold text-blue-600 dark:text-sky-400 hover:underline flex items-center gap-1 transition-colors group"
-                      title={`Verified Basename on Base L2 (${walletAddress})`}
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                      <span>{resolvedBasename}</span>
-                      <ExternalLink className="w-2.5 h-2.5 text-blue-400 opacity-60 group-hover:opacity-100 transition-opacity" />
-                    </a>
-                  ) : (
-                    <span
-                      className="text-[11px] font-mono font-bold text-slate-800 dark:text-slate-200"
-                      title={walletAddress || undefined}
-                    >
-                      {shortAddr}
-                    </span>
-                  )}
-                  <span
-                    className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded ${
-                      isFounder
-                        ? 'bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 border border-amber-400/30'
-                        : 'bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 border border-emerald-400/30'
-                    }`}
-                  >
-                    {isFounder ? 'FOUNDER' : 'MERCHANT'}
+                {isFounder ? (
+                  <Crown className="w-4 h-4 sm:w-5 sm:h-5 text-white drop-shadow" />
+                ) : (
+                  <span className="text-white drop-shadow text-xs sm:text-sm">
+                    {shortAddr.slice(2, 4).toUpperCase()}
                   </span>
-                </div>
-                <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-600 dark:text-slate-400 font-semibold">
-                  <span>{tokenBalance} $APAY</span>
-                  <button
-                    type="button"
-                    onClick={() => addApayTokenToWallet(activeNetwork)}
-                    title="Import $APAY token into MetaMask"
-                    className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30 transition-all font-semibold cursor-pointer active:scale-95 flex items-center gap-1"
-                  >
-                    <span>🦊</span>
-                    <span>+Add</span>
-                  </button>
-                </div>
+                )}
               </div>
-              {disconnectWallet && (
-                <button
-                  onClick={disconnectWallet}
-                  title="Disconnect Wallet"
-                  className="ml-1 p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
-                >
-                  <LogOut className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
+              {/* Online Connection Pulse Dot */}
+              <span className="absolute bottom-0 right-0 flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border-2 border-white dark:border-slate-900" />
+              </span>
+            </button>
           ) : (
             <button
               onClick={connectWallet}

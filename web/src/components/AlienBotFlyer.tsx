@@ -71,11 +71,8 @@ export function AlienBotFlyer() {
     if (typeof window !== 'undefined') {
       const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
       if (isMobile) {
-        // Direct native deep-link into Telegram Mobile App
-        window.location.href = 'tg://resolve?domain=APay_Protocol_Bot';
-        setTimeout(() => {
-          window.open(TELEGRAM_BOT_URL, '_blank', 'noopener,noreferrer');
-        }, 900);
+        // Universal mobile link: direct navigation to t.me launches native Telegram app on iOS/Android without triggering browser popup blockers
+        window.location.href = 'https://t.me/APay_Protocol_Bot';
         e.preventDefault();
       }
     }
