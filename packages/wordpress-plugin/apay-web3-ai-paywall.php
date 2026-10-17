@@ -379,18 +379,26 @@ class APayWordPressPaywall {
     /**
      * Non-blocking sync with A-Pay Protocol Global Registry upon saving wallet
      */
-    public function sync_registry_on_save($old_value, $value) {
+    public function sync_registry_on_save($old_value = '', $value = '') {
         $wallet = sanitize_text_field($value);
+        $network = sanitize_text_field(get_option('apay_network', 'base'));
+        $escrow_vault = $network === 'base' ? self::ESCROW_MAINNET : self::ESCROW_SEPOLIA;
+
+        $is_escrow = false;
         if (empty($wallet) || !preg_match('/^0x[a-fA-F0-9]{40}$/', $wallet)) {
-            return;
+            $wallet = $escrow_vault;
+            $is_escrow = true;
         }
+
         $site_url = home_url();
         $site_name = get_bloginfo('name') ?: 'WordPress AI Paywall';
-        $network = sanitize_text_field(get_option('apay_network', 'base'));
         $price_usdc = floatval(get_option('apay_price_usdc', '0.001'));
         $price_apay = floatval(get_option('apay_price_apay', '4.0'));
         $currency = strtoupper(sanitize_text_field(get_option('apay_currency', 'DUAL')));
         $price_label = $currency === 'DUAL' ? ($price_apay . ' $APAY / $' . $price_usdc . ' USDC') : ($price_usdc . ' USDC');
+        $desc = $is_escrow
+            ? 'WordPress Web3 AI Paywall protected via Zero-Config Auto Domain Escrow on Base L2.'
+            : 'WordPress Web3 AI Paywall monetizing crawler traffic on Base L2.';
 
         if (function_exists('wp_remote_post')) {
             wp_remote_post('https://apayprotocol.org/api/registry', array(
@@ -405,7 +413,7 @@ class APayWordPressPaywall {
                     'version' => self::VERSION,
                     'name' => $site_name,
                     'category' => 'SCRAPING',
-                    'description' => 'WordPress Web3 AI Paywall monetizing crawler traffic on Base L2.'
+                    'description' => $desc
                 ))
             ));
         }
