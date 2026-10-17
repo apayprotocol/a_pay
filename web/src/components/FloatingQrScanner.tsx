@@ -75,18 +75,18 @@ export function FloatingQrScanner({
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // Centered default position: predictable and easy to locate on every visit / refresh
+    // Default starting position: Bottom Center — easy to spot, docked right above bottom edge
     const flyerSize = 64;
     const centerX = Math.max(16, Math.round((window.innerWidth - flyerSize) / 2));
-    const centerY = Math.max(76, Math.round((window.innerHeight - flyerSize) / 2));
+    const bottomY = Math.max(68, Math.round(window.innerHeight - 98));
 
-    setPosition({ x: centerX, y: centerY });
+    setPosition({ x: centerX, y: bottomY });
     setIsMounted(true);
 
     const handleResize = () => {
       setPosition((prev) => ({
         x: Math.max(12, Math.min(window.innerWidth - 76, prev.x)),
-        y: Math.max(68, Math.min(window.innerHeight - 76, prev.y)),
+        y: Math.max(68, Math.min(window.innerHeight - 90, prev.y)),
       }));
     };
 
@@ -170,7 +170,7 @@ export function FloatingQrScanner({
       const newX = Math.max(12, Math.min(window.innerWidth - 76, initialPosRef.current.x + deltaX));
       const newY = Math.max(
         68,
-        Math.min(window.innerHeight - 76, initialPosRef.current.y + deltaY),
+        Math.min(window.innerHeight - 90, initialPosRef.current.y + deltaY),
       );
 
       setPosition({ x: newX, y: newY });
