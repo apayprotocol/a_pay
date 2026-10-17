@@ -74,6 +74,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <script src="https://telegram.org/js/telegram-web-app.js" async />
         <link rel="help" type="text/markdown" href="/llms.txt" title="LLM Context & Guidelines" />
         <script type="application/ld+json">
           {JSON.stringify({

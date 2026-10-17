@@ -1152,6 +1152,47 @@ async function main() {
     assert(location.includes('telegram.me/APay_Protocol_Bot'), `Expected telegram.me redirect, got ${location}`);
   });
 
+  // =====================================================================
+  // 18. TELEGRAM MINI APP (TMA) & AI CRAWLER AUDITOR (/tma & /api/scan)
+  // =====================================================================
+  console.log('\n📱 18. Telegram Mini App (TMA) & AI Bot Auditor (/tma & /api/scan):');
+
+  await runStep('GET /tma renders dedicated Telegram Mini App view', async () => {
+    const res = await fetch(`${BASE_URL}/tma`);
+    assert(res.status === 200, `Expected status 200 for /tma, got ${res.status}`);
+    const text = await res.text();
+    assert(text.includes('telegram-web-app.js') || text.includes('A-PAY') || text.includes('TMA'), 'Expected TMA layout / script');
+  });
+
+  await runStep('POST /api/scan analyzes domain for AI bot crawlers', async () => {
+    const res = await fetch(`${BASE_URL}/api/scan`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: 'example.com' }),
+    });
+    assert(res.status === 200, `Expected status 200, got ${res.status}`);
+    const data = await res.json();
+    assert(data.success === true, 'Expected success: true');
+    assert(data.host.includes('example.com'), 'Expected host: example.com');
+    assert(data.bots && data.bots.gptBot, 'Expected bots telemetry');
+  });
+
+  await runStep('POST /api/scan rejects missing or restricted loopback URLs', async () => {
+    const resEmpty = await fetch(`${BASE_URL}/api/scan`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: '' }),
+    });
+    assert(resEmpty.status === 400, `Expected status 400 for empty url, got ${resEmpty.status}`);
+
+    const resLoopback = await fetch(`${BASE_URL}/api/scan`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: 'http://169.254.169.254' }),
+    });
+    assert(resLoopback.status === 400, `Expected status 400 for loopback url, got ${resLoopback.status}`);
+  });
+
 
 
 

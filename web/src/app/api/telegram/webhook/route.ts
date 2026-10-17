@@ -246,9 +246,10 @@ function getMainMenu(userName: string) {
         { text: '💬 Community & Support', callback_data: 'role_support' },
       ],
       [{ text: '💬 Join Developer Group (Live Chat) 💬', url: configuredCommunityGroup }],
+      [{ text: '🚀 Launch Telegram Mini App', web_app: { url: 'https://apayprotocol.org/tma' } }],
       [
-        { text: '🚀 Launch Web Console', url: 'https://apayprotocol.org' },
         { text: '🛍️ Checkout Demo Store', url: 'https://apayprotocol.org/checkout-demo' },
+        { text: '🌐 Desktop Web Console', url: 'https://apayprotocol.org' },
       ],
     ],
   };
@@ -527,7 +528,13 @@ export async function POST(req: Request) {
                 url: 'https://t.me/APay_Protocol_Bot?start=group',
               },
             ],
-            [{ text: '🚀 Launch Web Console', url: 'https://apayprotocol.org' }],
+            [
+              {
+                text: '🚀 Launch Telegram Mini App',
+                web_app: { url: 'https://apayprotocol.org/tma' },
+              },
+            ],
+            [{ text: '🌐 Desktop Web Console', url: 'https://apayprotocol.org' }],
           ],
         };
 
@@ -1408,7 +1415,8 @@ export async function POST(req: Request) {
     await sendTelegramMessage(chatId, answer, {
       inline_keyboard: [
         [{ text: '🏠 Open Main Menu', callback_data: 'menu_main' }],
-        [{ text: '🚀 Launch Web Console', url: 'https://apayprotocol.org' }],
+        [{ text: '🚀 Launch Telegram Mini App', web_app: { url: 'https://apayprotocol.org/tma' } }],
+        [{ text: '🌐 Desktop Web Console', url: 'https://apayprotocol.org' }],
       ],
     });
 
