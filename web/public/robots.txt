@@ -4,8 +4,8 @@ Allow: /
 
 # Canonical LLM Directives & Context Files
 # Emerging web standard for AI agents, crawlers & assistants:
-# See: https://apay-network.vercel.app/llms.txt
-# See: https://apay-network.vercel.app/llms-full.txt
+# See: https://apayprotocol.org/llms.txt
+# See: https://apayprotocol.org/llms-full.txt
 
 User-agent: GPTBot
 Allow: /
@@ -29,4 +29,4 @@ User-agent: Google-Extended
 Allow: /
 
 # Sitemaps and AI Context
-Sitemap: https://apay-network.vercel.app/llms.txt
+Sitemap: https://apayprotocol.org/sitemap.xml

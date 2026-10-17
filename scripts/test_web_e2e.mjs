@@ -550,6 +550,14 @@ async function main() {
     assert(text.includes('GPTBot') && text.includes('ClaudeBot'), 'robots.txt must declare AI bot permissions');
   });
 
+  await runStep('GET /sitemap.xml serves valid search engine sitemap with canonical URLs', async () => {
+    const res = await fetch(`${BASE_URL}/sitemap.xml`);
+    assert(res.status === 200, `Expected status 200, got ${res.status}`);
+    const text = await res.text();
+    assert(text.includes('https://apayprotocol.org'), 'sitemap must include canonical base URL');
+    assert(text.includes('/tma'), 'sitemap must list TMA route');
+  });
+
   await runStep('GET /?tab=aiguidelines renders AI Guidelines tab console', async () => {
     const res = await fetch(`${BASE_URL}/?tab=aiguidelines`);
     assert(res.status === 200, `Expected status 200, got ${res.status}`);
