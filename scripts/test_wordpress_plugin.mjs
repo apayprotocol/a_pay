@@ -164,6 +164,20 @@ test('Auto Domain Claim Verification: Serves /.well-known/apay-claim.txt and /.a
   assert(phpContent.includes("'/.apay/status'"), 'Missing /.apay/status endpoint');
 });
 
+test('Universal [apay_button] shortcode registered for instant eCommerce', () => {
+  assert(phpContent.includes("add_shortcode('apay_button'"), 'Missing apay_button shortcode registration');
+  assert(phpContent.includes("add_shortcode('apay_checkout'"), 'Missing apay_checkout shortcode registration');
+  assert(phpContent.includes('render_checkout_button_shortcode'), 'Missing shortcode render method');
+  assert(phpContent.includes('https://apayprotocol.org/v1.js'), 'Must load official standalone checkout widget');
+});
+
+test('WooCommerce WC_Gateway_APay payment gateway class registered', () => {
+  assert(phpContent.includes('class WC_Gateway_APay extends WC_Payment_Gateway'), 'Missing WC_Gateway_APay definition');
+  assert(phpContent.includes('woocommerce_payment_gateways'), 'Missing woocommerce_payment_gateways filter');
+  assert(phpContent.includes('apay_init_woocommerce_gateway'), 'Missing gateway initializer');
+  assert(phpContent.includes('apay_wc_complete_order'), 'Missing order completion ajax handler');
+});
+
 console.log('\n📦 Section 5: ZIP Archive Structure & Parity');
 
 test('ZIP file contains canonical directory and files', () => {

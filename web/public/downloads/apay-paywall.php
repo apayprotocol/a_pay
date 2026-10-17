@@ -31,6 +31,11 @@ class APayWordPressPaywall {
         add_action('update_option_apay_receiver_wallet', array($this, 'sync_registry_on_save'), 10, 2);
         add_action('add_option_apay_receiver_wallet', array($this, 'sync_registry_on_save'), 10, 2);
         add_filter('plugin_action_links_' . plugin_basename(__FILE__), array($this, 'add_settings_link'));
+        add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend_scripts'));
+        add_shortcode('apay_button', array($this, 'render_checkout_button_shortcode'));
+        add_shortcode('apay_checkout', array($this, 'render_checkout_button_shortcode'));
+        add_action('wp_ajax_apay_wc_complete_order', array($this, 'ajax_wc_complete_order'));
+        add_action('wp_ajax_nopriv_apay_wc_complete_order', array($this, 'ajax_wc_complete_order'));
     }
 
     /**
@@ -462,6 +467,139 @@ class APayWordPressPaywall {
         ));
     }
 
+    /**
+     * Enqueue A-Pay Standalone Checkout Widget (v1.js) on frontend
+     */
+    public function enqueue_frontend_scripts() {
+        wp_register_script('apay-checkout-widget', 'https://apayprotocol.org/v1.js', array(), self::VERSION, true);
+    }
+
+    /**
+     * Shortcode: [apay_button amount="10" title="My Product" currency="DUAL"]
+     */
+    public function render_checkout_button_shortcode($atts) {
+        $atts = shortcode_atts(array(
+            'amount'      => '10.0',
+            'amount_apay' => '',
+            'title'       => 'Product Purchase',
+            'currency'    => get_option('apay_currency', 'DUAL'),
+            'network'     => get_option('apay_network', 'base'),
+            'button_text' => '',
+            'theme'       => 'auto',
+        ), $atts, 'apay_button');
+
+        $network = $atts['network'] === 'base' ? 'base' : 'base-sepolia';
+        $escrow_vault = $network === 'base' ? self::ESCROW_MAINNET : self::ESCROW_SEPOLIA;
+        $wallet_saved = sanitize_text_field(get_option('apay_receiver_wallet', ''));
+        $receiver = !empty($wallet_saved) ? $wallet_saved : $escrow_vault;
+
+        $amount = floatval($atts['amount']);
+        if ($amount <= 0) {
+            $amount = 10.0;
+        }
+        $currency = strtoupper(sanitize_text_field($atts['currency']));
+        if (!in_array($currency, array('DUAL', 'USDC', 'APAY', 'ETH'), true)) {
+            $currency = 'DUAL';
+        }
+
+        $btn_text = !empty($atts['button_text'])
+            ? sanitize_text_field($atts['button_text'])
+            : sprintf(__('⚡ Pay with A-Pay ($%s USDC)', 'apay-web3-ai-paywall'), number_format($amount, 2));
+
+        $title_escaped = esc_js(sanitize_text_field($atts['title']));
+        $receiver_escaped = esc_js($receiver);
+        $network_escaped = esc_js($network);
+        $currency_escaped = esc_js($currency);
+        $theme_escaped = esc_js(sanitize_text_field($atts['theme']));
+        $amount_escaped = esc_js($amount);
+        $amount_apay_escaped = !empty($atts['amount_apay']) ? esc_js(floatval($atts['amount_apay'])) : 'null';
+
+        wp_enqueue_script('apay-checkout-widget', 'https://apayprotocol.org/v1.js', array(), self::VERSION, true);
+
+        $button_id = 'apay_btn_' . wp_rand(1000, 99999);
+
+        ob_start();
+        ?>
+        <div class="apay-button-wrapper" style="display:inline-block; margin: 8px 0;">
+            <button type="button" id="<?php echo esc_attr($button_id); ?>" class="button apay-checkout-btn" style="background: linear-gradient(135deg, #0052FF 0%, #2563EB 100%); color: #ffffff; border: none; border-radius: 8px; padding: 12px 22px; font-size: 15px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(0, 82, 255, 0.3); transition: all 0.2s ease; min-height: 44px;">
+                <?php echo esc_html($btn_text); ?>
+            </button>
+            <script type="text/javascript">
+            document.getElementById('<?php echo esc_js($button_id); ?>').addEventListener('click', function(e) {
+                e.preventDefault();
+                function triggerApay() {
+                    var opts = {
+                        amount: <?php echo $amount_escaped; ?>,
+                        currency: '<?php echo $currency_escaped; ?>',
+                        title: '<?php echo $title_escaped; ?>',
+                        receiver: '<?php echo $receiver_escaped; ?>',
+                        network: '<?php echo $network_escaped; ?>',
+                        theme: '<?php echo $theme_escaped; ?>',
+                        onSuccess: function(receipt) {
+                            alert('Payment Confirmed on Base L2! Tx Hash: ' + (receipt.txHash || ''));
+                        }
+                    };
+                    if (<?php echo $amount_apay_escaped; ?> !== null) {
+                        opts.amountApay = <?php echo $amount_apay_escaped; ?>;
+                    }
+                    window.APay.checkout(opts);
+                }
+
+                if (typeof window.APay !== 'undefined' && window.APay.checkout) {
+                    triggerApay();
+                } else {
+                    var s = document.createElement('script');
+                    s.src = 'https://apayprotocol.org/v1.js';
+                    s.onload = function() { triggerApay(); };
+                    document.head.appendChild(s);
+                }
+            });
+            </script>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * AJAX Endpoint: Finalize WooCommerce order upon on-chain Web3 settlement
+     */
+    public function ajax_wc_complete_order() {
+        if (!isset($_POST['order_id']) || !isset($_POST['order_key'])) {
+            wp_send_json_error(array('message' => 'Missing parameters'));
+        }
+
+        $order_id = intval($_POST['order_id']);
+        $order_key = sanitize_text_field(wp_unslash($_POST['order_key']));
+        $tx_hash = isset($_POST['tx_hash']) ? sanitize_text_field(wp_unslash($_POST['tx_hash'])) : '';
+        $payer = isset($_POST['payer']) ? sanitize_text_field(wp_unslash($_POST['payer'])) : '';
+
+        if (!function_exists('wc_get_order')) {
+            wp_send_json_error(array('message' => 'WooCommerce not active'));
+        }
+
+        $order = wc_get_order($order_id);
+        if (!$order || $order->get_order_key() !== $order_key) {
+            wp_send_json_error(array('message' => 'Invalid order credentials'));
+        }
+
+        if ($order->has_status(array('pending', 'failed', 'on-hold'))) {
+            $note = sprintf(
+                __('A-Pay Web3 Payment Confirmed on Base L2! Tx Hash: %1$s | Payer: %2$s', 'apay-web3-ai-paywall'),
+                $tx_hash,
+                $payer
+            );
+            $order->add_order_note($note);
+            $order->payment_complete($tx_hash);
+            if (function_exists('WC') && WC()->cart) {
+                WC()->cart->empty_cart();
+            }
+        }
+
+        wp_send_json_success(array(
+            'redirect_url' => $order->get_checkout_order_received_url()
+        ));
+    }
+
     public function render_admin_page() {
         $saved_wallet = sanitize_text_field(get_option('apay_receiver_wallet', ''));
         $site_domain = isset($_SERVER['HTTP_HOST']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_HOST'])) : (parse_url(get_site_url(), PHP_URL_HOST) ?: 'your-website.com');
@@ -565,6 +703,45 @@ class APayWordPressPaywall {
                 </table>
                 <?php submit_button(__('Save Settings', 'apay-web3-ai-paywall')); ?>
             </form>
+
+            <hr style="margin: 30px 0 20px 0; border: 0; border-top: 1px solid #cbd5e1;" />
+            <h2><?php echo esc_html__('🛍️ E-Commerce & Web3 Checkout Gateways', 'apay-web3-ai-paywall'); ?></h2>
+            <p><?php echo esc_html__('Sell physical goods or digital downloads directly with 1-click Web3 payments & QR codes on Base Layer 2 (0% chargeback risk).', 'apay-web3-ai-paywall'); ?></p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-top: 15px;">
+                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    <h3 style="margin-top: 0; color: #0052FF; font-size: 16px;">⚡ <?php echo esc_html__('Method 1: Instant Buy Now Shortcode', 'apay-web3-ai-paywall'); ?></h3>
+                    <p style="font-size: 13px; color: #64748b; line-height: 1.5;">
+                        <?php echo esc_html__('Paste this shortcode anywhere inside any WordPress Page, Blog Post, or Sidebar block to render an instant checkout button:', 'apay-web3-ai-paywall'); ?>
+                    </p>
+                    <code style="display: block; background: #0b1528; color: #60a5fa; padding: 10px 14px; border-radius: 6px; font-size: 13px; user-select: all; margin-bottom: 10px;">[apay_button amount="10.00" title="Digital E-Book" currency="DUAL"]</code>
+                    <p style="font-size: 12px; color: #94A3B8; margin: 0;">
+                        <?php echo esc_html__('Attributes: amount (USDC price), title (product name), currency (DUAL / USDC / APAY).', 'apay-web3-ai-paywall'); ?>
+                    </p>
+                </div>
+
+                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    <h3 style="margin-top: 0; color: #10B981; font-size: 16px;">🛒 <?php echo esc_html__('Method 2: WooCommerce Payment Gateway', 'apay-web3-ai-paywall'); ?></h3>
+                    <?php if (class_exists('WooCommerce')) : ?>
+                        <div style="background: #ecfdf5; border-left: 4px solid #10b981; padding: 10px 14px; border-radius: 4px; color: #065f46; font-size: 13px; margin-bottom: 12px;">
+                            <strong><?php echo esc_html__('✓ WooCommerce Detected & Active!', 'apay-web3-ai-paywall'); ?></strong> <?php echo esc_html__('The A-Pay Web3 Payment Gateway is registered and available.', 'apay-web3-ai-paywall'); ?>
+                        </div>
+                        <p style="font-size: 13px; color: #475569; margin-bottom: 10px;">
+                            <?php echo esc_html__('To configure title, description, and checkout sorting, visit:', 'apay-web3-ai-paywall'); ?>
+                        </p>
+                        <a href="<?php echo esc_url(admin_url('admin.php?page=wc-settings&tab=checkout&section=apay')); ?>" class="button button-secondary">
+                            ⚙️ <?php echo esc_html__('Manage A-Pay in WooCommerce Settings', 'apay-web3-ai-paywall'); ?>
+                        </a>
+                    <?php else : ?>
+                        <div style="background: #f8fafc; border-left: 4px solid #94a3b8; padding: 10px 14px; border-radius: 4px; color: #475569; font-size: 13px; margin-bottom: 12px;">
+                            <strong><?php echo esc_html__('ℹ WooCommerce Not Installed:', 'apay-web3-ai-paywall'); ?></strong> <?php echo esc_html__('You can install WooCommerce anytime for a multi-product shopping cart experience, or sell products directly right now using the [apay_button] shortcode on the left!', 'apay-web3-ai-paywall'); ?>
+                        </div>
+                        <a href="<?php echo esc_url(admin_url('plugin-install.php?s=woocommerce&tab=search&type=term')); ?>" class="button button-secondary">
+                            📦 <?php echo esc_html__('Install WooCommerce (Free)', 'apay-web3-ai-paywall'); ?>
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </div>
         </div>
         <?php
     }
@@ -610,3 +787,170 @@ register_activation_hook(__FILE__, array('APayWordPressPaywall', 'on_activate'))
 register_deactivation_hook(__FILE__, array('APayWordPressPaywall', 'on_deactivate'));
 
 new APayWordPressPaywall();
+
+/**
+ * Initialize A-Pay WooCommerce Payment Gateway
+ */
+function apay_init_woocommerce_gateway() {
+    if (!class_exists('WC_Payment_Gateway')) {
+        return;
+    }
+
+    class WC_Gateway_APay extends WC_Payment_Gateway {
+        public function __construct() {
+            $this->id = 'apay';
+            $this->icon = 'https://apayprotocol.org/apay-token-logo.png';
+            $this->has_fields = false;
+            $this->method_title = __('A-Pay (Base L2 Web3)', 'apay-web3-ai-paywall');
+            $this->method_description = __('Accept instant, zero-chargeback micropayments & purchases in USDC and $APAY tokens on Base Layer 2.', 'apay-web3-ai-paywall');
+            $this->supports = array('products');
+
+            $this->init_form_fields();
+            $this->init_settings();
+
+            $this->title = $this->get_option('title', __('A-Pay (Base L2 USDC & $APAY)', 'apay-web3-ai-paywall'));
+            $this->description = $this->get_option('description', __('Pay with your crypto wallet (MetaMask, Coinbase Wallet) or scan QR code. Instant 1.5s settlement on Base L2 with 0% chargebacks.', 'apay-web3-ai-paywall'));
+
+            add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
+            add_action('woocommerce_receipt_' . $this->id, array($this, 'receipt_page'));
+        }
+
+        public function init_form_fields() {
+            $this->form_fields = array(
+                'enabled' => array(
+                    'title'   => __('Enable/Disable', 'apay-web3-ai-paywall'),
+                    'type'    => 'checkbox',
+                    'label'   => __('Enable A-Pay Web3 Payment Gateway', 'apay-web3-ai-paywall'),
+                    'default' => 'yes',
+                ),
+                'title' => array(
+                    'title'       => __('Title', 'apay-web3-ai-paywall'),
+                    'type'        => 'text',
+                    'description' => __('Payment method title visible to customer during checkout.', 'apay-web3-ai-paywall'),
+                    'default'     => __('A-Pay (Base L2 USDC & $APAY)', 'apay-web3-ai-paywall'),
+                    'desc_tip'    => true,
+                ),
+                'description' => array(
+                    'title'       => __('Description', 'apay-web3-ai-paywall'),
+                    'type'        => 'textarea',
+                    'description' => __('Payment method description visible to customer during checkout.', 'apay-web3-ai-paywall'),
+                    'default'     => __('Pay with your crypto wallet (MetaMask, Coinbase Wallet) or scan QR code. Instant 1.5s settlement on Base L2 with 0% chargebacks.', 'apay-web3-ai-paywall'),
+                ),
+            );
+        }
+
+        public function process_payment($order_id) {
+            $order = wc_get_order($order_id);
+            return array(
+                'result'   => 'success',
+                'redirect' => $order->get_checkout_payment_url(true),
+            );
+        }
+
+        public function receipt_page($order_id) {
+            $order = wc_get_order($order_id);
+            if (!$order) {
+                return;
+            }
+
+            $total = floatval($order->get_total());
+            $network = sanitize_text_field(get_option('apay_network', 'base'));
+            $escrow_vault = $network === 'base' ? APayWordPressPaywall::ESCROW_MAINNET : APayWordPressPaywall::ESCROW_SEPOLIA;
+            $wallet_saved = sanitize_text_field(get_option('apay_receiver_wallet', ''));
+            $receiver = !empty($wallet_saved) ? $wallet_saved : $escrow_vault;
+            $currency = sanitize_text_field(get_option('apay_currency', 'DUAL'));
+            $order_key = $order->get_order_key();
+            $order_number = $order->get_order_number();
+            $ajax_url = admin_url('admin-ajax.php');
+
+            wp_enqueue_script('apay-checkout-widget', 'https://apayprotocol.org/v1.js', array(), APayWordPressPaywall::VERSION, true);
+
+            ?>
+            <div id="apay-wc-checkout-box" style="background: #0b1528; color: #f8fafc; padding: 26px 20px; border-radius: 14px; border: 1px solid #1e3a8a; margin: 20px 0; text-align: center; box-shadow: 0 8px 30px rgba(0, 82, 255, 0.15);">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #0052FF, #2563EB); display: inline-flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 12px; box-shadow: 0 4px 16px rgba(37,99,235,0.4);">⚡</div>
+                <h3 style="color: #60a5fa; margin: 0 0 8px 0; font-size: 20px; font-weight: 800;"><?php echo esc_html__('Complete Payment with A-Pay', 'apay-web3-ai-paywall'); ?></h3>
+                <p style="font-size: 15px; color: #cbd5e1; margin: 0 0 16px 0;">
+                    <?php printf(esc_html__('Order #%1$s Total: %2$s', 'apay-web3-ai-paywall'), esc_html($order_number), '<strong style="color: #38bdf8; font-size: 18px;">$' . esc_html(number_format($total, 2)) . ' USDC</strong>'); ?>
+                </p>
+                <p style="font-size: 13px; color: #94a3b8; margin: 0 auto 22px auto; max-width: 480px; line-height: 1.5;">
+                    <?php echo esc_html__('Settle instantly on Base Layer 2 with 0% chargebacks. Supports 1-click Web3 wallets (MetaMask, Coinbase Wallet) & mobile camera QR scan.', 'apay-web3-ai-paywall'); ?>
+                </p>
+                <button type="button" id="apay-launch-checkout-btn" class="button alt" style="background: linear-gradient(135deg, #0052FF 0%, #2563EB 100%); color: #ffffff; padding: 14px 32px; border-radius: 10px; font-weight: 800; font-size: 16px; cursor: pointer; border: none; box-shadow: 0 6px 20px rgba(0,82,255,0.45); min-height: 48px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                    ⚡ <?php printf(esc_html__('Launch A-Pay Web3 Modal ($%s)', 'apay-web3-ai-paywall'), number_format($total, 2)); ?>
+                </button>
+                <div id="apay-wc-status" style="margin-top: 18px; font-size: 14px; color: #38bdf8; font-weight: 600; display: none;"></div>
+            </div>
+
+            <script type="text/javascript">
+            (function() {
+                function launchCheckout() {
+                    if (typeof window.APay === 'undefined' || !window.APay.checkout) {
+                        var s = document.createElement('script');
+                        s.src = 'https://apayprotocol.org/v1.js';
+                        s.onload = function() { doCheckout(); };
+                        document.head.appendChild(s);
+                    } else {
+                        doCheckout();
+                    }
+                }
+
+                function doCheckout() {
+                    window.APay.checkout({
+                        amount: <?php echo esc_js($total); ?>,
+                        orderId: 'WC-<?php echo esc_js($order_number); ?>',
+                        currency: '<?php echo esc_js($currency); ?>',
+                        title: 'Order #<?php echo esc_js($order_number); ?>',
+                        receiver: '<?php echo esc_js($receiver); ?>',
+                        network: '<?php echo esc_js($network); ?>',
+                        onSuccess: function(receipt) {
+                            var statusDiv = document.getElementById('apay-wc-status');
+                            if (statusDiv) {
+                                statusDiv.style.display = 'block';
+                                statusDiv.innerHTML = '✓ Payment Confirmed on Base L2! Finalizing order...';
+                            }
+
+                            var formData = new FormData();
+                            formData.append('action', 'apay_wc_complete_order');
+                            formData.append('order_id', '<?php echo esc_js($order_id); ?>');
+                            formData.append('order_key', '<?php echo esc_js($order_key); ?>');
+                            formData.append('tx_hash', receipt.txHash || '');
+                            formData.append('payer', receipt.payer || '');
+
+                            fetch('<?php echo esc_url($ajax_url); ?>', {
+                                method: 'POST',
+                                body: formData
+                            })
+                            .then(function(res) { return res.json(); })
+                            .then(function(data) {
+                                if (data.success && data.data && data.data.redirect_url) {
+                                    window.location.href = data.data.redirect_url;
+                                } else {
+                                    window.location.reload();
+                                }
+                            })
+                            .catch(function() {
+                                window.location.reload();
+                            });
+                        }
+                    });
+                }
+
+                var btn = document.getElementById('apay-launch-checkout-btn');
+                if (btn) {
+                    btn.addEventListener('click', launchCheckout);
+                    setTimeout(launchCheckout, 600);
+                }
+            })();
+            </script>
+            <?php
+        }
+    }
+
+    function apay_add_woocommerce_gateway($gateways) {
+        $gateways[] = 'WC_Gateway_APay';
+        return $gateways;
+    }
+    add_filter('woocommerce_payment_gateways', 'apay_add_woocommerce_gateway');
+}
+add_action('plugins_loaded', 'apay_init_woocommerce_gateway', 11);
+

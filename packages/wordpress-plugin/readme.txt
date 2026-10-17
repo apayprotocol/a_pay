@@ -58,6 +58,9 @@ By default, the plugin identifies: `gptbot`, `chatgpt-user`, `claudebot`, `claud
 = Do I need a credit card or bank account? =
 No. Micropayments settle directly to your non-custodial EVM wallet address on Base L2.
 
+= Can I sell digital products or use this with WooCommerce? =
+Yes! You can use the [apay_button amount="10" title="My eBook"] shortcode on any post or page, or activate the official A-Pay WooCommerce Payment Gateway for full shopping cart checkouts.
+
 == Screenshots ==
 
 1. A-Pay Web3 AI Paywall Settings screen in WordPress Admin.
@@ -66,6 +69,8 @@ No. Micropayments settle directly to your non-custodial EVM wallet address on Ba
 == Changelog ==
 
 = 0.1.8 =
+* Added universal [apay_button] shortcode for 1-click digital product sales on any post or page.
+* Added official WooCommerce Payment Gateway (WC_Gateway_APay) with instant Web3 modal checkout.
 * Renamed plugin display name and slug to A-Pay Web3 AI Paywall.
 * Strictly sanitize and unslash all HTTP request headers and authorization inputs.
 * Added server-side nonce issuing and single-use validation to prevent voucher replay.
