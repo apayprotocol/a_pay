@@ -56,6 +56,7 @@ EXCLUDE_DIRS = {
 EXCLUDE_FILES = {
     ".env",
     ".env.local",
+    ".env.meta",
 }
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))

@@ -17,6 +17,7 @@ import {
   CreditCard,
   Database,
   ExternalLink,
+  FileText,
   Flame,
   Globe,
   Key,
@@ -432,14 +433,40 @@ export function LandingPage({
                   </span>
                 </button>
 
+                <Link
+                  href="/whitepaper"
+                  className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-sky-400 hover:bg-white dark:hover:bg-slate-900 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-all shrink-0 whitespace-nowrap"
+                >
+                  <FileText className="w-3.5 h-3.5 text-blue-500" />
+                  <span>Whitepaper</span>
+                </Link>
+
                 <a
-                  href="https://t.me/+HOkmQo2KuvdlNjU9"
+                  href="#team"
+                  className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-white dark:hover:bg-slate-900 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-all shrink-0 whitespace-nowrap"
+                >
+                  <Users className="w-3.5 h-3.5 text-purple-500" />
+                  <span>Team</span>
+                </a>
+
+                <a
+                  href="https://github.com/apayprotocol/a_pay"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-slate-900 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-all shrink-0 whitespace-nowrap"
+                >
+                  <span>GitHub</span>
+                  <ExternalLink className="w-3 h-3 text-slate-400" />
+                </a>
+
+                <a
+                  href="https://t.me/apay_protocol"
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400 hover:bg-white dark:hover:bg-slate-900 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-all shrink-0 whitespace-nowrap"
+                  className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-950/40 border border-transparent hover:border-sky-500/20 transition-all shrink-0 whitespace-nowrap"
                 >
-                  <span>💬 Live Chat</span>
-                  <ExternalLink className="w-3 h-3 text-slate-400" />
+                  <span>💬 Telegram</span>
+                  <ExternalLink className="w-3 h-3 text-sky-400" />
                 </a>
               </nav>
             </div>
@@ -642,15 +669,37 @@ export function LandingPage({
                     </span>
                   </Link>
 
+                  <Link
+                    href="/whitepaper"
+                    onClick={() => setIsMobileNavOpen(false)}
+                    className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-100/70 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800/80 hover:border-blue-500/30 transition-all"
+                  >
+                    <FileText className="w-4 h-4 text-blue-500 shrink-0" />
+                    <span className="text-xs font-medium text-slate-800 dark:text-slate-200">
+                      Whitepaper
+                    </span>
+                  </Link>
+
                   <a
-                    href="https://t.me/+HOkmQo2KuvdlNjU9"
+                    href="#team"
+                    onClick={() => setIsMobileNavOpen(false)}
+                    className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-100/70 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800/80 hover:border-purple-500/30 transition-all"
+                  >
+                    <Users className="w-4 h-4 text-purple-500 shrink-0" />
+                    <span className="text-xs font-medium text-slate-800 dark:text-slate-200">
+                      Team &amp; Founder
+                    </span>
+                  </a>
+
+                  <a
+                    href="https://t.me/apay_protocol"
                     target="_blank"
                     rel="noreferrer"
                     className="flex items-center justify-between p-2.5 rounded-xl bg-sky-500/10 border border-sky-500/25 text-sky-600 dark:text-sky-400 col-span-2 hover:bg-sky-500/15 transition-all"
                   >
                     <div className="flex items-center gap-2">
                       <span>💬</span>
-                      <span className="text-xs font-bold">Join Developer Group (Live Chat)</span>
+                      <span className="text-xs font-bold">Official Telegram Channel</span>
                     </div>
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
@@ -1507,7 +1556,144 @@ export function LandingPage({
       </section>
 
       {/* ========================================================================= */}
-      {/* 5. LEGAL TRADEMARK DISCLAIMER & GLOBAL FOOTER */}
+      {/* 5. LEADERSHIP, FOUNDER & GOVERNANCE TRANSPARENCY */}
+      {/* ========================================================================= */}
+      <section id="team" className="py-16 sm:py-24 border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-500/20 text-blue-600 dark:text-sky-400 text-xs font-mono font-bold tracking-wide uppercase">
+              <UserCheck className="w-3.5 h-3.5" />
+              <span>Leadership &amp; Core Governance</span>
+            </div>
+            <h2 className="text-2xl sm:text-4xl font-spatial font-black text-slate-950 dark:text-white tracking-tight">
+              The Architects Behind A-Pay Protocol
+            </h2>
+            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              Institutional transparency and verifiable on-chain identity powering the next generation of autonomous machine-to-machine micropayments.
+            </p>
+          </div>
+
+          <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Founder Card */}
+            <div className="md:col-span-2 p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 soft-shadow space-y-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+                <div className="relative w-20 h-20 rounded-2xl overflow-hidden border-2 border-blue-500/40 shadow-md shrink-0 bg-slate-800">
+                  <img
+                    src="/brand/sagar-yadav.png"
+                    alt="Sagar Yadav - Founder &amp; Protocol Architect"
+                    className="w-full h-full object-cover"
+                  />
+                  <span className="absolute bottom-1 right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-900" />
+                </div>
+                <div className="space-y-1 flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="font-spatial font-bold text-xl text-slate-950 dark:text-white">
+                      Sagar Yadav
+                    </h3>
+                    <span className="inline-flex items-center gap-1 text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-sky-300">
+                      <UserCheck className="w-3 h-3" />
+                      Founder &amp; Protocol Architect
+                    </span>
+                  </div>
+                  <div className="text-xs font-mono text-slate-500 dark:text-slate-400">
+                    Lead Architect • Base L2 Smart Contracts &amp; M2M Systems
+                  </div>
+                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed pt-1">
+                    System architect specializing in autonomous AI agent economics, RFC-compliant HTTP 402 paywall rails, and multi-agent non-custodial session escrows on Base Layer 2.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-slate-100 dark:border-slate-800 text-xs">
+                <a
+                  href="https://www.linkedin.com/in/sagar-yadav-6b0804182/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 hover:bg-blue-50 dark:hover:bg-blue-950/40 border border-slate-200 dark:border-slate-700 transition-colors flex items-center justify-between"
+                  title="Verified Personal LinkedIn Profile"
+                >
+                  <div>
+                    <span className="font-bold text-slate-800 dark:text-slate-200 block">Personal LinkedIn</span>
+                    <span className="text-[10px] text-slate-500">Sagar Yadav</span>
+                  </div>
+                  <ExternalLink className="w-3.5 h-3.5 text-blue-500" />
+                </a>
+
+                <a
+                  href={contracts.basename.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 hover:bg-blue-50 dark:hover:bg-blue-950/40 border border-slate-200 dark:border-slate-700 transition-colors flex items-center justify-between"
+                  title="Official Base L2 ENS Resolver"
+                >
+                  <div>
+                    <span className="font-bold text-slate-800 dark:text-slate-200 block">Basename (ENS)</span>
+                    <span className="text-[10px] text-slate-500">apayprotocol.base.eth</span>
+                  </div>
+                  <ExternalLink className="w-3.5 h-3.5 text-blue-500" />
+                </a>
+
+                <a
+                  href="mailto:founder@apayprotocol.org"
+                  className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 hover:bg-blue-50 dark:hover:bg-blue-950/40 border border-slate-200 dark:border-slate-700 transition-colors flex items-center justify-between"
+                  title="Founder Direct Communications"
+                >
+                  <div>
+                    <span className="font-bold text-slate-800 dark:text-slate-200 block">Direct Inquiries</span>
+                    <span className="text-[10px] text-slate-500">founder@apayprotocol.org</span>
+                  </div>
+                  <Mail className="w-3.5 h-3.5 text-blue-500" />
+                </a>
+              </div>
+            </div>
+
+            {/* Open Source & Standards Card */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 soft-shadow flex flex-col justify-between space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 uppercase">
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>Institutional Hygeine</span>
+                </div>
+                <h4 className="font-spatial font-bold text-base text-slate-950 dark:text-white">
+                  100% Open-Source &amp; Verifiable
+                </h4>
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Every smart contract, SDK package, and CLI tool is audited, publicly published, and cryptographically verified on-chain.
+                </p>
+              </div>
+
+              <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs font-mono">
+                <Link
+                  href="/whitepaper"
+                  className="flex items-center justify-between p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-sky-400 hover:underline font-bold"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>Read Whitepaper</span>
+                  </span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+
+                <a
+                  href="https://github.com/apayprotocol/a_pay"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white font-medium"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <Code2 className="w-3.5 h-3.5" />
+                    <span>GitHub Repository</span>
+                  </span>
+                  <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 6. LEGAL TRADEMARK DISCLAIMER & GLOBAL FOOTER */}
       {/* ========================================================================= */}
       <footer className="border-t border-slate-200/80 dark:border-slate-800/80 bg-white/50 dark:bg-slate-950/50 py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
@@ -1577,6 +1763,25 @@ export function LandingPage({
                 <ExternalLink className="w-3 h-3" />
               </a>
               <span className="hidden sm:inline text-slate-400">•</span>
+              <Link
+                href="/whitepaper"
+                className="text-blue-600 dark:text-sky-400 hover:underline flex items-center gap-1 font-medium transition-colors"
+                title="Official Technical Whitepaper"
+              >
+                <span>Whitepaper</span>
+              </Link>
+              <span className="hidden sm:inline text-slate-400">•</span>
+              <a
+                href="https://github.com/apayprotocol/a_pay"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white hover:underline flex items-center gap-1 font-medium transition-colors"
+                title="Official GitHub Organization &amp; Codebase"
+              >
+                <span>GitHub</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+              <span className="hidden sm:inline text-slate-400">•</span>
               <a
                 href="https://gitlab.com/apayprotocol/a_pay"
                 target="_blank"
@@ -1585,6 +1790,39 @@ export function LandingPage({
                 title="Official GitLab Repository"
               >
                 <span>GitLab</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+              <span className="hidden sm:inline text-slate-400">•</span>
+              <a
+                href="https://t.me/apay_protocol"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1 font-medium transition-colors"
+                title="Official Telegram Channel: @apay_protocol"
+              >
+                <span>Telegram</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+              <span className="hidden sm:inline text-slate-400">•</span>
+              <a
+                href="https://discord.gg/cW2WRSfb35"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 font-medium transition-colors"
+                title="Official A-Pay Discord Community"
+              >
+                <span>Discord</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+              <span className="hidden sm:inline text-slate-400">•</span>
+              <a
+                href="https://www.reddit.com/r/A_Pay_Protocol/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-orange-600 dark:text-orange-400 hover:underline flex items-center gap-1 font-medium transition-colors"
+                title="Official Subreddit: r/A_Pay_Protocol"
+              >
+                <span>Reddit</span>
                 <ExternalLink className="w-3 h-3" />
               </a>
               <span className="hidden sm:inline text-slate-400">•</span>
@@ -1600,13 +1838,24 @@ export function LandingPage({
               </a>
               <span className="hidden sm:inline text-slate-400">•</span>
               <a
+                href="https://www.linkedin.com/in/sagar-yadav-6b0804182/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 dark:text-sky-400 hover:underline flex items-center gap-1 font-medium transition-colors"
+                title="Verified Founder &amp; Architect: Sagar Yadav"
+              >
+                <span>Sagar Yadav (Founder)</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+              <span className="hidden sm:inline text-slate-400">•</span>
+              <a
                 href="https://www.linkedin.com/company/a-pay-protocol/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1 font-medium transition-colors"
                 title="Official LinkedIn Company Page"
               >
-                <span>LinkedIn</span>
+                <span>Company LinkedIn</span>
                 <ExternalLink className="w-3 h-3" />
               </a>
               <span className="hidden sm:inline text-slate-400">•</span>

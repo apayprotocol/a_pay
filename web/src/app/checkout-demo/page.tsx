@@ -535,7 +535,7 @@ export default function CheckoutDemoPage() {
           </div>
           <div className="p-4 rounded-2xl bg-slate-900 text-sky-300 font-mono text-xs overflow-x-auto whitespace-pre">
             {`<!-- 1. Include Script in <head> -->
-<script src="https://apay-network.vercel.app/v1.js"></script>
+<script src="https://apayprotocol.org/v1.js"></script>
 
 <!-- 2. Call on Button Click (${currency}) -->
 <button onclick="APay.checkout({ amount: ${currency === 'APAY' ? '200.0' : '25.00'}, currency: '${currency}', title: 'DeepSeek R1 Compute' })">

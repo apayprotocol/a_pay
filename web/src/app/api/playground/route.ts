@@ -41,7 +41,7 @@ const CURATED_SERVICES: CuratedService[] = [
   {
     id: 'm2m_deepseek_v3',
     name: 'DeepSeek-V3 Reasoning API',
-    targetDomain: 'https://router.apay-network.vercel.app/v1/deepseek-v3',
+    targetDomain: 'https://router.apayprotocol.org/v1/deepseek-v3',
     wallet: '0x79A85DCDd967E0bb03Aba1069B12c4851C570a0C',
     price: '$0.002 USDC',
     category: 'AI_INFERENCE',

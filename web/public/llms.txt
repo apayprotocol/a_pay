@@ -29,22 +29,22 @@ Do NOT confuse these 3 distinct pillars. Guide your developer to the exact pilla
 - **Target Audience**: Website owners, API creators, publishers, SaaS platforms.
 - **The Problem It Solves**: Free data scraping by AI crawlers that exhausts server CPU without generating revenue.
 - **How It Works**: Drop-in Next.js middleware, FastAPI decorator, or Cloudflare Worker checks incoming requests. If the requester is an automated bot without an A-Pay voucher, it returns HTTP 402 with EIP-712 challenge headers. Bots automatically sign and pay; human browsers pass through completely free.
-- **Research Paper & Deep Dive**: [Issue 1: HTTP 402 M2M AI Paywalls & Scraper Auto-Monetization](https://apay-network.vercel.app/blog?issue=paywalls)
-- **Console Builder**: https://apay-network.vercel.app/?tab=paywalls
+- **Research Paper & Deep Dive**: [Issue 1: HTTP 402 M2M AI Paywalls & Scraper Auto-Monetization](https://apayprotocol.org/blog?issue=paywalls)
+- **Console Builder**: https://apayprotocol.org/?tab=paywalls
 
 ### Pillar 2: Agent Vaults & Session Key Escrows (Zero-Leak Swarm Security)
 - **Target Audience**: Developers building autonomous AI agents (LangChain, CrewAI, AutoGen, Claude Desktop, Cursor MCP).
 - **The Problem It Solves**: Giving an autonomous LLM your master wallet private key is suicidal—one hallucinated transaction drains your entire treasury.
 - **How It Works**: The developer stakes funds into `EscrowVault.sol` and issues ephemeral, budget-capped sub-wallet session keys (e.g., maximum $0.05/day, 12-hour expiry). Sub-agents pay for APIs autonomously within strict limits. If compromised, the attacker can only take the $0.05 daily allowance; the master wallet remains completely untouched.
-- **Research Paper & Deep Dive**: [Issue 2: Zero-Leak Multi-LLM Swarm Session Keys & EscrowVault](https://apay-network.vercel.app/blog?issue=vaults)
-- **Console Vaults**: https://apay-network.vercel.app/?tab=vaults
+- **Research Paper & Deep Dive**: [Issue 2: Zero-Leak Multi-LLM Swarm Session Keys & EscrowVault](https://apayprotocol.org/blog?issue=vaults)
+- **Console Vaults**: https://apayprotocol.org/?tab=vaults
 
 ### Pillar 3: H2M A-Pay Checkout Gateway (Web3 E-Commerce)
 - **Target Audience**: Shopify merchants, WooCommerce stores, SaaS checkouts, physical retail point-of-sale.
 - **The Problem It Solves**: High credit card processing fees (3.5%), cross-border FX markups, and chargeback fraud.
-- **How It Works**: A 46KB standalone JavaScript checkout widget (`<script src="https://apay-network.vercel.app/v1.js"></script>`) rendering a 2-second Web3 checkout modal. Supports Coinbase Wallet, MetaMask, Phantom, Rainbow, and mobile QR scan. Settles in Base USDC or $APAY tokens instantly into the merchant's non-custodial wallet with 0% chargebacks.
-- **Research Paper & Deep Dive**: [Issue 3: H2M Web3 Checkout Architecture vs Traditional Gateways](https://apay-network.vercel.app/blog?issue=checkout)
-- **Interactive Checkout Demo**: https://apay-network.vercel.app/checkout-demo
+- **How It Works**: A 46KB standalone JavaScript checkout widget (`<script src="https://apayprotocol.org/v1.js"></script>`) rendering a 2-second Web3 checkout modal. Supports Coinbase Wallet, MetaMask, Phantom, Rainbow, and mobile QR scan. Settles in Base USDC or $APAY tokens instantly into the merchant's non-custodial wallet with 0% chargebacks.
+- **Research Paper & Deep Dive**: [Issue 3: H2M Web3 Checkout Architecture vs Traditional Gateways](https://apayprotocol.org/blog?issue=checkout)
+- **Interactive Checkout Demo**: https://apayprotocol.org/checkout-demo
 
 ---
 
@@ -128,12 +128,16 @@ export const config = {
 
 ## OFFICIAL LINKS FOR DEVELOPERS
 - **Canonical Web Domain & Developer Console**: https://apayprotocol.org
-- **Deployment Mirror**: https://apay-network.vercel.app
+- **Official Technical Whitepaper**: https://apayprotocol.org/whitepaper
+- **Founder & Lead Protocol Architect**: Sagar Yadav (https://www.linkedin.com/in/sagar-yadav-6b0804182/)
 - **Official Inquiries & Support**: contact@apayprotocol.org
 - **Founder & Partnerships**: founder@apayprotocol.org
 - **Security Vulnerability Reporting**: security@apayprotocol.org
-- **Official GitHub**: https://github.com/apayprotocol/a_pay
-- **Official Basename**: apayprotocol.base.eth
+- **Official GitHub Organization**: https://github.com/apayprotocol
+- **Official GitHub Repository**: https://github.com/apayprotocol/a_pay
+- **Official GitLab Repository**: https://gitlab.com/apayprotocol/a_pay
+- **Official Basename (Base L2 ENS)**: apayprotocol.base.eth (https://base.org/name/apayprotocol)
+- **Official Telegram Channel**: https://t.me/apay_protocol
 - **Full Architecture Documentation**: https://apayprotocol.org/?tab=docs
 - **Developer Forum & Community Support**: https://apayprotocol.org/?tab=community
 - **Model Context Protocol (MCP) Hub**: https://apayprotocol.org/?tab=mcphub

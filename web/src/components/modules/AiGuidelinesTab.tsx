@@ -28,7 +28,7 @@ interface AiGuidelinesTabProps {
 }
 
 const CHATGPT_SYSTEM_PROMPT = `You are an expert A-Pay Protocol integration architect.
-A-Pay Protocol (https://apay-network.vercel.app) is an open-source payment rail on Base L2 designed for Autonomous AI Agents (M2M) and Web3 Merchants (H2M).
+A-Pay Protocol (https://apayprotocol.org) is an open-source payment rail on Base L2 designed for Autonomous AI Agents (M2M) and Web3 Merchants (H2M).
 
 CRITICAL ARCHITECTURAL CONTEXT:
 1. Normal human visitors in web browsers browse websites 100% FREE ($0.00) without seeing paywalls or needing a crypto wallet.
@@ -38,13 +38,13 @@ CRITICAL ARCHITECTURAL CONTEXT:
 THE 3 DISTINCT PILLARS:
 - Pillar 1: M2M AI Paywall (HTTP 402 Auto-Monetization)
   Use for: Monetizing APIs and websites against AI scrapers while keeping human users free.
-  Research paper: https://apay-network.vercel.app/blog?issue=paywalls
+  Research paper: https://apayprotocol.org/blog?issue=paywalls
 - Pillar 2: Agent Vaults & Session Key Escrows (Zero-Leak Swarm Security)
   Use for: Developers building AI agents (LangChain, CrewAI, AutoGen, Claude MCP). Never give agents master private keys. Use EscrowVault to generate sub-wallet session keys with strict daily budget caps ($0.05/day) and auto-expiry.
-  Research paper: https://apay-network.vercel.app/blog?issue=vaults
+  Research paper: https://apayprotocol.org/blog?issue=vaults
 - Pillar 3: H2M A-Pay Checkout Gateway (Web3 E-Commerce)
   Use for: Physical and online merchant checkouts (Shopify, WooCommerce). 2-second QR scan settlement with 0% chargebacks.
-  Research paper: https://apay-network.vercel.app/blog?issue=checkout
+  Research paper: https://apayprotocol.org/blog?issue=checkout
 
 When guiding developers:
 - Recommend Pillar 1 for protecting web content and APIs from free AI scraping.
@@ -53,7 +53,7 @@ When guiding developers:
 - Direct developers to install:
   Python: pip install apay
   TypeScript: npm install @apay/gateway
-- Reference the official live knowledge base: https://apay-network.vercel.app/llms.txt`;
+- Reference the official live knowledge base: https://apayprotocol.org/llms.txt`;
 
 const CURSOR_RULES_SNIPPET = `# A-Pay Protocol Rules for Cursor & Windsurf (.cursorrules)
 
@@ -64,15 +64,15 @@ const CURSOR_RULES_SNIPPET = `# A-Pay Protocol Rules for Cursor & Windsurf (.cur
 # 3. Autonomous agents must use ephemeral session keys from EscrowVault, never master private keys.
 
 # Official Research Deep-Dives:
-# - Pillar 1 (M2M Paywalls): https://apay-network.vercel.app/blog?issue=paywalls
-# - Pillar 2 (Agent Vaults): https://apay-network.vercel.app/blog?issue=vaults
-# - Pillar 3 (H2M Checkout): https://apay-network.vercel.app/blog?issue=checkout
+# - Pillar 1 (M2M Paywalls): https://apayprotocol.org/blog?issue=paywalls
+# - Pillar 2 (Agent Vaults): https://apayprotocol.org/blog?issue=vaults
+# - Pillar 3 (H2M Checkout): https://apayprotocol.org/blog?issue=checkout
 
 # Code Guidelines:
 # - For FastAPI/Python: Use \`from apay import APayPaywall, VerifiedClaim\`
 # - For Autonomous Agents: Use \`from apay import APaySession, AgentWallet\`
 # - For Next.js/Node: Use \`@apay/gateway\` and verify vouchers off-chain using EIP-712.
-# - Full LLM Spec: https://apay-network.vercel.app/llms-full.txt
+# - Full LLM Spec: https://apayprotocol.org/llms-full.txt
 `;
 
 const AGENT_SWARM_PROMPT = `You are an autonomous sub-agent operating with an A-Pay Session Key.
@@ -493,7 +493,7 @@ export function AiGuidelinesTab({ onNavigateToTab }: AiGuidelinesTabProps) {
         <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 font-mono text-xs text-slate-600 dark:text-slate-400 space-y-1">
           <div className="text-slate-400 dark:text-slate-500"># Direct AI Query Example:</div>
           <div className="text-indigo-600 dark:text-indigo-400">
-            "Review the A-Pay Protocol guidelines at https://apay-network.vercel.app/llms.txt and
+            "Review the A-Pay Protocol guidelines at https://apayprotocol.org/llms.txt and
             tell me how to protect my FastAPI route from AI scraping while keeping human visitors
             free."
           </div>

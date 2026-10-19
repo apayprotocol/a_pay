@@ -200,7 +200,7 @@ export function ApiKeysTab({
   };
 
   const embedSnippet = `<!-- 1. Include A-Pay Checkout Bundle in <head> -->
-<script src="https://apay-network.vercel.app/checkout.js" data-key="${pkKey}"></script>
+<script src="https://apayprotocol.org/checkout.js" data-key="${pkKey}"></script>
 
 <!-- 2. Launch 1-Click Autonomous Checkout Modal (${selectedCurrency === 'DUAL' ? 'DUAL: Accepts USDC & $APAY' : selectedCurrency}) -->
 <button onclick="APay.checkout({

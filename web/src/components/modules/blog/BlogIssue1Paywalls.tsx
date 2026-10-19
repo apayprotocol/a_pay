@@ -91,7 +91,7 @@ export function BlogIssue1Paywalls({
     }
   };
 
-  const testCurlCommand = `curl -i -A "GPTBot/1.2" https://apay-network.vercel.app/api/ping`;
+  const testCurlCommand = `curl -i -A "GPTBot/1.2" https://apayprotocol.org/api/ping`;
 
   // Calculations
   const monthlyUnprotectedLoss = Math.round(monthlyBotHits * avgDbWakeupCost * 100) / 100;

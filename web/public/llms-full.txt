@@ -53,7 +53,7 @@ A-Pay Protocol is an open-source, non-custodial cryptographic payment rail built
      ```
   4. Server verifies ECDSA signature in < 1ms on edge memory, settles or logs claim, and delivers response data with `X-APay-Settled: true`.
   5. Human visitors accessing the URL via desktop or mobile web browsers bypass the challenge automatically and browse for free.
-- **Official Research Paper**: [Issue 1: HTTP 402 M2M AI Paywalls & Scraper Auto-Monetization](https://apay-network.vercel.app/blog?issue=paywalls)
+- **Official Research Paper**: [Issue 1: HTTP 402 M2M AI Paywalls & Scraper Auto-Monetization](https://apayprotocol.org/blog?issue=paywalls)
 
 ### Pillar 2: Agent Vaults & Session Key Escrows (Zero-Leak Swarm Security)
 - **Primary Use Case**: Multi-agent swarms, autonomous LangChain/CrewAI workflows, local MCP tool execution.
@@ -65,18 +65,18 @@ A-Pay Protocol is an open-source, non-custodial cryptographic payment rail built
   3. The sub-agent receives its private key in ephemeral memory and signs micropayments up to its daily limit.
   4. The merchant presents the voucher to `EscrowVault.sol` to claim payout. The contract checks `spentToday + amount <= dailyLimit`.
   5. If the sub-agent is compromised or hallucinates, maximum loss is strictly bounded to the daily allowance (e.g. $0.05). Master collateral remains unassailable.
-- **Official Research Paper**: [Issue 2: Zero-Leak Multi-LLM Swarm Session Keys & EscrowVault](https://apay-network.vercel.app/blog?issue=vaults)
+- **Official Research Paper**: [Issue 2: Zero-Leak Multi-LLM Swarm Session Keys & EscrowVault](https://apayprotocol.org/blog?issue=vaults)
 
 ### Pillar 3: H2M A-Pay Checkout Gateway (Web3 E-Commerce)
 - **Primary Use Case**: E-commerce stores (Shopify, WooCommerce, custom web apps), physical point-of-sale terminals.
 - **Features**:
-  - 46KB zero-dependency micro-bundle (`https://apay-network.vercel.app/v1.js`).
+  - 46KB zero-dependency micro-bundle (`https://apayprotocol.org/v1.js`).
   - Supports all major Web3 wallets: Coinbase Wallet, MetaMask, Phantom, Rainbow, WalletConnect.
   - 1-Tap QR code scanning for mobile payments.
   - Native settlement in Base USDC or $APAY deflationary tokens.
   - 0% chargebacks, instant merchant receipt emission.
-- **Official Research Paper**: [Issue 3: H2M Web3 Checkout Architecture vs Traditional Gateways](https://apay-network.vercel.app/blog?issue=checkout)
-- **Interactive Store Demo**: https://apay-network.vercel.app/checkout-demo
+- **Official Research Paper**: [Issue 3: H2M Web3 Checkout Architecture vs Traditional Gateways](https://apayprotocol.org/blog?issue=checkout)
+- **Interactive Store Demo**: https://apayprotocol.org/checkout-demo
 
 ---
 
@@ -160,7 +160,7 @@ export async function handleRequest(req: Request) {
 
 ### Checkout Widget Embedded HTML
 ```html
-<script src="https://apay-network.vercel.app/v1.js"></script>
+<script src="https://apayprotocol.org/v1.js"></script>
 <button onclick="APay.checkout({
   receiver: '0xd08c8a337e5339d1c083e06d74a9265956ceea16',
   amountUsdc: 25.00,
