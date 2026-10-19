@@ -230,7 +230,7 @@ export function LandingPage({
         {/* Tier 2: Dedicated Sub-Header Navigation Bar (Fluid Responsive Rail) */}
         <div className="w-full border-b border-slate-200/80 dark:border-slate-800/80 bg-slate-50/95 dark:bg-slate-950/90 shadow-sm backdrop-blur-md relative z-30">
           <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 relative">
-            <div className="flex items-center gap-1 sm:gap-1.5 py-1.5 relative overflow-x-auto no-scrollbar scroll-smooth touch-pan-x justify-start sm:justify-between min-w-0">
+            <div className="flex items-center gap-1 sm:gap-2 py-1.5 relative overflow-x-auto no-scrollbar scroll-smooth touch-pan-x justify-start min-w-0">
               {/* Left: The 3 Pillars Dropdown & Sub-Nodes Flyout (Unclipped) */}
               <div
                 className="relative shrink-0 overflow-visible"
@@ -359,14 +359,14 @@ export function LandingPage({
               <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 shrink-0 mx-0.5 hidden sm:block" />
 
               {/* Remaining Nav Links (Flows smoothly from left to right on all screens) */}
-              <nav className="flex items-center gap-1 sm:gap-1.5 min-w-0 shrink-0 sm:shrink sm:flex-1 justify-start sm:justify-end">
+              <nav className="flex items-center gap-1 sm:gap-1.5 shrink-0 justify-start">
                 <Link
                   href="/blog"
                   className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-slate-900 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-all shrink-0 whitespace-nowrap"
                 >
                   <BookOpen className="w-3.5 h-3.5 text-indigo-500" />
                   <span>Research Hub</span>
-                  <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 font-bold">
+                  <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 font-bold hidden xl:inline">
                     3 Papers
                   </span>
                 </Link>
@@ -416,7 +416,7 @@ export function LandingPage({
                 >
                   <MessageSquare className="w-3.5 h-3.5 text-emerald-500" />
                   <span>Community</span>
-                  <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold">
+                  <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold hidden xl:inline">
                     Dev Forum
                   </span>
                 </button>
@@ -428,7 +428,7 @@ export function LandingPage({
                 >
                   <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
                   <span>AI Guidelines</span>
-                  <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold">
+                  <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold hidden xl:inline">
                     llms.txt
                   </span>
                 </button>
