@@ -17,6 +17,7 @@ import httpx
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 
+from . import __version__
 from .channel import ChannelReceiverValidator, ChannelVoucher
 from .nonce_store import BaseNonceStore, SlidingWindowNonceStore
 from .relayer import ClaimJournal, ClaimRecord
@@ -178,7 +179,7 @@ class APayPaywall:
             headers["X-APay-Token-USDC"] = "0x036CbD53842c5426634e7929541eC2318f3dCF7e"
             headers["X-APay-Token-APAY"] = "0x8dd4ff9035c7d4e0Bef30aa64FC30d128A4066C3"
 
-        headers["X-APay-Protocol"] = "A-Pay/0.1.8"
+        headers["X-APay-Protocol"] = f"A-Pay/{__version__}"
         headers["X-APay-Portal"] = "https://apayprotocol.org"
         headers["X-APay-Free-Human-Access"] = "true"
         headers["X-APay-Developer-Alert"] = (

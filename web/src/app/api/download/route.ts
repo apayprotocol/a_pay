@@ -102,7 +102,7 @@ export default {
         status: 402,
         headers: {
           'Content-Type': 'application/json',
-          'X-APay-Protocol': 'A-Pay/0.1.10',
+          'X-APay-Protocol': 'A-Pay/0.1.11',
           'X-APay-Portal': 'https://apayprotocol.org',
           'X-APay-Free-Human-Access': 'true',
           'X-APay-Receiver': '${wallet}',
@@ -191,7 +191,7 @@ export function middleware(request: NextRequest) {
     }, {
       status: 402,
       headers: {
-        'X-APay-Protocol': 'A-Pay/0.1.10',
+        'X-APay-Protocol': 'A-Pay/0.1.11',
         'X-APay-Free-Human-Access': 'true',
         'X-APay-Receiver': '${wallet}',
         'X-APay-Nonce': nonce,
@@ -278,7 +278,7 @@ add_action('init', function() {
         $nonce = bin2hex(random_bytes(16));
         header('HTTP/1.1 402 Payment Required');
         header('Content-Type: application/json');
-        header('X-APay-Protocol: A-Pay/0.1.10');
+        header('X-APay-Protocol: A-Pay/0.1.11');
         header('X-APay-Receiver: ${wallet}');
         header('X-APay-Amount: ${priceUsdc}');
         header('X-APay-Currency: ${currency}');

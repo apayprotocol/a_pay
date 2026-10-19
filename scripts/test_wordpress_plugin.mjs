@@ -86,8 +86,7 @@ test("3rd Party Service Disclosures are declared (Base RPC & APay Portal)", () =
 		"Missing 3rd party disclosure",
 	);
 	assert(
-		readmeContent.includes("https://apayprotocol.org") ||
-			readmeContent.includes("https://apay-network.vercel.app"),
+		readmeContent.includes("https://apayprotocol.org"),
 		"Missing APay Portal URL",
 	);
 	assert(

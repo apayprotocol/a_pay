@@ -222,7 +222,7 @@ export class APayGateway {
         };
       }
 
-      challenge['X-APay-Protocol'] = 'A-Pay/0.1.8';
+      challenge['X-APay-Protocol'] = 'A-Pay/0.1.11';
       challenge['X-APay-Portal'] = 'https://apayprotocol.org';
       challenge['X-APay-Free-Human-Access'] = 'true';
       challenge['X-APay-Developer-Alert'] = 'Autonomous payment required. Visit https://apayprotocol.org to integrate A-Pay.';

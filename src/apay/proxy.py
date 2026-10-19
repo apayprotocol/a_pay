@@ -16,6 +16,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 from starlette.routing import Route
 
+from . import __version__
 from .channel import ChannelReceiverValidator, ChannelVoucher
 from .nonce_store import BaseNonceStore, SlidingWindowNonceStore
 from .relayer import ClaimJournal, ClaimRecord
@@ -143,7 +144,7 @@ class ProxyGate:
                     "X-APay-Scheme": "eip712",
                     "X-APay-Chain-Id": str(self.chain_id),
                     "X-APay-Router": self.router_address,
-                    "X-APay-Protocol": "A-Pay/0.1.8",
+                    "X-APay-Protocol": f"A-Pay/{__version__}",
                     "X-APay-Portal": "https://apayprotocol.org",
                     "X-APay-Free-Human-Access": "true",
                     "X-APay-Developer-Alert": "Autonomous payment required. Visit https://apayprotocol.org to integrate A-Pay.",
@@ -247,7 +248,7 @@ class ProxyGate:
                 "X-APay-Scheme": "eip712",
                 "X-APay-Chain-Id": str(self.chain_id),
                 "X-APay-Router": self.router_address,
-                "X-APay-Protocol": "A-Pay/0.1.8",
+                "X-APay-Protocol": f"A-Pay/{__version__}",
                 "X-APay-Portal": "https://apayprotocol.org",
                 "X-APay-Free-Human-Access": "true",
                 "X-APay-Developer-Alert": "Autonomous payment required. Visit https://apayprotocol.org to integrate A-Pay.",

@@ -183,7 +183,7 @@ export default {
 
       const responseHeaders = {
         'Content-Type': 'application/json',
-        'X-APay-Protocol': 'A-Pay/0.1.8',
+        'X-APay-Protocol': 'A-Pay/0.1.11',
         'X-APay-Portal': 'https://apayprotocol.org',
         'X-APay-Free-Human-Access': 'true',
         'X-APay-Developer-Alert':

@@ -729,9 +729,7 @@ def stake_status(agent: str) -> None:
 @click.option("--arbiter-key", "-k", envvar="ARBITER_PRIVATE_KEY", help="Arbiter private key for broadcast")
 @click.option("--network", "-n", default="base-sepolia", help="Network (base, base-sepolia)")
 @click.option("--sync-feed", is_flag=True, default=False, help="Sync slash event to web dispute feed")
-@click.option(
-    "--feed-url", default="https://apayprotocol.org/api/dispute", help="Dispute telemetry feed URL"
-)
+@click.option("--feed-url", default="https://apayprotocol.org/api/dispute", help="Dispute telemetry feed URL")
 def stake_slash(
     agent: str,
     challenger: str,
@@ -781,9 +779,7 @@ def stake_slash(
 
 @stake.command("disputes")
 @click.option("--network", "-n", default="all", help="Filter network (base, base-sepolia, all)")
-@click.option(
-    "--feed-url", default="https://apayprotocol.org/api/dispute", help="Dispute telemetry feed URL"
-)
+@click.option("--feed-url", default="https://apayprotocol.org/api/dispute", help="Dispute telemetry feed URL")
 def stake_disputes(network: str, feed_url: str) -> None:
     """Query live anti-spam dispute telemetry and slashing history."""
     import httpx

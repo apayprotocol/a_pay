@@ -350,7 +350,7 @@ export default {
         status: 402,
         headers: {
           'Content-Type': 'application/json',
-          'X-APay-Protocol': 'A-Pay/0.1.8',
+          'X-APay-Protocol': 'A-Pay/0.1.11',
           'X-APay-Portal': 'https://apayprotocol.org',
           'X-APay-Free-Human-Access': 'true',
           'X-APay-Developer-Alert': 'Autonomous payment required. Visit https://apayprotocol.org to integrate A-Pay.',
@@ -461,7 +461,7 @@ export function middleware(request: NextRequest) {
     }, {
       status: 402,
       headers: {
-        'X-APay-Protocol': 'A-Pay/0.1.8',
+        'X-APay-Protocol': 'A-Pay/0.1.11',
         'X-APay-Portal': 'https://apayprotocol.org',
         'X-APay-Free-Human-Access': 'true',
         'X-APay-Developer-Alert': 'Autonomous payment required. Visit https://apayprotocol.org to integrate A-Pay.',

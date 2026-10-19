@@ -41,7 +41,7 @@ A-Pay Protocol is an open-source, non-custodial cryptographic payment rail built
   2. A-Pay Gateway intercepts the request. Since no valid `X-APay-Voucher` is attached, the server replies with:
      ```http
      HTTP/1.1 402 Payment Required
-     X-APay-Protocol: A-Pay/0.1.8
+     X-APay-Protocol: A-Pay/0.1.11
      X-APay-Price-USDC: 0.002
      X-APay-Receiver: 0xMerchantWalletAddress
      X-APay-Challenge: 0xNonceRandomChallenge
