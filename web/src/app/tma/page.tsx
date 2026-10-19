@@ -1056,7 +1056,7 @@ export default function TelegramMiniAppPage() {
       {/* ── BOTTOM STICKY ACTION BAR ────────────────────────────────────────── */}
       <footer className="fixed bottom-0 left-0 right-0 z-40 bg-[#07080b]/95 backdrop-blur-lg border-t border-slate-800/80 px-4 py-2.5 flex items-center justify-between">
         <button
-          onClick={() => openTelegramLink('https://t.me/+HOkmQo2KuvdlNjU9')}
+          onClick={() => openTelegramLink('https://t.me/apay_protocol')}
           className="flex items-center gap-1.5 text-xs font-mono text-sky-400 hover:text-sky-300"
         >
           <span>💬</span>

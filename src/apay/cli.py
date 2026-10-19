@@ -526,7 +526,7 @@ def mcp(
 )
 @click.option(
     "--sync-feed",
-    default="https://apay-network.vercel.app/api/burn-feed",
+    default="https://apayprotocol.org/api/burn-feed",
     help="Web Console telemetry URL",
 )
 def burn_engine_cmd(
@@ -730,7 +730,7 @@ def stake_status(agent: str) -> None:
 @click.option("--network", "-n", default="base-sepolia", help="Network (base, base-sepolia)")
 @click.option("--sync-feed", is_flag=True, default=False, help="Sync slash event to web dispute feed")
 @click.option(
-    "--feed-url", default="https://apay-network.vercel.app/api/dispute", help="Dispute telemetry feed URL"
+    "--feed-url", default="https://apayprotocol.org/api/dispute", help="Dispute telemetry feed URL"
 )
 def stake_slash(
     agent: str,
@@ -782,7 +782,7 @@ def stake_slash(
 @stake.command("disputes")
 @click.option("--network", "-n", default="all", help="Filter network (base, base-sepolia, all)")
 @click.option(
-    "--feed-url", default="https://apay-network.vercel.app/api/dispute", help="Dispute telemetry feed URL"
+    "--feed-url", default="https://apayprotocol.org/api/dispute", help="Dispute telemetry feed URL"
 )
 def stake_disputes(network: str, feed_url: str) -> None:
     """Query live anti-spam dispute telemetry and slashing history."""

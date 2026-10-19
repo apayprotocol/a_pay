@@ -24,8 +24,10 @@
 * **Official Inboxes**: `founder@apayprotocol.org` | `contact@apayprotocol.org` | `security@apayprotocol.org`
 * **Official GitHub Organization**: [https://github.com/apayprotocol](https://github.com/apayprotocol) *(Verified Domain Organization)*
 * **Official GitLab (Decentralized Mirror)**: [https://gitlab.com/apayprotocol/a_pay](https://gitlab.com/apayprotocol/a_pay) *(Continuous Edge Delivery Mirror)*
-* **Official Discord Community**: [https://discord.gg/cW2WRSfb35](https://discord.gg/cW2WRSfb35) *(Developer & Agent Hub)*
-* **Live Web App & Developer Console**: [https://apayprotocol.org](https://apayprotocol.org) / [https://apay-network.vercel.app](https://apay-network.vercel.app)
+* **Live Web App & Developer Console**: [https://apayprotocol.org](https://apayprotocol.org)
+* **Technical Whitepaper**: [https://apayprotocol.org/whitepaper](https://apayprotocol.org/whitepaper)
+* **Founder & Lead Architect**: [Sagar Yadav](https://www.linkedin.com/in/sagar-yadav-6b0804182/)
+* **Official Telegram**: [https://t.me/apay_protocol](https://t.me/apay_protocol) | Bot: [@APay_Protocol_Bot](https://t.me/APay_Protocol_Bot)
 
 ### ⛓️ Verified Smart Contracts (Base Mainnet — Chain ID `8453`)
 | Contract / Resource | Contract Address | Explorer / Pool |
@@ -292,6 +294,9 @@ a_pay/
 ## 🤝 Community & Ecosystem
 
 * **Official Website**: [https://apayprotocol.org](https://apayprotocol.org)
+* **Technical Whitepaper**: [https://apayprotocol.org/whitepaper](https://apayprotocol.org/whitepaper)
+* **Founder & Lead Architect**: [Sagar Yadav](https://www.linkedin.com/in/sagar-yadav-6b0804182/)
+* **Official Telegram**: [https://t.me/apay_protocol](https://t.me/apay_protocol) | [Gateway Bridge](https://apayprotocol.org/telegram)
 * **Official Discord**: [https://discord.gg/cW2WRSfb35](https://discord.gg/cW2WRSfb35) *(Developer Community)*
 * **Official Subreddit**: [r/A_Pay_Protocol](https://www.reddit.com/r/A_Pay_Protocol/)
 * **GitHub Organization**: [https://github.com/apayprotocol](https://github.com/apayprotocol)

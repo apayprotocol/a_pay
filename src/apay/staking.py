@@ -230,7 +230,7 @@ class StakingClient:
         arbiter_private_key: str | None = None,
         dry_run: bool = False,
         sync_feed: bool = False,
-        sync_feed_url: str = "https://apay-network.vercel.app/api/dispute",
+        sync_feed_url: str = "https://apayprotocol.org/api/dispute",
     ) -> dict[str, Any]:
         """Slashes an agent's stake due to malicious or hallucinated output.
 

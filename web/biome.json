@@ -19,7 +19,8 @@
     "rules": {
       "recommended": true,
       "style": {
-        "useTemplate": "off"
+        "useTemplate": "off",
+        "useNodejsImportProtocol": "off"
       },
       "suspicious": {
         "noExplicitAny": "off",

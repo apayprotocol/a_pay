@@ -493,9 +493,8 @@ export function AiGuidelinesTab({ onNavigateToTab }: AiGuidelinesTabProps) {
         <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 font-mono text-xs text-slate-600 dark:text-slate-400 space-y-1">
           <div className="text-slate-400 dark:text-slate-500"># Direct AI Query Example:</div>
           <div className="text-indigo-600 dark:text-indigo-400">
-            "Review the A-Pay Protocol guidelines at https://apayprotocol.org/llms.txt and
-            tell me how to protect my FastAPI route from AI scraping while keeping human visitors
-            free."
+            "Review the A-Pay Protocol guidelines at https://apayprotocol.org/llms.txt and tell me
+            how to protect my FastAPI route from AI scraping while keeping human visitors free."
           </div>
         </div>
       </div>

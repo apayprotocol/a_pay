@@ -1558,7 +1558,10 @@ export function LandingPage({
       {/* ========================================================================= */}
       {/* 5. LEADERSHIP, FOUNDER & GOVERNANCE TRANSPARENCY */}
       {/* ========================================================================= */}
-      <section id="team" className="py-16 sm:py-24 border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40">
+      <section
+        id="team"
+        className="py-16 sm:py-24 border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-500/20 text-blue-600 dark:text-sky-400 text-xs font-mono font-bold tracking-wide uppercase">
@@ -1569,7 +1572,8 @@ export function LandingPage({
               The Architects Behind A-Pay Protocol
             </h2>
             <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-              Institutional transparency and verifiable on-chain identity powering the next generation of autonomous machine-to-machine micropayments.
+              Institutional transparency and verifiable on-chain identity powering the next
+              generation of autonomous machine-to-machine micropayments.
             </p>
           </div>
 
@@ -1599,7 +1603,9 @@ export function LandingPage({
                     Lead Architect • Base L2 Smart Contracts &amp; M2M Systems
                   </div>
                   <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed pt-1">
-                    System architect specializing in autonomous AI agent economics, RFC-compliant HTTP 402 paywall rails, and multi-agent non-custodial session escrows on Base Layer 2.
+                    System architect specializing in autonomous AI agent economics, RFC-compliant
+                    HTTP 402 paywall rails, and multi-agent non-custodial session escrows on Base
+                    Layer 2.
                   </p>
                 </div>
               </div>
@@ -1613,7 +1619,9 @@ export function LandingPage({
                   title="Verified Personal LinkedIn Profile"
                 >
                   <div>
-                    <span className="font-bold text-slate-800 dark:text-slate-200 block">Personal LinkedIn</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200 block">
+                      Personal LinkedIn
+                    </span>
                     <span className="text-[10px] text-slate-500">Sagar Yadav</span>
                   </div>
                   <ExternalLink className="w-3.5 h-3.5 text-blue-500" />
@@ -1627,7 +1635,9 @@ export function LandingPage({
                   title="Official Base L2 ENS Resolver"
                 >
                   <div>
-                    <span className="font-bold text-slate-800 dark:text-slate-200 block">Basename (ENS)</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200 block">
+                      Basename (ENS)
+                    </span>
                     <span className="text-[10px] text-slate-500">apayprotocol.base.eth</span>
                   </div>
                   <ExternalLink className="w-3.5 h-3.5 text-blue-500" />
@@ -1639,7 +1649,9 @@ export function LandingPage({
                   title="Founder Direct Communications"
                 >
                   <div>
-                    <span className="font-bold text-slate-800 dark:text-slate-200 block">Direct Inquiries</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200 block">
+                      Direct Inquiries
+                    </span>
                     <span className="text-[10px] text-slate-500">founder@apayprotocol.org</span>
                   </div>
                   <Mail className="w-3.5 h-3.5 text-blue-500" />
@@ -1658,7 +1670,8 @@ export function LandingPage({
                   100% Open-Source &amp; Verifiable
                 </h4>
                 <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                  Every smart contract, SDK package, and CLI tool is audited, publicly published, and cryptographically verified on-chain.
+                  Every smart contract, SDK package, and CLI tool is audited, publicly published,
+                  and cryptographically verified on-chain.
                 </p>
               </div>
 

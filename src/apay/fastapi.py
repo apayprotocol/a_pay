@@ -179,10 +179,10 @@ class APayPaywall:
             headers["X-APay-Token-APAY"] = "0x8dd4ff9035c7d4e0Bef30aa64FC30d128A4066C3"
 
         headers["X-APay-Protocol"] = "A-Pay/0.1.8"
-        headers["X-APay-Portal"] = "https://apay-network.vercel.app"
+        headers["X-APay-Portal"] = "https://apayprotocol.org"
         headers["X-APay-Free-Human-Access"] = "true"
         headers["X-APay-Developer-Alert"] = (
-            "Autonomous payment required. Visit https://apay-network.vercel.app to integrate A-Pay."
+            "Autonomous payment required. Visit https://apayprotocol.org to integrate A-Pay."
         )
 
         return headers

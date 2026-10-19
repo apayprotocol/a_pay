@@ -499,7 +499,7 @@ class BurnDaemon:
         poll_interval: int = 3600,
         dry_run: bool = False,
         network: str = "base",
-        sync_feed_url: str | None = "https://apay-network.vercel.app/api/burn-feed",
+        sync_feed_url: str | None = "https://apayprotocol.org/api/burn-feed",
         journal_path: str | None = None,
     ) -> None:
         self.network = network.lower()

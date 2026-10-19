@@ -161,6 +161,7 @@ export default function RootLayout({
                 url: 'https://apayprotocol.org',
                 logo: 'https://apayprotocol.org/brand/apay-official-logo.png',
                 sameAs: [
+                  'https://t.me/apay_protocol',
                   'https://x.com/apayprotocol',
                   'https://discord.gg/cW2WRSfb35',
                   'https://github.com/apayprotocol',
@@ -171,6 +172,13 @@ export default function RootLayout({
                   'https://www.instagram.com/apayprotocol/',
                   'https://www.facebook.com/apayprotocol',
                 ],
+                founder: {
+                  '@type': 'Person',
+                  name: 'Sagar Yadav',
+                  jobTitle: 'Founder & Lead Protocol Architect',
+                  url: 'https://www.linkedin.com/in/sagar-yadav-6b0804182/',
+                  sameAs: ['https://www.linkedin.com/in/sagar-yadav-6b0804182/'],
+                },
               },
               {
                 '@type': 'WebSite',

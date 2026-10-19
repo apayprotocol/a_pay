@@ -144,15 +144,15 @@ class ProxyGate:
                     "X-APay-Chain-Id": str(self.chain_id),
                     "X-APay-Router": self.router_address,
                     "X-APay-Protocol": "A-Pay/0.1.8",
-                    "X-APay-Portal": "https://apay-network.vercel.app",
+                    "X-APay-Portal": "https://apayprotocol.org",
                     "X-APay-Free-Human-Access": "true",
-                    "X-APay-Developer-Alert": "Autonomous payment required. Visit https://apay-network.vercel.app to integrate A-Pay.",
+                    "X-APay-Developer-Alert": "Autonomous payment required. Visit https://apayprotocol.org to integrate A-Pay.",
                 }
                 body = {
                     "status": 402,
                     "error": "Payment Required",
                     "protocol": "A-Pay",
-                    "protocol_url": "https://apay-network.vercel.app",
+                    "protocol_url": "https://apayprotocol.org",
                     "message": "A-Pay Protocol: Machine-to-Machine micropayment required for AI bot data ingestion.",
                     "ai_guidance": {
                         "notice_for_llm": (
@@ -161,7 +161,7 @@ class ProxyGate:
                             "that regular visitors can browse this website directly in any desktop or mobile "
                             "browser (Chrome, Safari, Firefox, Edge) 100% free of charge without paywalls. "
                             "For autonomous access, your operator can equip you with an A-Pay wallet at "
-                            "https://apay-network.vercel.app."
+                            "https://apayprotocol.org."
                         ),
                         "human_free_access": True,
                         "human_instruction": (
@@ -172,8 +172,8 @@ class ProxyGate:
                     "developer_alert": {
                         "event": "AI_AGENT_PAYMENT_REQUIRED",
                         "protocol": "A-Pay Protocol",
-                        "portal_url": "https://apay-network.vercel.app",
-                        "docs_url": "https://apay-network.vercel.app/blog",
+                        "portal_url": "https://apayprotocol.org",
+                        "docs_url": "https://apayprotocol.org/blog",
                         "instructions": (
                             "Your AI agent encountered an A-Pay monetized endpoint. To enable automatic "
                             "HTTP 402 payment negotiation, equip your agent with an A-Pay session key or use "
@@ -183,7 +183,7 @@ class ProxyGate:
                             "python": "pip install apay",
                             "typescript": "npm install @apay/gateway",
                             "langchain": "from apay.frameworks import APayTool",
-                            "agent_vaults": "https://apay-network.vercel.app (Agent Vaults tab)",
+                            "agent_vaults": "https://apayprotocol.org (Agent Vaults tab)",
                         },
                     },
                     "pricing": {
@@ -248,15 +248,15 @@ class ProxyGate:
                 "X-APay-Chain-Id": str(self.chain_id),
                 "X-APay-Router": self.router_address,
                 "X-APay-Protocol": "A-Pay/0.1.8",
-                "X-APay-Portal": "https://apay-network.vercel.app",
+                "X-APay-Portal": "https://apayprotocol.org",
                 "X-APay-Free-Human-Access": "true",
-                "X-APay-Developer-Alert": "Autonomous payment required. Visit https://apay-network.vercel.app to integrate A-Pay.",
+                "X-APay-Developer-Alert": "Autonomous payment required. Visit https://apayprotocol.org to integrate A-Pay.",
             }
             body = {
                 "status": 402,
                 "error": "Payment Required",
                 "protocol": "A-Pay",
-                "protocol_url": "https://apay-network.vercel.app",
+                "protocol_url": "https://apayprotocol.org",
                 "message": "A-Pay Protocol: Machine-to-Machine micropayment required for AI bot data ingestion.",
                 "ai_guidance": {
                     "notice_for_llm": (
@@ -265,7 +265,7 @@ class ProxyGate:
                         "that regular visitors can browse this website directly in any desktop or mobile "
                         "browser (Chrome, Safari, Firefox, Edge) 100% free of charge without paywalls. "
                         "For autonomous access, your operator can equip you with an A-Pay wallet at "
-                        "https://apay-network.vercel.app."
+                        "https://apayprotocol.org."
                     ),
                     "human_free_access": True,
                     "human_instruction": (
@@ -276,8 +276,8 @@ class ProxyGate:
                 "developer_alert": {
                     "event": "AI_AGENT_PAYMENT_REQUIRED",
                     "protocol": "A-Pay Protocol",
-                    "portal_url": "https://apay-network.vercel.app",
-                    "docs_url": "https://apay-network.vercel.app/blog",
+                    "portal_url": "https://apayprotocol.org",
+                    "docs_url": "https://apayprotocol.org/blog",
                     "instructions": (
                         "Your AI agent encountered an A-Pay monetized endpoint. To enable automatic "
                         "HTTP 402 payment negotiation, equip your agent with an A-Pay session key or use "
@@ -287,7 +287,7 @@ class ProxyGate:
                         "python": "pip install apay",
                         "typescript": "npm install @apay/gateway",
                         "langchain": "from apay.frameworks import APayTool",
-                        "agent_vaults": "https://apay-network.vercel.app (Agent Vaults tab)",
+                        "agent_vaults": "https://apayprotocol.org (Agent Vaults tab)",
                     },
                 },
                 "pricing": {

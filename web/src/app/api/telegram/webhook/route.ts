@@ -161,7 +161,7 @@ const DEFAULT_ANNOUNCEMENT_CHANNEL = '@apay_protocol';
 let configuredAnnouncementChannel =
   process.env.TELEGRAM_ANNOUNCEMENT_CHANNEL || DEFAULT_ANNOUNCEMENT_CHANNEL;
 
-const DEFAULT_COMMUNITY_GROUP_URL = 'https://t.me/+HOkmQo2KuvdlNjU9';
+const DEFAULT_COMMUNITY_GROUP_URL = 'https://t.me/apay_protocol';
 let configuredCommunityGroup = process.env.TELEGRAM_COMMUNITY_GROUP || DEFAULT_COMMUNITY_GROUP_URL;
 
 // Minimal ERC20 ABI for balance checks

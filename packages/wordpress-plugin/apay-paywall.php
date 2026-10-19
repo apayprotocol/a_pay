@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:       apay98 Autonomous Crawler Paywall
- * Plugin URI:        https://apay-network.vercel.app
+ * Plugin URI:        https://apayprotocol.org
  * Description:       Universal HTTP 402 AI paywall for WordPress. Monetize GPTBot, ClaudeBot, and AI crawlers on Base L2 while humans browse 100% free.
  * Version:           0.1.8
  * Requires at least: 5.8

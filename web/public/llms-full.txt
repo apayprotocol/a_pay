@@ -192,6 +192,8 @@ export async function handleRequest(req: Request) {
 
 ---
 Official Inquiries & Support: contact@apayprotocol.org | founder@apayprotocol.org
+Founder & Lead Protocol Architect: Sagar Yadav (https://www.linkedin.com/in/sagar-yadav-6b0804182/)
+Official Technical Whitepaper: https://apayprotocol.org/whitepaper
 Official GitHub: https://github.com/apayprotocol/a_pay
 Official Domain: https://apayprotocol.org
 Official Basename: apayprotocol.base.eth

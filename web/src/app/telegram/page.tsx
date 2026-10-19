@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import {
   ArrowLeft,
   Bot,
@@ -15,6 +14,7 @@ import {
   Sparkles,
   Zap,
 } from 'lucide-react';
+import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { ApayBrandLogo } from '@/components/ApayBrandLogo';
 
@@ -101,12 +101,15 @@ export default function TelegramGatewayPage() {
                   A-Pay Protocol Bot
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                  Base Sepolia testnet faucet, AI web crawler auditor, and interactive Mini App launcher.
+                  Base Sepolia testnet faucet, AI web crawler auditor, and interactive Mini App
+                  launcher.
                 </p>
               </div>
 
               <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 flex items-center justify-between font-mono text-xs">
-                <span className="text-slate-700 dark:text-slate-300 font-bold">@APay_Protocol_Bot</span>
+                <span className="text-slate-700 dark:text-slate-300 font-bold">
+                  @APay_Protocol_Bot
+                </span>
                 <button
                   type="button"
                   onClick={() => copyToClipboard('@APay_Protocol_Bot', 'bot')}
@@ -157,7 +160,8 @@ export default function TelegramGatewayPage() {
                   Announcements Channel
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                  Real-time protocol releases, Base L2 smart contract updates, and developer announcements.
+                  Real-time protocol releases, Base L2 smart contract updates, and developer
+                  announcements.
                 </p>
               </div>
 
@@ -207,20 +211,33 @@ export default function TelegramGatewayPage() {
             <span>Notice for Users with ISP / t.me Loading Issues</span>
           </div>
           <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-            In certain regions (including some Indian telecom operators like Jio, Airtel, and Vi), web browsers may fail to load <code className="px-1 py-0.5 rounded bg-amber-500/20 text-amber-800 dark:text-amber-300 font-mono">t.me</code> domains due to telecom DNS filtering.
+            In certain regions (including some Indian telecom operators like Jio, Airtel, and Vi),
+            web browsers may fail to load{' '}
+            <code className="px-1 py-0.5 rounded bg-amber-500/20 text-amber-800 dark:text-amber-300 font-mono">
+              t.me
+            </code>{' '}
+            domains due to telecom DNS filtering.
           </p>
           <div className="p-3.5 rounded-2xl bg-white/80 dark:bg-slate-900/80 border border-amber-500/20 text-xs space-y-2">
             <div className="font-bold text-slate-900 dark:text-white">
               💡 Zero-Link Solution (Search directly in Telegram App):
             </div>
             <ol className="list-decimal list-inside space-y-1 text-slate-600 dark:text-slate-300 font-sans">
-              <li>Open your native <strong>Telegram Mobile or Desktop App</strong>.</li>
+              <li>
+                Open your native <strong>Telegram Mobile or Desktop App</strong>.
+              </li>
               <li>Tap the search bar (magnifying glass 🔍 at the top).</li>
               <li>
-                Type <strong className="font-mono text-blue-600 dark:text-sky-400">@APay_Protocol_Bot</strong> to chat with the assistant bot.
+                Type{' '}
+                <strong className="font-mono text-blue-600 dark:text-sky-400">
+                  @APay_Protocol_Bot
+                </strong>{' '}
+                to chat with the assistant bot.
               </li>
               <li>
-                Type <strong className="font-mono text-sky-600 dark:text-sky-400">@apay_protocol</strong> to join the announcements channel.
+                Type{' '}
+                <strong className="font-mono text-sky-600 dark:text-sky-400">@apay_protocol</strong>{' '}
+                to join the announcements channel.
               </li>
             </ol>
           </div>
@@ -229,8 +246,12 @@ export default function TelegramGatewayPage() {
         {/* Web Mini App Fallback */}
         <div className="p-5 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
           <div className="space-y-0.5 text-center sm:text-left">
-            <div className="font-bold text-slate-900 dark:text-white">Prefer using the browser?</div>
-            <div className="text-slate-500">Test all bot features directly on our Web Mini App.</div>
+            <div className="font-bold text-slate-900 dark:text-white">
+              Prefer using the browser?
+            </div>
+            <div className="text-slate-500">
+              Test all bot features directly on our Web Mini App.
+            </div>
           </div>
           <Link
             href="/tma"

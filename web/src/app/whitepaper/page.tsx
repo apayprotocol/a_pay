@@ -1,5 +1,3 @@
-import type { Metadata } from 'next';
-import Link from 'next/link';
 import {
   Activity,
   ArrowLeft,
@@ -32,6 +30,8 @@ import {
   Users,
   Zap,
 } from 'lucide-react';
+import type { Metadata } from 'next';
+import Link from 'next/link';
 import React from 'react';
 import { ApayBrandLogo } from '@/components/ApayBrandLogo';
 
@@ -136,17 +136,21 @@ export default function WhitepaperPage() {
           </div>
           <p className="text-sm sm:text-base text-slate-700 dark:text-slate-300 leading-relaxed">
             As autonomous Artificial Intelligence (AI) agents proliferate across the internet, the
-            web faces two unprecedented structural crises: (1) <strong>The Unmetered Scraping Crisis</strong>,
-            where commercial LLM crawlers exhaust server compute without compensating website owners; and (2)
-            <strong>The AI Financial Disenfranchisement Crisis</strong>, wherein autonomous agents lack legal
-            identities, bank accounts, and credit card credentials necessary to pay for proprietary data and tools.
+            web faces two unprecedented structural crises: (1){' '}
+            <strong>The Unmetered Scraping Crisis</strong>, where commercial LLM crawlers exhaust
+            server compute without compensating website owners; and (2)
+            <strong>The AI Financial Disenfranchisement Crisis</strong>, wherein autonomous agents
+            lack legal identities, bank accounts, and credit card credentials necessary to pay for
+            proprietary data and tools.
           </p>
           <p className="text-sm sm:text-base text-slate-700 dark:text-slate-300 leading-relaxed">
-            <strong>A-Pay Protocol</strong> solves this dilemma by introducing an open-source, RFC-compliant
-            <strong> HTTP 402 (Payment Required)</strong> protocol integrated with Base Layer 2. A-Pay enables
-            real-time, sub-second micropayments through EIP-712 cryptographic authorization, budget-capped
-            session escrows (`EscrowVault.sol`), and a deflationary 100,000,000 fixed-supply utility token (`$APAY`),
-            while allowing normal human visitors to browse 100% free with zero paywalls.
+            <strong>A-Pay Protocol</strong> solves this dilemma by introducing an open-source,
+            RFC-compliant
+            <strong> HTTP 402 (Payment Required)</strong> protocol integrated with Base Layer 2.
+            A-Pay enables real-time, sub-second micropayments through EIP-712 cryptographic
+            authorization, budget-capped session escrows (`EscrowVault.sol`), and a deflationary
+            100,000,000 fixed-supply utility token (`$APAY`), while allowing normal human visitors
+            to browse 100% free with zero paywalls.
           </p>
         </section>
 
@@ -171,9 +175,9 @@ export default function WhitepaperPage() {
                 Pillar 1: M2M AI Paywall
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                Drop-in middleware (FastAPI, Next.js, Cloudflare, WordPress) that detects automated AI
-                bots and prompts HTTP 402 challenge headers. Bots pay micro-cents per query via Base
-                L2 vouchers; human browsers pass through completely free ($0.00).
+                Drop-in middleware (FastAPI, Next.js, Cloudflare, WordPress) that detects automated
+                AI bots and prompts HTTP 402 challenge headers. Bots pay micro-cents per query via
+                Base L2 vouchers; human browsers pass through completely free ($0.00).
               </p>
             </div>
 
@@ -187,8 +191,9 @@ export default function WhitepaperPage() {
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                 Non-custodial smart contract (`EscrowVault.sol`) enabling multi-agent swarms
-                (LangChain, CrewAI, AutoGen, Claude Desktop) to operate with ephemeral, budget-capped
-                sub-wallet session keys. Master treasuries are 100% immune to prompt injection drain.
+                (LangChain, CrewAI, AutoGen, Claude Desktop) to operate with ephemeral,
+                budget-capped sub-wallet session keys. Master treasuries are 100% immune to prompt
+                injection drain.
               </p>
             </div>
 
@@ -254,14 +259,20 @@ export default function WhitepaperPage() {
               </h3>
               <p>
                 Every time an autonomous AI crawler pays for an API call or a customer checks out
-                through an A-Pay gateway, a nominal protocol fee (1.0%) is processed by `APayRouterV2.sol`.
-                <strong> 30% of this collected fee is programmatically routed to Aerodrome DEX</strong> on
-                Base Mainnet to execute continuous market buybacks of `$APAY` tokens, which are then permanently
-                sent to the Ethereum dead burn address (`0x000000000000000000000000000000000000dEaD`).
+                through an A-Pay gateway, a nominal protocol fee (1.0%) is processed by
+                `APayRouterV2.sol`.
+                <strong>
+                  {' '}
+                  30% of this collected fee is programmatically routed to Aerodrome DEX
+                </strong>{' '}
+                on Base Mainnet to execute continuous market buybacks of `$APAY` tokens, which are
+                then permanently sent to the Ethereum dead burn address
+                (`0x000000000000000000000000000000000000dEaD`).
               </p>
               <p>
-                Because the supply of `$APAY` is hard-capped at 100,000,000 with zero mint functions in
-                bytecode, increased M2M transaction volume induces structural, continuous supply deflation.
+                Because the supply of `$APAY` is hard-capped at 100,000,000 with zero mint functions
+                in bytecode, increased M2M transaction volume induces structural, continuous supply
+                deflation.
               </p>
             </div>
           </div>
@@ -347,9 +358,7 @@ export default function WhitepaperPage() {
                   <span className="font-bold text-slate-800 dark:text-slate-200 block">
                     StakingVault (Agent Collateral & Slashing)
                   </span>
-                  <span className="text-[11px] text-slate-500">
-                    Anti-spam agent bond staking
-                  </span>
+                  <span className="text-[11px] text-slate-500">Anti-spam agent bond staking</span>
                 </div>
                 <a
                   href="https://basescan.org/address/0x3e35a9e802627a3d9a86d6554e72b1c446e34aaf"
@@ -386,7 +395,10 @@ export default function WhitepaperPage() {
         </section>
 
         {/* Section 4: Leadership, Transparency & Governance */}
-        <section id="leadership" className="space-y-6 border-t border-slate-200 dark:border-slate-800 pt-10">
+        <section
+          id="leadership"
+          className="space-y-6 border-t border-slate-200 dark:border-slate-800 pt-10"
+        >
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center font-spatial font-bold text-sm">
               4
@@ -419,12 +431,13 @@ export default function WhitepaperPage() {
                   </span>
                 </div>
                 <div className="text-xs font-mono text-slate-500 dark:text-slate-400">
-                  Protocol Founder & Lead Architect • Base L2 Smart Contracts & Machine-to-Machine Systems
+                  Protocol Founder & Lead Architect • Base L2 Smart Contracts & Machine-to-Machine
+                  Systems
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed pt-1">
-                  Lead architect of A-Pay Protocol. Architect of RFC-compliant HTTP 402 micro-settlement
-                  gateways, non-custodial session key escrow vaults for autonomous agent swarms, and
-                  open-source developer tooling for the decentralized AI economy.
+                  Lead architect of A-Pay Protocol. Architect of RFC-compliant HTTP 402
+                  micro-settlement gateways, non-custodial session key escrow vaults for autonomous
+                  agent swarms, and open-source developer tooling for the decentralized AI economy.
                 </p>
               </div>
             </div>
@@ -438,7 +451,9 @@ export default function WhitepaperPage() {
                 className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-blue-50 dark:hover:bg-blue-950/40 border border-slate-200 dark:border-slate-700 transition-colors flex items-center justify-between"
               >
                 <div>
-                  <span className="font-bold text-slate-800 dark:text-slate-200 block">LinkedIn Profile</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200 block">
+                    LinkedIn Profile
+                  </span>
                   <span className="text-[10px] text-slate-500">Sagar Yadav</span>
                 </div>
                 <ExternalLink className="w-3.5 h-3.5 text-blue-500" />
@@ -451,7 +466,9 @@ export default function WhitepaperPage() {
                 className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-blue-50 dark:hover:bg-blue-950/40 border border-slate-200 dark:border-slate-700 transition-colors flex items-center justify-between"
               >
                 <div>
-                  <span className="font-bold text-slate-800 dark:text-slate-200 block">Basename (ENS)</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200 block">
+                    Basename (ENS)
+                  </span>
                   <span className="text-[10px] text-slate-500">apayprotocol.base.eth</span>
                 </div>
                 <ExternalLink className="w-3.5 h-3.5 text-blue-500" />
@@ -464,7 +481,9 @@ export default function WhitepaperPage() {
                 className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-blue-50 dark:hover:bg-blue-950/40 border border-slate-200 dark:border-slate-700 transition-colors flex items-center justify-between"
               >
                 <div>
-                  <span className="font-bold text-slate-800 dark:text-slate-200 block">GitHub Org</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200 block">
+                    GitHub Org
+                  </span>
                   <span className="text-[10px] text-slate-500">github.com/apayprotocol</span>
                 </div>
                 <ExternalLink className="w-3.5 h-3.5 text-blue-500" />
@@ -475,7 +494,9 @@ export default function WhitepaperPage() {
                 className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-blue-50 dark:hover:bg-blue-950/40 border border-slate-200 dark:border-slate-700 transition-colors flex items-center justify-between"
               >
                 <div>
-                  <span className="font-bold text-slate-800 dark:text-slate-200 block">Direct Inquiries</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200 block">
+                    Direct Inquiries
+                  </span>
                   <span className="text-[10px] text-slate-500">founder@apayprotocol.org</span>
                 </div>
                 <Mail className="w-3.5 h-3.5 text-blue-500" />

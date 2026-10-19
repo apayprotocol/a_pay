@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * ⚡ A-PAY PROTOCOL: AUTOMATED GIT VERSIONING & SESSION CONTINUITY ENGINE
- * 
+ *
  * Functions:
  * 1. Deep security guardrail (scans staged files for sensitive tokens/keys).
  * 2. Reads live ecosystem versions (PyPI, npm, Web).
@@ -10,47 +10,61 @@
  * 5. Safely syncs to remote GitHub repository.
  */
 
-import { execSync } from 'child_process';
-import fs from 'fs';
-import path from 'path';
+import { execSync } from "child_process";
+import fs from "fs";
+import path from "path";
 
-const ROOT_DIR = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+const ROOT_DIR = path.resolve(
+	path.dirname(new URL(import.meta.url).pathname),
+	"..",
+);
 
 function run(cmd, options = {}) {
-  try {
-    return execSync(cmd, { cwd: ROOT_DIR, encoding: 'utf-8', ...options }).trim();
-  } catch (err) {
-    if (options.ignoreError) return '';
-    throw err;
-  }
+	try {
+		return execSync(cmd, {
+			cwd: ROOT_DIR,
+			encoding: "utf-8",
+			...options,
+		}).trim();
+	} catch (err) {
+		if (options.ignoreError) return "";
+		throw err;
+	}
 }
 
-console.log('===============================================================');
-console.log('🚀 A-PAY PROTOCOL: AUTO GIT & CONTINUITY SNAPSHOT ENGINE');
-console.log('===============================================================');
+console.log("===============================================================");
+console.log("🚀 A-PAY PROTOCOL: AUTO GIT & CONTINUITY SNAPSHOT ENGINE");
+console.log("===============================================================");
 
 // 1. Read Active Package Versions
-let pyVersion = 'unknown';
+let pyVersion = "unknown";
 try {
-  const pyproject = fs.readFileSync(path.join(ROOT_DIR, 'pyproject.toml'), 'utf-8');
-  const match = pyproject.match(/version\s*=\s*["']([^"']+)["']/);
-  if (match) pyVersion = match[1];
+	const pyproject = fs.readFileSync(
+		path.join(ROOT_DIR, "pyproject.toml"),
+		"utf-8",
+	);
+	const match = pyproject.match(/version\s*=\s*["']([^"']+)["']/);
+	if (match) pyVersion = match[1];
 } catch (e) {}
 
-let tsGatewayVersion = 'unknown';
+let tsGatewayVersion = "unknown";
 try {
-  const pkg = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'gateway-ts/package.json'), 'utf-8'));
-  tsGatewayVersion = pkg.version || 'unknown';
+	const pkg = JSON.parse(
+		fs.readFileSync(path.join(ROOT_DIR, "gateway-ts/package.json"), "utf-8"),
+	);
+	tsGatewayVersion = pkg.version || "unknown";
 } catch (e) {}
 
-let webVersion = 'unknown';
+let webVersion = "unknown";
 try {
-  const pkg = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'web/package.json'), 'utf-8'));
-  webVersion = pkg.version || 'unknown';
+	const pkg = JSON.parse(
+		fs.readFileSync(path.join(ROOT_DIR, "web/package.json"), "utf-8"),
+	);
+	webVersion = pkg.version || "unknown";
 } catch (e) {}
 
 const now = new Date();
-const timestamp = now.toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+const timestamp = now.toISOString().replace("T", " ").substring(0, 19) + " UTC";
 
 console.log(`📦 Ecosystem Versions:`);
 console.log(`   • Python SDK (PyPI)     : v${pyVersion}`);
@@ -59,20 +73,20 @@ console.log(`   • Web App (Next.js)     : v${webVersion}`);
 console.log(`   • Snapshot Timestamp    : ${timestamp}`);
 
 // 2. Stage Non-Sensitive Files
-console.log('\n🔒 Running security pre-stage checks...');
+console.log("\n🔒 Running security pre-stage checks...");
 
 // Check if any tracked/staged files leak secrets
 const sensitivePatterns = [
-  /\b0x[a-fA-F0-9]{64}\b/,
-  /UPSTASH_REDIS_REST_TOKEN\s*=\s*["'][^"']+["']/,
-  /UV_PUBLISH_TOKEN\s*=\s*["'][^"']+["']/,
-  /NPM_TOKEN\s*=\s*["'][^"']+["']/,
+	/\b0x[a-fA-F0-9]{64}\b/,
+	/UPSTASH_REDIS_REST_TOKEN\s*=\s*["'][^"']+["']/,
+	/UV_PUBLISH_TOKEN\s*=\s*["'][^"']+["']/,
+	/NPM_TOKEN\s*=\s*["'][^"']+["']/,
 ];
 
 // 3. Update CONTINUITY.md Snapshot File in .aum/ (Internal, Never Public)
-const aumDir = path.join(ROOT_DIR, '.aum');
+const aumDir = path.join(ROOT_DIR, ".aum");
 if (!fs.existsSync(aumDir)) fs.mkdirSync(aumDir, { recursive: true });
-const continuityPath = path.join(aumDir, 'CONTINUITY.md');
+const continuityPath = path.join(aumDir, "CONTINUITY.md");
 const continuityContent = `# ⚡ A-PAY PROTOCOL: ECOSYSTEM CONTINUITY & STATE SNAPSHOT
 > Automatically maintained by \`npm run git:save\`. Last Synced: **${timestamp}**
 
@@ -86,7 +100,7 @@ This document provides a single-source-of-truth for agents, developers, and main
 | :--- | :---: | :--- | :--- |
 | **Python SDK** (\`apay\`) | \`v${pyVersion}\` | **PyPI** (Global Index) | \`pip install --upgrade apay\` |
 | **Gateway Middleware** (\`apay-gateway\`) | \`v${tsGatewayVersion}\` | **npm** (Global Registry) | \`npm install apay-gateway\` |
-| **Dashboard & Edge API** | \`v${webVersion}\` | **Vercel Edge** | [apay-network.vercel.app](https://apay-network.vercel.app) |
+| **Dashboard & Edge API** | \`v${webVersion}\` | **Cloudflare / Vercel Edge** | [apayprotocol.org](https://apayprotocol.org) |
 | **Distributed Registry** | \`v1.0\` | **Upstash Redis (Singapore)** | \`storageEngine: upstash_redis\` |
 
 ---
@@ -126,85 +140,101 @@ This document provides a single-source-of-truth for agents, developers, and main
 
 1. **Architecture Rule**: All seller APIs return standard HTTP 402 with EIP-712 challenge headers. All buyer agents handle 402 automatically using \`APaySession\` / \`APayClient\` or TypeScript \`apay-gateway\`.
 2. **Dual-Currency Parity (USDC + $APAY)**: 100% first-class support for both native \`USDC\` (6 decimals) and \`$APAY\` (18 decimals), with strict underpayment defenses and dual budget guardrails.
-3. **Registry**: Live heartbeat telemetry flows to \`https://apay-network.vercel.app/api/registry\` and is stored on Upstash Redis for global sub-millisecond AI agent discovery.
+3. **Registry**: Live heartbeat telemetry flows to \`https://apayprotocol.org/api/registry\` and is stored on Upstash Redis for global sub-millisecond AI agent discovery.
 4. **Zero-Mock Policy**: All RPC reads and contract interactions strictly use authentic Base Sepolia state. No mock fallback data is permitted in production routes.
 `;
 
-fs.writeFileSync(continuityPath, continuityContent, 'utf-8');
-console.log('✅ Updated CONTINUITY.md state snapshot.');
+fs.writeFileSync(continuityPath, continuityContent, "utf-8");
+console.log("✅ Updated CONTINUITY.md state snapshot.");
 
 // 4. Git Status & Stage
-const status = run('git status --porcelain');
+const status = run("git status --porcelain");
 if (!status) {
-  console.log('\n✨ Git working tree is already completely clean. Nothing to commit.');
-  process.exit(0);
+	console.log(
+		"\n✨ Git working tree is already completely clean. Nothing to commit.",
+	);
+	process.exit(0);
 }
 
 // Stage modified and untracked files (excluding gitignored)
-console.log('\n📥 Staging changes...');
-run('git add -A');
+console.log("\n📥 Staging changes...");
+run("git add -A");
 
 // Pre-commit security check on staged files (only Added/Copied/Modified, deletions are allowed)
-const stagedFiles = run('git diff --cached --diff-filter=ACM --name-only').split('\n').filter(Boolean);
-const forbiddenStaged = stagedFiles.filter(f => 
-  f.includes('RULEBOOK.md') || 
-  f.includes('CONTINUITY.md') || 
-  f.startsWith('.aum') || 
-  f.startsWith('.env')
+const stagedFiles = run("git diff --cached --diff-filter=ACM --name-only")
+	.split("\n")
+	.filter(Boolean);
+const forbiddenStaged = stagedFiles.filter(
+	(f) =>
+		f.includes("RULEBOOK.md") ||
+		f.includes("CONTINUITY.md") ||
+		f.startsWith(".aum") ||
+		f.startsWith(".env"),
 );
 if (forbiddenStaged.length > 0) {
-  console.error('\n🚨 CRITICAL SECURITY ERROR: Internal or sensitive files staged:');
-  console.error(forbiddenStaged.join('\n'));
-  console.error('Aborting git save. Untracking forbidden files...');
-  run(`git reset HEAD -- ${forbiddenStaged.join(' ')}`);
-  process.exit(1);
+	console.error(
+		"\n🚨 CRITICAL SECURITY ERROR: Internal or sensitive files staged:",
+	);
+	console.error(forbiddenStaged.join("\n"));
+	console.error("Aborting git save. Untracking forbidden files...");
+	run(`git reset HEAD -- ${forbiddenStaged.join(" ")}`);
+	process.exit(1);
 }
 
 // Pre-commit security check on staged diff (only scan newly added lines)
-const stagedDiff = run('git diff --cached');
+const stagedDiff = run("git diff --cached");
 const addedContent = stagedDiff
-  .split('\n')
-  .filter(l => l.startsWith('+') && !l.startsWith('+++'))
-  .join('\n');
+	.split("\n")
+	.filter((l) => l.startsWith("+") && !l.startsWith("+++"))
+	.join("\n");
 
 for (const pattern of sensitivePatterns) {
-  if (pattern.test(addedContent)) {
-    console.error('\n🚨 CRITICAL SECURITY ERROR: Staged diff matches sensitive pattern in newly added lines!');
-    console.error('Aborting git save. Please remove secrets from tracked files.');
-    run('git restore --staged .');
-    process.exit(1);
-  }
+	if (pattern.test(addedContent)) {
+		console.error(
+			"\n🚨 CRITICAL SECURITY ERROR: Staged diff matches sensitive pattern in newly added lines!",
+		);
+		console.error(
+			"Aborting git save. Please remove secrets from tracked files.",
+		);
+		run("git restore --staged .");
+		process.exit(1);
+	}
 }
 
 // 5. Commit (Authorized for Vercel Hobby Production Deployment)
 run('git config user.name "A-Pay Protocol"');
 run('git config user.email "neural.ais.official@gmail.com"');
 
-const customMsg = process.argv.slice(2).join(' ').trim();
+const customMsg = process.argv.slice(2).join(" ").trim();
 const commitMsg = customMsg
-  ? `${customMsg} [py: v${pyVersion} | ts: v${tsGatewayVersion}]`
-  : `chore(snapshot): save ecosystem state [py: v${pyVersion} | ts: v${tsGatewayVersion}] at ${timestamp}`;
+	? `${customMsg} [py: v${pyVersion} | ts: v${tsGatewayVersion}]`
+	: `chore(snapshot): save ecosystem state [py: v${pyVersion} | ts: v${tsGatewayVersion}] at ${timestamp}`;
 
 console.log(`\n💾 Committing changes with message: "${commitMsg}"...`);
 run(`git commit -m "${commitMsg}"`);
 
 // 6. Push to Remotes (Decentralized GitLab mirror & GitHub origin)
 try {
-  console.log('\n⬆️ Pushing to gitlab main...');
-  const gitlabPush = run('git push gitlab main');
-  console.log(gitlabPush || 'GitLab pushed successfully.');
+	console.log("\n⬆️ Pushing to gitlab main...");
+	const gitlabPush = run("git push gitlab main");
+	console.log(gitlabPush || "GitLab pushed successfully.");
 } catch (err) {
-  console.warn('⚠️ GitLab push warning:', err.message);
+	console.warn("⚠️ GitLab push warning:", err.message);
 }
 
 try {
-  console.log('\n⬆️ Pushing to origin main...');
-  const pushOutput = run('git push origin main');
-  console.log(pushOutput || 'Pushed successfully.');
+	console.log("\n⬆️ Pushing to origin main...");
+	const pushOutput = run("git push origin main");
+	console.log(pushOutput || "Pushed successfully.");
 } catch (err) {
-  console.warn('⚠️ Origin push warning (may already be synced or network isolated):', err.message);
+	console.warn(
+		"⚠️ Origin push warning (may already be synced or network isolated):",
+		err.message,
+	);
 }
 
-console.log('\n===============================================================');
-console.log('🎉 SESSION SAVED & SNAPSHOTTED SUCCESSFULLY!');
-console.log('===============================================================');
+console.log(
+	"\n===============================================================",
+);
+console.log("🎉 SESSION SAVED & SNAPSHOTTED SUCCESSFULLY!");
+console.log("===============================================================");
