@@ -51,6 +51,26 @@ def get_dispatched_indices():
 def get_next_pending_entry():
     queue = load_queue()
     dispatched = get_dispatched_indices()
+    now_ts = int(time.time())
+
+    # 1. Check if there is an undispatched reel whose scheduled timestamp is due
+    if os.path.exists(FB_LEDGER_PATH):
+        try:
+            with open(FB_LEDGER_PATH, "r", encoding="utf-8") as f:
+                fb_ledger = json.load(f)
+            due_candidates = [
+                e for e in fb_ledger
+                if e.get("scheduled_timestamp") and e.get("scheduled_timestamp") <= (now_ts + 300) and e.get("index") not in dispatched
+            ]
+            if due_candidates:
+                target_idx = due_candidates[0].get("index")
+                for item in queue:
+                    if item.get("index") == target_idx:
+                        return item
+        except Exception:
+            pass
+
+    # 2. Fallback to first undispatched item in queue
     for item in queue:
         if item.get("index") not in dispatched:
             return item

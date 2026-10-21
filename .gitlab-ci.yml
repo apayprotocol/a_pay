@@ -15,6 +15,18 @@ publish_reels_cloud:
   stage: publish
   image: python:3.11-slim
   before_script:
-    - apt-get update && apt-get install -y ffmpeg curl
+    - apt-get update && apt-get install -y ffmpeg curl git
+    - git config --global user.name "A-Pay CI Bot"
+    - git config --global user.email "bot@apayprotocol.org"
   script:
     - python3 scripts/reels_scheduler_daemon.py --dispatch-next
+  after_script:
+    - git remote set-url origin "https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
+    - git add scripts/scheduled_reels_ledger.json
+    - |
+      if git diff --cached --quiet; then
+        echo "No ledger changes to push."
+      else
+        git commit -m "chore(social): update scheduled reels ledger [skip ci]" || true
+        git push origin HEAD:${CI_COMMIT_BRANCH} -o ci.skip || true
+      fi
