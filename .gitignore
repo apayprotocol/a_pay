@@ -48,6 +48,7 @@ AGENTS.md
 neural_ais
 RULEBOOK.md
 CONTINUITY.md
+scripts/show_gitlab_variables.py
 
 # Vercel Project Metadata
 .vercel/
