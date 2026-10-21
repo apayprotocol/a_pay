@@ -5,6 +5,7 @@ Publishes a single vertical video reel (1080x1920 MP4) simultaneously across:
 1. Facebook Page Reel (Meta Graph API)
 2. Instagram Reel (@apayprotocol)
 3. LinkedIn Feed (GST Neural / A-Pay Protocol)
+4. Telegram Announcements Channel (@apay_protocol)
 
 Zero duplicate content. 100% native integration.
 """
@@ -176,7 +177,7 @@ def publish_linkedin_reel(video_path: str, caption: str) -> dict:
 
 def dispatch_reel(reel_entry: dict, platforms: list = None):
     if platforms is None:
-        platforms = ["facebook", "instagram", "linkedin"]
+        platforms = ["facebook", "instagram", "linkedin", "telegram"]
 
     video_path = reel_entry["file"]
     hook = reel_entry["hook"]
@@ -230,13 +231,25 @@ def dispatch_reel(reel_entry: dict, platforms: list = None):
     # 3. LinkedIn Reel
     if "linkedin" in platforms:
         try:
-            print("💼 [3/3] Publishing LinkedIn Reel...")
+            print("💼 [3/4] Publishing LinkedIn Reel...")
             li_res = publish_linkedin_reel(video_path, caption)
             print(f"   ✅ LinkedIn Reel LIVE: {li_res['url']}")
             results["linkedin"] = li_res
         except Exception as e:
             print(f"   ❌ LinkedIn Reel failed: {e}")
             results["linkedin"] = {"error": str(e)}
+
+    # 4. Telegram Reel
+    if "telegram" in platforms:
+        try:
+            print("✈️ [4/4] Publishing Telegram Channel Reel (@apay_protocol)...")
+            from telegram_channel_publisher import publish_telegram_video
+            tg_res = publish_telegram_video(video_path, caption)
+            print(f"   ✅ Telegram Video LIVE: {tg_res['url']}")
+            results["telegram"] = tg_res
+        except Exception as e:
+            print(f"   ❌ Telegram Reel failed: {e}")
+            results["telegram"] = {"error": str(e)}
 
     # Append to Ledger
     ledger = []
@@ -266,7 +279,7 @@ def main():
     parser.add_argument("--index", type=int, help="Reel index (1-50) from queue")
     parser.add_argument("--file", type=str, help="Direct video file path")
     parser.add_argument("--caption", type=str, help="Direct caption")
-    parser.add_argument("--platforms", nargs="+", default=["facebook", "instagram", "linkedin"], help="Platforms to publish to")
+    parser.add_argument("--platforms", nargs="+", default=["facebook", "instagram", "linkedin", "telegram"], help="Platforms to publish to")
 
     args = parser.parse_args()
 

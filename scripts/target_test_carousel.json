@@ -1,0 +1,15 @@
+{
+  "index": 5,
+  "title": "Why Web3 Payments Failed: Zero Gas Per Click via EIP-712 State Channels",
+  "folder": "005-eip712-zero-gas-channels",
+  "slides": [
+    "/home/sagar/a_pay/social-studio/posts/005-eip712-zero-gas-channels/dist/slide-01.png",
+    "/home/sagar/a_pay/social-studio/posts/005-eip712-zero-gas-channels/dist/slide-02.png",
+    "/home/sagar/a_pay/social-studio/posts/005-eip712-zero-gas-channels/dist/slide-03.png",
+    "/home/sagar/a_pay/social-studio/posts/005-eip712-zero-gas-channels/dist/slide-04.png",
+    "/home/sagar/a_pay/social-studio/posts/005-eip712-zero-gas-channels/dist/slide-05.png",
+    "/home/sagar/a_pay/social-studio/posts/005-eip712-zero-gas-channels/dist/slide-06.png",
+    "/home/sagar/a_pay/social-studio/posts/005-eip712-zero-gas-channels/dist/slide-07.png"
+  ],
+  "caption": "Why did early Web3 crypto payments fail? \n\nBecause nobody wants to wait 15 seconds for block confirmations or pay $0.20 in gas every time they read an article or query an API. \n\nMaking 1 on-chain transaction per click was a fatal UX mistake.\n\nHere is how A-Pay Protocol achieves ZERO gas per click with EIP-712 state channels. 🧵\n\nThe Architecture:\n1. One-time Escrow Deposit: User or AI agent deposits $5.00 once into the Base Mainnet EscrowVault (0xd08c...ea16).\n2. Off-Chain Micro-Tickets: Every subsequent click or API request signs an EIP-712 cryptographic promise in memory:\n   • Gas cost: $0.00\n   • Verification speed: 5 milliseconds\n3. Batched L2 Settlement: The merchant server accumulates hundreds of signed tickets and settles them atomically in ONE single transaction on Base L2.\n\nResult:\n• 100x faster than credit cards\n• $0.00 gas per click for users\n• 0 chargeback fraud\n• 100% non-custodial\n\nThe future of web micropayments isn't on-chain bloat. It's cryptographic state channels on Base L2. ⚡\n\n🔗 Explore the architecture: https://apayprotocol.org\n⚡ Basename: apayprotocol.base.eth\n💻 GitHub: https://github.com/apayprotocol/a_pay\n\n#Web3 #Ethereum #BuildOnBase #Cryptography #EIP712 #SoftwareEngineering #SystemDesign #Blockchain #Micropayments #OpenSource #Fullstack"
+}

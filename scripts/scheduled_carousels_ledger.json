@@ -1,0 +1,31 @@
+[
+  {
+    "carousel_index": 5,
+    "title": "Why Web3 Payments Failed: Zero Gas Per Click via EIP-712 State Channels",
+    "dispatched_at": "2026-10-21T11:17:44.132418+00:00",
+    "total_slides": 7,
+    "results": {
+      "instagram": {
+        "success": true,
+        "media_id": "18211139767322386",
+        "url": "https://www.instagram.com/p/DewR_b8jEtw/"
+      },
+      "facebook": {
+        "success": true,
+        "post_id": "1356833567513986_122110739715502911",
+        "url": "https://www.facebook.com/1356833567513986_122110739715502911"
+      },
+      "linkedin": {
+        "success": true,
+        "post_urn": "urn:li:share:7518631603867250688",
+        "url": "https://www.linkedin.com/feed/update/urn:li:share:7518631603867250688/"
+      },
+      "telegram": {
+        "success": true,
+        "message_ids": [3, 4, 5, 6, 7, 8, 9],
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/3"
+      }
+    }
+  }
+]

@@ -1,0 +1,134 @@
+[
+  {
+    "index": 5,
+    "title": "Why Web3 Payments Failed: Zero Gas Per Click via EIP-712 State Channels",
+    "folder": "005-eip712-zero-gas-channels",
+    "day_offset": 0,
+    "scheduled_slot_utc": "09:30",
+    "topic": "Architecture & UX",
+    "hook": "Why did early Web3 crypto payments fail?",
+    "caption": "Why did early Web3 crypto payments fail? Because nobody wants to wait 15 seconds for block confirmations or pay $0.20 in gas every time they read an article or query an API.\n\nMaking 1 on-chain transaction per click was a fatal UX mistake.\n\nHere is how A-Pay Protocol achieves ZERO gas per click with EIP-712 state channels: 1 deposit into Base EscrowVault, 5ms off-chain cryptographic tickets, and batched L2 settlement.\n\n🔗 https://apayprotocol.org\n#Web3 #BuildOnBase #EIP712 #Micropayments #Ethereum #SystemDesign",
+    "slides_count": 7
+  },
+  {
+    "index": 6,
+    "title": "Stripe Charges 2.9% + $0.30: Why AI Agents Break Traditional SaaS Billing",
+    "folder": "006-stripe-vs-ai-agents",
+    "day_offset": 0,
+    "scheduled_slot_utc": "17:30",
+    "topic": "Fintech & Unit Economics",
+    "hook": "Try buying a $0.005 API query with a Visa card. You can't.",
+    "caption": "Stripe charges 2.9% + $0.30 per transaction. If an AI agent queries an API for $0.01, the payment processor fee is 3,000% of the transaction value!\n\nCredit card economics completely break in the autonomous machine economy. AI agents make thousands of micro-calls per hour.\n\nA-Pay Protocol enables sub-cent micropayments ($0.001) settled natively on Base L2 with near-zero overhead.\n\n🔗 https://apayprotocol.org\n#Fintech #Stripe #AIAgents #Micropayments #MachineEconomy #BaseL2",
+    "slides_count": 7
+  },
+  {
+    "index": 7,
+    "title": "Building a Non-Custodial Machine Wallet with Ephemeral Session Keys",
+    "folder": "007-session-keys-wallets",
+    "day_offset": 1,
+    "scheduled_slot_utc": "09:30",
+    "topic": "Security & Cryptography",
+    "hook": "Never give an AI agent your master private key.",
+    "caption": "Giving an AI agent your root private key is financial suicide: one prompt injection or runaway hallucination loop can drain your balance in seconds.\n\nHere is how A-Pay implements ephemeral session keys:\n1. Scoped allowance (e.g. max $2.00)\n2. Strict expiration timelocks\n3. Non-transferable micro-authorization tickets\n\nMathematical security for autonomous workflows.\n\n🔗 https://apayprotocol.org\n#CyberSecurity #AIAgents #Cryptography #SmartContracts #BuildOnBase",
+    "slides_count": 7
+  },
+  {
+    "index": 8,
+    "title": "Stop AI Web Scraping Bots: The 1-Line HTTP 402 Paywall Architecture",
+    "folder": "008-stop-ai-scrapers",
+    "day_offset": 1,
+    "scheduled_slot_utc": "17:30",
+    "topic": "Web Infrastructure & Dev",
+    "hook": "AI crawlers are scraping your site for free while your hosting bill explodes.",
+    "caption": "AI bots scrape millions of pages daily to train LLMs without paying creators or publishers a single penny.\n\nBlocking them with Cloudflare captcha kills human SEO.\n\nThe real solution? HTTP 402 Payment Required: allow bots to scrape your data, but make them pay $0.001 per page automatically via Base L2 micro-settlement.\n\nTurn scraping into instant automated revenue.\n\n🔗 https://apayprotocol.org\n#WebDev #HTTP402 #Serverless #Nextjs #APIs #Cloudflare",
+    "slides_count": 7
+  },
+  {
+    "index": 9,
+    "title": "Why Base L2 is the Settlement Layer for Autonomous AI Agents",
+    "folder": "009-why-base-l2",
+    "day_offset": 2,
+    "scheduled_slot_utc": "09:30",
+    "topic": "Blockchain & L2 Scaling",
+    "hook": "Why did we choose Base L2 instead of Solana, Polygon, or Ethereum Mainnet?",
+    "caption": "Why is Base L2 the ideal settlement rail for machine-to-machine payments?\n1. Coinbase ecosystem & AgentKit native synergy\n2. Sub-cent gas fees powered by EIP-4844 blobs\n3. Ethereum security without Ethereum gas spikes\n4. Verified on-chain smart contract escrows\n\nBase is built for developers and autonomous agents.\n\n🔗 https://apayprotocol.org\n#BuildOnBase #Coinbase #Ethereum #Layer2 #CryptoDev #Web3",
+    "slides_count": 7
+  },
+  {
+    "index": 10,
+    "title": "Model Context Protocol (MCP) + A-Pay: Monetizing Custom Tools in Claude Desktop",
+    "folder": "010-mcp-monetization",
+    "day_offset": 2,
+    "scheduled_slot_utc": "17:30",
+    "topic": "AI Developer Ecosystem",
+    "hook": "You built an awesome MCP tool. How do you actually get paid for it?",
+    "caption": "Anthropic's Model Context Protocol (MCP) lets Claude Desktop and Cursor connect to any external API.\n\nWith `uvx apay mcp` or `apay-gateway`, you can instantly monetize your custom MCP server: every tool invocation settles a micro-fee directly into your wallet.\n\nZero credit cards. Zero subscriptions. Pure pay-per-tool execution.\n\n🔗 https://apayprotocol.org\n#ClaudeAI #CursorAI #ModelContextProtocol #MCP #AIEngineering #Python",
+    "slides_count": 7
+  },
+  {
+    "index": 11,
+    "title": "The Trillion Dollar Machine Economy: How APIs Get Paid by Code",
+    "folder": "011-machine-economy-apis",
+    "day_offset": 3,
+    "scheduled_slot_utc": "09:30",
+    "topic": "Economics & Vision",
+    "hook": "In 2026, more API calls will be made by AI agents than by humans.",
+    "caption": "Software is transitioning from B2B SaaS to M2M (Machine-to-Machine) utility computing.\n\nWhen autonomous agents book flights, analyze databases, and train models, they need native digital currency rails without human intermediaries.\n\nA-Pay Protocol provides the programmatic settlement layer for this trillion-dollar autonomous economy.\n\n🔗 https://apayprotocol.org\n#FutureOfTech #AI #MachineLearning #AutonomousEconomy #Fintech #SoftwareEngineering",
+    "slides_count": 7
+  },
+  {
+    "index": 12,
+    "title": "FastAPI & Express in 3 Lines: Adding Crypto Micro-Settlement to Any API",
+    "folder": "012-fastapi-express-integration",
+    "day_offset": 3,
+    "scheduled_slot_utc": "17:30",
+    "topic": "Developer Tutorial",
+    "hook": "Add Web3 micropayments to your existing Python or TypeScript API in 3 lines.",
+    "caption": "You don't need to rewrite your entire backend to accept machine payments.\n\nWith A-Pay Gateway:\n- Python: `@app.get('/data', dependencies=[Depends(APayProtect('0.01'))])`\n- TypeScript: `app.use(apayMiddleware({ priceUsd: 0.01 }))`\n\nInstant HTTP 402 verification with zero database migrations.\n\n🔗 https://apayprotocol.org\n#Python #FastAPI #NodeJS #ExpressJS #TypeScript #Backend",
+    "slides_count": 7
+  },
+  {
+    "index": 13,
+    "title": "Smart Contract Deep Dive: EscrowVault Security & Reentrancy Invariants",
+    "folder": "013-escrowvault-security",
+    "day_offset": 4,
+    "scheduled_slot_utc": "09:30",
+    "topic": "Smart Contract Security",
+    "hook": "How do you secure millions in micro-payment deposits against reentrancy attacks?",
+    "caption": "A deep dive into our verified Base Mainnet EscrowVault smart contract:\n• Checks-Effects-Interactions pattern strictly enforced\n• Non-reentrant mutex locks\n• Cryptographic ticket replay protection via sequential nonces\n• Emergency timelock exits\n\nZero room for compromise in production financial rails.\n\n🔗 https://basescan.org/address/0xd08c8a337e5339d1c083e06d74a9265956ceea16\n#Solidity #SmartContracts #Audit #Web3Security #Ethereum #BaseScan",
+    "slides_count": 7
+  },
+  {
+    "index": 14,
+    "title": "From WordPress to Next.js: Drop-In 1-Click Paywalls for Digital Creators",
+    "folder": "014-wordpress-nextjs-paywalls",
+    "day_offset": 4,
+    "scheduled_slot_utc": "17:30",
+    "topic": "Content Monetization",
+    "hook": "Why pay $50/mo for premium newsletters when you only want to read 1 article?",
+    "caption": "Subscription fatigue is real. Readers abandon sites when hit with aggressive monthly paywalls.\n\nOur official WordPress Plugin (`apay-web3-ai-paywall`) and Next.js 15 Checkout widget let readers unlock single articles for $0.10 with 1 click.\n\n10x higher conversion than monthly subscriptions.\n\n🔗 https://wordpress.org/plugins/apay-web3-ai-paywall/\n#WordPress #Blogging #CreatorEconomy #Nextjs #WebDev #Publishing",
+    "slides_count": 7
+  },
+  {
+    "index": 15,
+    "title": "Autonomous Spending Budgets: Preventing Hallucination Drains with Nonces",
+    "folder": "015-spending-guardrails",
+    "day_offset": 5,
+    "scheduled_slot_utc": "09:30",
+    "topic": "AI Safety & Guardrails",
+    "hook": "What happens when an LLM enters an infinite recursive loop with a credit card?",
+    "caption": "Infinite LLM loops can cost thousands of dollars on unmetered cards.\n\nWith A-Pay Protocol's programmatic spend limits:\n• Hard per-request caps ($0.05 max)\n• Sliding 24-hour total spend ceiling\n• Cryptographic signature expiry\n\nNo agent can exceed its programmed budget under any circumstance.\n\n🔗 https://apayprotocol.org\n#AISafety #LLMOps #DevOps #AgenticAI #LangChain #MachineLearning",
+    "slides_count": 7
+  },
+  {
+    "index": 16,
+    "title": "The Death of Subscriptions: Pay-Per-Query vs $20/Month SaaS Lock-in",
+    "folder": "016-death-of-subscriptions",
+    "day_offset": 5,
+    "scheduled_slot_utc": "17:30",
+    "topic": "SaaS & Future Business Models",
+    "hook": "Why are you paying for 10 different $20/month SaaS subscriptions you barely use?",
+    "caption": "The average knowledge worker pays for 5-10 SaaS subscriptions just for occasional lookups or single reports.\n\nHTTP 402 micro-billing replaces monthly SaaS lock-in with frictionless pay-per-query access.\n\nPay only for what you compute, when you compute it.\n\n🔗 https://apayprotocol.org\n#SaaS #Startups #BusinessModels #Cloud #Microservices #TechTrends",
+    "slides_count": 7
+  }
+]

@@ -12,6 +12,12 @@
       "linkedin": {
         "success": true,
         "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7518620597128744960/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 10,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/10"
       }
     }
   }

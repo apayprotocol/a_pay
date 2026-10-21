@@ -78,7 +78,7 @@ def show_status():
     print(f"Total Dispatched to Date    : {len(dispatched)}")
     print(f"Remaining in Queue          : {len(queue) - len(dispatched)}")
     print(f"Posting Frequency           : 5 Reels / Day (Spaced ~4 Hours)")
-    print(f"Platforms Active            : Facebook Reels, Instagram Reels, LinkedIn")
+    print(f"Platforms Active            : Facebook Reels, Instagram Reels, LinkedIn, Telegram")
     print("="*70)
 
     if ledger:
@@ -89,10 +89,12 @@ def show_status():
             fb = item.get("results", {}).get("facebook", {}).get("url", "N/A")
             ig = item.get("results", {}).get("instagram", {}).get("url", "N/A")
             li = item.get("results", {}).get("linkedin", {}).get("url", "N/A")
+            tg = item.get("results", {}).get("telegram", {}).get("url", "N/A")
             print(f" • Reel #{idx} [{dt}]:")
             print(f"    - FB: {fb}")
             print(f"    - IG: {ig}")
             print(f"    - LI: {li}")
+            print(f"    - TG: {tg}")
     print("\n" + "="*70 + "\n")
 
 def run_daemon():
