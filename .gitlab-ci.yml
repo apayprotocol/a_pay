@@ -1,0 +1,16 @@
+# A-Pay Protocol — Multi-Platform Reels Cloud Scheduler
+# Runs on GitLab Cloud Shared Runners (100% Free & 24/7 Autopilot)
+
+stages:
+  - publish
+
+publish_reels_cloud:
+  stage: publish
+  image: python:3.11-slim
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "web"'
+  before_script:
+    - apt-get update && apt-get install -y ffmpeg curl
+  script:
+    - python3 scripts/reels_scheduler_daemon.py --dispatch-next

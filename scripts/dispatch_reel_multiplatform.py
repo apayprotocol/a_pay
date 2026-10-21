@@ -174,7 +174,10 @@ def publish_linkedin_reel(video_path: str, caption: str) -> dict:
     else:
         raise RuntimeError(f"LinkedIn publish error: {res.stderr or res.stdout}")
 
-def dispatch_reel(reel_entry: dict):
+def dispatch_reel(reel_entry: dict, platforms: list = None):
+    if platforms is None:
+        platforms = ["facebook", "instagram", "linkedin"]
+
     video_path = reel_entry["file"]
     hook = reel_entry["hook"]
     body = reel_entry["body"]
@@ -185,6 +188,7 @@ def dispatch_reel(reel_entry: dict):
     print(f"\n=======================================================")
     print(f"🚀 DISPATCHING REEL #{reel_entry.get('index', 'X')}: {hook[:50]}...")
     print(f"📁 Video: {video_path}")
+    print(f"🎯 Target Platforms: {', '.join(platforms)}")
     print(f"=======================================================")
 
     meta_creds = load_env(META_ENV_PATH)
@@ -197,37 +201,42 @@ def dispatch_reel(reel_entry: dict):
     results = {}
 
     # 1. Facebook Reel
-    try:
-        print("📘 [1/3] Publishing Facebook Reel...")
-        fb_res = publish_facebook_reel(page_id, fb_token, video_path, caption)
-        print(f"   ✅ Facebook Reel LIVE: {fb_res['url']}")
-        results["facebook"] = fb_res
-    except Exception as e:
-        print(f"   ❌ Facebook Reel failed: {e}")
-        results["facebook"] = {"error": str(e)}
+    if "facebook" in platforms:
+        try:
+            print("📘 [1/3] Publishing Facebook Reel...")
+            fb_res = publish_facebook_reel(page_id, fb_token, video_path, caption)
+            print(f"   ✅ Facebook Reel LIVE: {fb_res['url']}")
+            results["facebook"] = fb_res
+        except Exception as e:
+            print(f"   ❌ Facebook Reel failed: {e}")
+            results["facebook"] = {"error": str(e)}
+    else:
+        print("📘 [1/3] Facebook Reel skipped (already live on FB Cloud).")
 
     # 2. Instagram Reel
-    try:
-        print("📸 [2/3] Uploading video to Edge host for Instagram...")
-        edge_url = upload_to_uguu(video_path)
-        print(f"   🔗 Edge Video URL: {edge_url}")
-        print("   📸 Publishing Instagram Reel...")
-        ig_res = publish_instagram_reel(ig_id, fb_token, edge_url, caption)
-        print(f"   ✅ Instagram Reel LIVE: {ig_res['url']}")
-        results["instagram"] = ig_res
-    except Exception as e:
-        print(f"   ❌ Instagram Reel failed: {e}")
-        results["instagram"] = {"error": str(e)}
+    if "instagram" in platforms:
+        try:
+            print("📸 [2/3] Uploading video to Edge host for Instagram...")
+            edge_url = upload_to_uguu(video_path)
+            print(f"   🔗 Edge Video URL: {edge_url}")
+            print("   📸 Publishing Instagram Reel...")
+            ig_res = publish_instagram_reel(ig_id, fb_token, edge_url, caption)
+            print(f"   ✅ Instagram Reel LIVE: {ig_res['url']}")
+            results["instagram"] = ig_res
+        except Exception as e:
+            print(f"   ❌ Instagram Reel failed: {e}")
+            results["instagram"] = {"error": str(e)}
 
     # 3. LinkedIn Reel
-    try:
-        print("💼 [3/3] Publishing LinkedIn Reel...")
-        li_res = publish_linkedin_reel(video_path, caption)
-        print(f"   ✅ LinkedIn Reel LIVE: {li_res['url']}")
-        results["linkedin"] = li_res
-    except Exception as e:
-        print(f"   ❌ LinkedIn Reel failed: {e}")
-        results["linkedin"] = {"error": str(e)}
+    if "linkedin" in platforms:
+        try:
+            print("💼 [3/3] Publishing LinkedIn Reel...")
+            li_res = publish_linkedin_reel(video_path, caption)
+            print(f"   ✅ LinkedIn Reel LIVE: {li_res['url']}")
+            results["linkedin"] = li_res
+        except Exception as e:
+            print(f"   ❌ LinkedIn Reel failed: {e}")
+            results["linkedin"] = {"error": str(e)}
 
     # Append to Ledger
     ledger = []
@@ -257,6 +266,7 @@ def main():
     parser.add_argument("--index", type=int, help="Reel index (1-50) from queue")
     parser.add_argument("--file", type=str, help="Direct video file path")
     parser.add_argument("--caption", type=str, help="Direct caption")
+    parser.add_argument("--platforms", nargs="+", default=["facebook", "instagram", "linkedin"], help="Platforms to publish to")
 
     args = parser.parse_args()
 
@@ -268,7 +278,7 @@ def main():
             "body": args.caption,
             "hashtags": "#Web3 #AI #WordPress #Monetization"
         }
-        dispatch_reel(reel_entry)
+        dispatch_reel(reel_entry, platforms=args.platforms)
         return
 
     queue_path = os.path.join(BASE_DIR, "scripts/reels_50_queue.json")
@@ -285,7 +295,7 @@ def main():
         sys.exit(1)
 
     reel_entry = queue[target_idx - 1]
-    dispatch_reel(reel_entry)
+    dispatch_reel(reel_entry, platforms=args.platforms)
 
 if __name__ == "__main__":
     main()
