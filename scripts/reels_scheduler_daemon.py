@@ -48,7 +48,7 @@ def get_dispatched_indices():
     ledger = load_ledger()
     return set(item.get("reel_index") for item in ledger if item.get("reel_index"))
 
-def get_next_pending_entry():
+def get_next_pending_entry(force: bool = False):
     queue = load_queue()
     dispatched = get_dispatched_indices()
     now_ts = int(time.time())
@@ -67,10 +67,14 @@ def get_next_pending_entry():
                 for item in queue:
                     if item.get("index") == target_idx:
                         return item
+
+            # If not forcing and facebook schedule exists, do not dispatch prematurely
+            if not force:
+                return None
         except Exception:
             pass
 
-    # 2. Fallback to first undispatched item in queue
+    # 2. Fallback to first undispatched item in queue (only if forced or no fb schedule)
     for item in queue:
         if item.get("index") not in dispatched:
             return item
@@ -88,11 +92,29 @@ def get_fb_schedule_entry(reel_index: int):
             pass
     return None
 
-def dispatch_next():
-    next_reel = get_next_pending_entry()
+def dispatch_next(force: bool = False):
+    next_reel = get_next_pending_entry(force=force)
     if not next_reel:
-        print("🎉 All 50 reels in queue have already been dispatched!")
-        return False
+        queue = load_queue()
+        dispatched = get_dispatched_indices()
+        remaining = [item for item in queue if item.get("index") not in dispatched]
+        if not remaining:
+            print("🎉 All 50 reels in queue have already been dispatched!")
+            return True
+
+        upcoming = remaining[0]
+        idx = upcoming.get("index")
+        fb_entry = get_fb_schedule_entry(idx)
+        if fb_entry and fb_entry.get("scheduled_timestamp"):
+            diff = fb_entry.get("scheduled_timestamp") - int(time.time())
+            hrs = max(0, diff // 3600)
+            mins = max(0, (diff % 3600) // 60)
+            print(f"⏳ Upcoming Reel #{idx} is scheduled for {fb_entry.get('scheduled_utc')} ({hrs}h {mins}m remaining).")
+            print("   Not due yet. Safe standby mode — exiting cleanly (0).")
+            return True
+        else:
+            print(f"⏳ Reel #{idx} is queued but not scheduled. Safe standby.")
+            return True
 
     idx = next_reel.get("index")
     fb_entry = get_fb_schedule_entry(idx)
@@ -101,7 +123,7 @@ def dispatch_next():
     platforms = ["instagram", "linkedin", "telegram"] if fb_entry else ["facebook", "instagram", "linkedin", "telegram"]
 
     from dispatch_reel_multiplatform import dispatch_reel
-    print(f"🚀 Found pending reel #{idx}. Dispatching to: {', '.join(platforms)}...")
+    print(f"🚀 Found due pending reel #{idx}. Dispatching to: {', '.join(platforms)}...")
     dispatch_reel(next_reel, platforms=platforms)
     return True
 
@@ -208,7 +230,8 @@ def run_daemon():
 def main():
     parser = argparse.ArgumentParser(description="A-Pay Protocol Reels Scheduler Daemon")
     parser.add_argument("--status", action="store_true", help="Show current queue and ledger status")
-    parser.add_argument("--dispatch-next", action="store_true", help="Immediately dispatch the next pending reel")
+    parser.add_argument("--dispatch-next", action="store_true", help="Immediately dispatch the next pending reel (only if due)")
+    parser.add_argument("--force", action="store_true", help="Force dispatch without checking scheduled timestamp")
     parser.add_argument("--daemon", action="store_true", help="Run background scheduler loop")
 
     args = parser.parse_args()
@@ -216,7 +239,7 @@ def main():
     if args.status:
         show_status()
     elif args.dispatch_next:
-        dispatch_next()
+        dispatch_next(force=args.force)
     elif args.daemon:
         run_daemon()
     else:
