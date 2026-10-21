@@ -22,11 +22,15 @@ LEDGER_PATH = os.path.join(BASE_DIR, "scripts/facebook_scheduled_reels_ledger.js
 
 def load_credentials():
     creds = {}
-    with open(ENV_PATH, "r", encoding="utf-8") as f:
-        for line in f:
-            if "=" in line and not line.startswith("#"):
-                k, v = line.strip().split("=", 1)
-                creds[k] = v
+    if os.path.exists(ENV_PATH):
+        with open(ENV_PATH, "r", encoding="utf-8") as f:
+            for line in f:
+                if "=" in line and not line.startswith("#"):
+                    k, v = line.strip().split("=", 1)
+                    creds[k.strip()] = v.strip().strip('"').strip("'")
+    for k in ["META_USER_TOKEN", "META_PAGE_ID", "META_IG_USER_ID"]:
+        if os.environ.get(k):
+            creds[k] = os.environ[k].strip().strip('"').strip("'")
     return creds
 
 def get_page_access_token(user_token: str, page_id: str) -> str:

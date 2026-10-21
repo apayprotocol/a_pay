@@ -29,7 +29,11 @@ def load_meta_credentials():
             for line in f:
                 if "=" in line and not line.startswith("#"):
                     k, v = line.strip().split("=", 1)
-                    creds[k] = v
+                    creds[k.strip()] = v.strip().strip('"').strip("'")
+    # Environment variable overrides
+    for k in ["META_USER_TOKEN", "META_PAGE_ID", "META_IG_USER_ID"]:
+        if os.environ.get(k):
+            creds[k] = os.environ[k].strip().strip('"').strip("'")
     return creds
 
 def get_page_access_token(user_token: str, page_id: str) -> str:
@@ -235,8 +239,15 @@ def dispatch_carousel(carousel_item: dict, platforms: list = None) -> dict:
         print("\n📤 Uploading slides to Meta Cloud & preparing Instagram containers...")
         for i, slide_path in enumerate(slides):
             if not os.path.exists(slide_path):
-                print(f"⚠️ Slide not found: {slide_path}")
-                continue
+                # Fallback to local repo path if absolute path was from another system
+                filename = os.path.basename(slide_path)
+                folder = carousel_item.get("folder", "")
+                fallback = os.path.join(BASE_DIR, "social-studio/posts", folder, "dist", filename)
+                if os.path.exists(fallback):
+                    slide_path = fallback
+                else:
+                    print(f"⚠️ Slide not found: {slide_path}")
+                    continue
             
             print(f"   [{i+1}/{len(slides)}] Processing: {os.path.basename(slide_path)}")
             fb_res = upload_photo_to_facebook_unpublished(page_id, page_token, slide_path)

@@ -72,6 +72,42 @@ def upload_to_uguu(file_path: str) -> str:
             return res["files"][0]["url"]
     raise RuntimeError(f"Uguu upload failed: {res}")
 
+def upload_video_for_instagram(file_path: str) -> str:
+    """Uploads video with multi-host resilience (Uguu -> Litterbox/Catbox) for Instagram."""
+    try:
+        return upload_to_uguu(file_path)
+    except Exception as e:
+        print(f"   ⚠️ Primary video host (Uguu) failed: {e}. Trying fallback host...")
+
+    try:
+        boundary = "----WebKitFormBoundary" + hex(int(time.time() * 1000))[2:]
+        with open(file_path, "rb") as f:
+            file_bytes = f.read()
+        body = bytearray()
+        for k, v in [("reqtype", "fileupload"), ("time", "72h")]:
+            body.extend(f"--{boundary}\r\n".encode("utf-8"))
+            body.extend(f'Content-Disposition: form-data; name="{k}"\r\n\r\n{v}\r\n'.encode("utf-8"))
+        filename = os.path.basename(file_path)
+        body.extend(f"--{boundary}\r\n".encode("utf-8"))
+        body.extend(f'Content-Disposition: form-data; name="fileToUpload"; filename="{filename}"\r\n'.encode("utf-8"))
+        body.extend(b"Content-Type: video/mp4\r\n\r\n")
+        body.extend(file_bytes)
+        body.extend(f"\r\n--{boundary}--\r\n".encode("utf-8"))
+        req = urllib.request.Request(
+            "https://litterbox.catbox.moe/resources/internals/api.php",
+            data=bytes(body),
+            headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
+            method="POST"
+        )
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            url = resp.read().decode("utf-8").strip()
+            if url.startswith("http"):
+                return url
+    except Exception as e:
+        print(f"   ⚠️ Fallback video host (Litterbox) failed: {e}")
+
+    raise RuntimeError("All public video hosts failed. Cannot deliver video URL to Instagram.")
+
 def publish_facebook_reel(page_id: str, page_token: str, video_path: str, caption: str) -> dict:
     """Uploads and publishes vertical video Reel directly to Facebook Page."""
     boundary = "----WebKitFormBoundary" + hex(int(time.time() * 1000))[2:]
@@ -179,7 +215,16 @@ def dispatch_reel(reel_entry: dict, platforms: list = None):
     if platforms is None:
         platforms = ["facebook", "instagram", "linkedin", "telegram"]
 
+    # Dynamic path resolution: If absolute path from another machine doesn't exist, resolve to local repo root
     video_path = reel_entry["file"]
+    if not os.path.exists(video_path):
+        filename = os.path.basename(video_path)
+        fallback = os.path.join(BASE_DIR, "scripts/assets/rendered_reels", filename)
+        if os.path.exists(fallback):
+            video_path = fallback
+        else:
+            raise FileNotFoundError(f"Video file not found at {video_path} or {fallback}")
+
     hook = reel_entry["hook"]
     body = reel_entry["body"]
     hashtags = reel_entry.get("hashtags", "")
@@ -193,40 +238,53 @@ def dispatch_reel(reel_entry: dict, platforms: list = None):
     print(f"=======================================================")
 
     meta_creds = load_env(META_ENV_PATH)
-    page_id = meta_creds.get("META_PAGE_ID")
-    ig_id = meta_creds.get("META_IG_USER_ID")
-    user_token = meta_creds.get("META_USER_TOKEN")
+    page_id = os.environ.get("META_PAGE_ID") or meta_creds.get("META_PAGE_ID")
+    ig_id = os.environ.get("META_IG_USER_ID") or meta_creds.get("META_IG_USER_ID")
+    user_token = os.environ.get("META_USER_TOKEN") or meta_creds.get("META_USER_TOKEN")
 
-    fb_token = get_fb_page_token(user_token, page_id)
+    fb_token = None
+    if ("facebook" in platforms or "instagram" in platforms) and user_token and page_id:
+        try:
+            fb_token = get_fb_page_token(user_token, page_id)
+        except Exception as e:
+            print(f"   ⚠️ Could not obtain Facebook Page Token: {e}")
 
     results = {}
 
     # 1. Facebook Reel
     if "facebook" in platforms:
-        try:
-            print("📘 [1/3] Publishing Facebook Reel...")
-            fb_res = publish_facebook_reel(page_id, fb_token, video_path, caption)
-            print(f"   ✅ Facebook Reel LIVE: {fb_res['url']}")
-            results["facebook"] = fb_res
-        except Exception as e:
-            print(f"   ❌ Facebook Reel failed: {e}")
-            results["facebook"] = {"error": str(e)}
+        if not page_id or not fb_token:
+            print("   ❌ Facebook Reel skipped: Missing META_PAGE_ID or META_USER_TOKEN.")
+            results["facebook"] = {"error": "Missing Meta credentials"}
+        else:
+            try:
+                print("📘 [1/4] Publishing Facebook Reel...")
+                fb_res = publish_facebook_reel(page_id, fb_token, video_path, caption)
+                print(f"   ✅ Facebook Reel LIVE: {fb_res['url']}")
+                results["facebook"] = fb_res
+            except Exception as e:
+                print(f"   ❌ Facebook Reel failed: {e}")
+                results["facebook"] = {"error": str(e)}
     else:
-        print("📘 [1/3] Facebook Reel skipped (already live on FB Cloud).")
+        print("📘 [1/4] Facebook Reel skipped (already live on FB Cloud).")
 
     # 2. Instagram Reel
     if "instagram" in platforms:
-        try:
-            print("📸 [2/3] Uploading video to Edge host for Instagram...")
-            edge_url = upload_to_uguu(video_path)
-            print(f"   🔗 Edge Video URL: {edge_url}")
-            print("   📸 Publishing Instagram Reel...")
-            ig_res = publish_instagram_reel(ig_id, fb_token, edge_url, caption)
-            print(f"   ✅ Instagram Reel LIVE: {ig_res['url']}")
-            results["instagram"] = ig_res
-        except Exception as e:
-            print(f"   ❌ Instagram Reel failed: {e}")
-            results["instagram"] = {"error": str(e)}
+        if not ig_id or not fb_token:
+            print("   ❌ Instagram Reel skipped: Missing META_IG_USER_ID or Page Token.")
+            results["instagram"] = {"error": "Missing Instagram credentials"}
+        else:
+            try:
+                print("📸 [2/4] Uploading video to Edge host for Instagram...")
+                edge_url = upload_video_for_instagram(video_path)
+                print(f"   🔗 Edge Video URL: {edge_url}")
+                print("   📸 Publishing Instagram Reel...")
+                ig_res = publish_instagram_reel(ig_id, fb_token, edge_url, caption)
+                print(f"   ✅ Instagram Reel LIVE: {ig_res['url']}")
+                results["instagram"] = ig_res
+            except Exception as e:
+                print(f"   ❌ Instagram Reel failed: {e}")
+                results["instagram"] = {"error": str(e)}
 
     # 3. LinkedIn Reel
     if "linkedin" in platforms:
