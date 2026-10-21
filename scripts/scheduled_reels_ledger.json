@@ -1,0 +1,18 @@
+[
+  {
+    "reel_index": 1,
+    "hook": "Is your blog monetization dying from the 42% of readers using ad-blockers?",
+    "video": "/home/sagar/a_pay/scripts/assets/rendered_reels/reel_01.mp4",
+    "dispatched_at": "2026-10-21T10:34:00Z",
+    "results": {
+      "instagram": {
+        "media_id": "18080781290718448",
+        "url": "https://www.instagram.com/reel/18080781290718448/"
+      },
+      "linkedin": {
+        "success": true,
+        "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7518620597128744960/"
+      }
+    }
+  }
+]
