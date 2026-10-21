@@ -1,19 +1,26 @@
-# A-Pay Protocol — Multi-Platform Reels Cloud Scheduler
+# A-Pay Protocol — Multi-Platform Reels Cloud Scheduler & Codebase Integrity
 # Runs on GitLab Cloud Shared Runners (100% Free & 24/7 Autopilot)
 
-# Top-level workflow rules: Prevents empty pipeline failure notifications on git push
-workflow:
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "web"'
-    - when: never
-
 stages:
+  - test
   - publish
 
+# Runs on every git push to ensure 0 secrets/credentials leaked (Takes ~2s, guarantees non-empty green pipeline)
+audit_security:
+  stage: test
+  image: python:3.11-slim
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+  script:
+    - python3 scripts/scan_secrets.py
+
+# Runs on GitLab Schedule or manual Web trigger to dispatch reels across social platforms
 publish_reels_cloud:
   stage: publish
   image: python:3.11-slim
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "web"'
   before_script:
     - apt-get update && apt-get install -y ffmpeg curl git
     - git config --global user.name "A-Pay CI Bot"
