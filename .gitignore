@@ -37,6 +37,8 @@ out/
 *.key
 *.cert
 secrets/
+youtube_token.json
+client_secret*.json
 
 # Internal Collaboration & Private Core Files (Never Public)
 AGENTS.md

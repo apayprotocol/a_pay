@@ -57,6 +57,10 @@ EXCLUDE_FILES = {
     ".env",
     ".env.local",
     ".env.meta",
+    ".env.youtube",
+    ".env.linkedin",
+    "youtube_token.json",
+    "client_secret_youtube.json",
 }
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
