@@ -145,8 +145,8 @@ function buildSvgFrame1(hook, p, idx) {
     <rect x="120" y="300" width="260" height="52" rx="26" fill="${p.primaryLight}" />
     <text x="145" y="333" font-family="Inter, sans-serif" font-size="18" font-weight="800" fill="${p.primary}" letter-spacing="1">⚡ A-PAY PROTOCOL</text>
 
-    <rect x="680" y="300" width="280" height="52" rx="26" fill="${p.pillBg}" />
-    <text x="705" y="333" font-family="Inter, sans-serif" font-size="16" font-weight="800" fill="${p.pillText}" letter-spacing="0.5">REEL #${String(idx).padStart(2, '0')} • VIRAL B2B</text>
+    <rect x="660" y="300" width="300" height="52" rx="26" fill="${p.pillBg}" />
+    <text x="685" y="333" font-family="Inter, sans-serif" font-size="16" font-weight="800" fill="${p.pillText}" letter-spacing="0.5">⚡ WEB3 MONETIZATION</text>
 
     <!-- Shock Hook -->
     ${headlineSvg}
@@ -326,23 +326,32 @@ async function main() {
   const queuePath = path.resolve(__dirname, 'posts_100_queue.json');
   const allPosts = JSON.parse(fs.readFileSync(queuePath, 'utf-8'));
   const targetCount = parseInt(process.argv[2] || '50', 10);
+  const startIdx = parseInt(process.env.START_IDX || '0', 10);
   const posts = allPosts.slice(0, targetCount);
 
-  console.log(`🎬 Rendering ${posts.length} unique video reels (1080x1920 vertical)...`);
+  const ledgerPath = path.resolve(__dirname, 'reels_50_queue.json');
+  let results = [];
+  if (fs.existsSync(ledgerPath)) {
+    try {
+      results = JSON.parse(fs.readFileSync(ledgerPath, 'utf-8'));
+    } catch (e) {
+      results = [];
+    }
+  }
 
-  const results = [];
-  for (let i = 0; i < posts.length; i++) {
+  console.log(`🎬 Rendering reels ${startIdx + 1} to ${posts.length} (1080x1920 vertical)...`);
+
+  for (let i = startIdx; i < posts.length; i++) {
     const start = Date.now();
     const res = await renderReel(posts[i], i);
     const elapsed = ((Date.now() - start) / 1000).toFixed(1);
     console.log(`[${i + 1}/${posts.length}] Rendered reel_${String(i + 1).padStart(2, '0')}.mp4 (${elapsed}s) | Palette: ${res.palette} | Audio: ${res.audio}`);
-    results.push(res);
+    results[i] = res;
   }
 
   // Save Reels Ledger
-  const ledgerPath = path.resolve(__dirname, 'reels_50_queue.json');
   fs.writeFileSync(ledgerPath, JSON.stringify(results, null, 2));
-  console.log(`\n🎉 All ${results.length} Reels rendered and saved to ${ledgerPath}!`);
+  console.log(`\n🎉 Reels updated and saved to ${ledgerPath}!`);
 }
 
 main().catch(err => {
