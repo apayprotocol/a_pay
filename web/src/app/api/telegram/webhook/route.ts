@@ -25,6 +25,12 @@ interface TelegramMessage {
     first_name?: string;
     username?: string;
   };
+  sender_chat?: {
+    id: number;
+    title?: string;
+    type: string;
+  };
+  is_automatic_forward?: boolean;
   chat: {
     id: number;
     type: string;
@@ -314,6 +320,16 @@ export async function POST(req: Request) {
       text.toLowerCase().includes('@apay_protocol_bot') ||
       update.message?.reply_to_message?.from?.is_bot === true;
     const isCommand = rawCommand.startsWith('/');
+
+    // Ignore automatic channel forwards, sender chats (channels posting), and Telegram service user (ID 777000)
+    const isAutoForward = update.message?.is_automatic_forward === true;
+    const isSenderChat = !!update.message?.sender_chat;
+    const isTelegramService =
+      sender?.id === 777000 || sender?.first_name?.toLowerCase() === 'telegram';
+
+    if (isAutoForward || isSenderChat || isTelegramService) {
+      return NextResponse.json({ ok: true, channel_sync: true });
+    }
 
     // ── GROUP CHANNEL SUBSCRIPTION GATE ──────────────────────────────────────
     if (isGroup && sender && !sender.is_bot && configuredAnnouncementChannel) {
