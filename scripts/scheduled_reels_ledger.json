@@ -105,5 +105,27 @@
         "url": "https://t.me/apay_protocol/13"
       }
     }
+  },
+  {
+    "reel_index": 6,
+    "hook": "How much revenue is your website monetization losing every day to ad-blocking extensions?",
+    "video": "/builds/apayprotocol/a_pay/scripts/assets/rendered_reels/reel_06.mp4",
+    "dispatched_at": "2026-10-22T12:38:12Z",
+    "results": {
+      "instagram": {
+        "media_id": "18133399330666451",
+        "url": "https://www.instagram.com/reel/18133399330666451/"
+      },
+      "linkedin": {
+        "success": true,
+        "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7519014234551128065/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 14,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/14"
+      }
+    }
   }
 ]
