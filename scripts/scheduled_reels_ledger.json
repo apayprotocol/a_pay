@@ -149,5 +149,27 @@
         "url": "https://t.me/apay_protocol/15"
       }
     }
+  },
+  {
+    "reel_index": 8,
+    "hook": "Why let programmatic ad exchanges take a 40% cut of your blog monetization?",
+    "video": "/builds/apayprotocol/a_pay/scripts/assets/rendered_reels/reel_08.mp4",
+    "dispatched_at": "2026-10-22T14:38:07Z",
+    "results": {
+      "instagram": {
+        "media_id": "17918705592462786",
+        "url": "https://www.instagram.com/reel/17918705592462786/"
+      },
+      "linkedin": {
+        "success": true,
+        "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7519044409137471489/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 16,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/16"
+      }
+    }
   }
 ]
