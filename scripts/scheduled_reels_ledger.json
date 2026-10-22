@@ -171,5 +171,27 @@
         "url": "https://t.me/apay_protocol/16"
       }
     }
+  },
+  {
+    "reel_index": 9,
+    "hook": "Can micropayments really 10X your website content monetization compared to display banners?",
+    "video": "/builds/apayprotocol/a_pay/scripts/assets/rendered_reels/reel_09.mp4",
+    "dispatched_at": "2026-10-22T15:38:04Z",
+    "results": {
+      "instagram": {
+        "media_id": "18177959560432579",
+        "url": "https://www.instagram.com/reel/18177959560432579/"
+      },
+      "linkedin": {
+        "success": true,
+        "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7519059498687152128/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 17,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/17"
+      }
+    }
   }
 ]
