@@ -64,5 +64,24 @@
         "url": "https://t.me/apay_protocol/12"
       }
     }
+  },
+  {
+    "reel_index": 4,
+    "hook": "Are slow ad scripts draining your server resources while your monetization keeps shrinking?",
+    "video": "/builds/apayprotocol/a_pay/scripts/assets/rendered_reels/reel_04.mp4",
+    "dispatched_at": "2026-10-22T10:37:25Z",
+    "results": {
+      "instagram": {
+        "media_id": "18200562082389006",
+        "url": "https://www.instagram.com/reel/18200562082389006/"
+      },
+      "linkedin": {
+        "success": true,
+        "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7518983844843110400/"
+      },
+      "telegram": {
+        "error": "<urlopen error [Errno 104] Connection reset by peer>"
+      }
+    }
   }
 ]
