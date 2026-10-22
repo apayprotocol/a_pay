@@ -193,5 +193,27 @@
         "url": "https://t.me/apay_protocol/17"
       }
     }
+  },
+  {
+    "reel_index": 10,
+    "hook": "Why are independent bloggers replacing affiliate widgets with direct micropayment monetization?",
+    "video": "/builds/apayprotocol/a_pay/scripts/assets/rendered_reels/reel_10.mp4",
+    "dispatched_at": "2026-10-22T19:37:31Z",
+    "results": {
+      "instagram": {
+        "media_id": "17889972396686180",
+        "url": "https://www.instagram.com/reel/17889972396686180/"
+      },
+      "linkedin": {
+        "success": true,
+        "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7519119755618738176/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 18,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/18"
+      }
+    }
   }
 ]
