@@ -127,5 +127,27 @@
         "url": "https://t.me/apay_protocol/14"
       }
     }
+  },
+  {
+    "reel_index": 7,
+    "hook": "Is your digital publication relying on 2010s ad monetization in a 2026 Web3 world?",
+    "video": "/builds/apayprotocol/a_pay/scripts/assets/rendered_reels/reel_07.mp4",
+    "dispatched_at": "2026-10-22T13:38:29Z",
+    "results": {
+      "instagram": {
+        "media_id": "18118020070815196",
+        "url": "https://www.instagram.com/reel/18118020070815196/"
+      },
+      "linkedin": {
+        "success": true,
+        "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7519029401628327937/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 15,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/15"
+      }
+    }
   }
 ]
