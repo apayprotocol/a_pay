@@ -215,5 +215,27 @@
         "url": "https://t.me/apay_protocol/18"
       }
     }
+  },
+  {
+    "reel_index": 11,
+    "hook": "Why are automated AI bots draining your server bandwidth with zero monetization?",
+    "video": "/builds/apayprotocol/a_pay/scripts/assets/rendered_reels/reel_11.mp4",
+    "dispatched_at": "2026-10-23T03:37:45Z",
+    "results": {
+      "instagram": {
+        "media_id": "17943807432360243",
+        "url": "https://www.instagram.com/reel/17943807432360243/"
+      },
+      "linkedin": {
+        "success": true,
+        "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7519240611896442880/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 19,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/19"
+      }
+    }
   }
 ]
