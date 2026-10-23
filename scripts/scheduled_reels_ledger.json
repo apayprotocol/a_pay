@@ -237,5 +237,27 @@
         "url": "https://t.me/apay_protocol/19"
       }
     }
+  },
+  {
+    "reel_index": 12,
+    "hook": "Is unmetered AI scraper traffic destroying your content monetization margins?",
+    "video": "/builds/apayprotocol/a_pay/scripts/assets/rendered_reels/reel_12.mp4",
+    "dispatched_at": "2026-10-23T07:37:37Z",
+    "results": {
+      "instagram": {
+        "media_id": "18191638408396482",
+        "url": "https://www.instagram.com/reel/18191638408396482/"
+      },
+      "linkedin": {
+        "success": true,
+        "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7519300977947066368/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 20,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/20"
+      }
+    }
   }
 ]
