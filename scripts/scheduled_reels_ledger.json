@@ -302,5 +302,27 @@
         "url": "https://t.me/apay_protocol/22"
       }
     }
+  },
+  {
+    "reel_index": 15,
+    "hook": "Could an HTTP 402 AI paywall 10X your WordPress blog monetization while slashing server bills?",
+    "video": "/builds/apayprotocol/a_pay/scripts/assets/rendered_reels/reel_15.mp4",
+    "dispatched_at": "2026-10-23T19:37:02Z",
+    "results": {
+      "instagram": {
+        "media_id": "17909936892664680",
+        "url": "https://www.instagram.com/reel/17909936892664680/"
+      },
+      "linkedin": {
+        "success": true,
+        "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7519482025003790337/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 23,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/23"
+      }
+    }
   }
 ]
