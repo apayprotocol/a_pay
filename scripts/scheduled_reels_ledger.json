@@ -281,5 +281,26 @@
         "url": "https://t.me/apay_protocol/21"
       }
     }
+  },
+  {
+    "reel_index": 14,
+    "hook": "Why let AI search engines summarize your articles without contributing to your monetization?",
+    "video": "/builds/apayprotocol/a_pay/scripts/assets/rendered_reels/reel_14.mp4",
+    "dispatched_at": "2026-10-23T15:38:02Z",
+    "results": {
+      "instagram": {
+        "media_id": "17914664706470992",
+        "url": "https://www.instagram.com/reel/17914664706470992/"
+      },
+      "linkedin": {
+        "error": "LinkedIn publish error: Traceback (most recent call last):\n  File \"/builds/apayprotocol/a_pay/scripts/linkedin_company_publisher.py\", line 402, in <module>\n    main()\n  File \"/builds/apayprotocol/a_pay/scripts/linkedin_company_publisher.py\", line 372, in main\n    result = publish_post(token, author_urn, text=text, media_urn=media_urn, title=args.title)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/builds/apayprotocol/a_pay/scripts/linkedin_company_publisher.py\", line 268, in publish_post\n    status, headers, body = make_request(posts_url, method=\"POST\", headers=post_headers, data=json.dumps(payload).encode(\"utf-8\"))\n                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/builds/apayprotocol/a_pay/scripts/linkedin_company_publisher.py\", line 42, in make_request\n    with urllib.request.urlopen(req, timeout=30) as resp:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/urllib/request.py\", line 216, in urlopen\n    return opener.open(url, data, timeout)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/urllib/request.py\", line 519, in open\n    response = self._open(req, data)\n               ^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/urllib/request.py\", line 536, in _open\n    result = self._call_chain(self.handle_open, protocol, protocol +\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/urllib/request.py\", line 496, in _call_chain\n    result = func(*args)\n             ^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/urllib/request.py\", line 1404, in https_open\n    return self.do_open(http.client.HTTPSConnection, req,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/urllib/request.py\", line 1365, in do_open\n    r = h.getresponse()\n        ^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/http/client.py\", line 1443, in getresponse\n    response.begin()\n  File \"/usr/local/lib/python3.11/http/client.py\", line 337, in begin\n    version, status, reason = self._read_status()\n                              ^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/http/client.py\", line 298, in _read_status\n    line = str(self.fp.readline(_MAXLINE + 1), \"iso-8859-1\")\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/socket.py\", line 718, in readinto\n    return self._sock.recv_into(b)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/ssl.py\", line 1327, in recv_into\n    return self.read(nbytes, buffer)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/ssl.py\", line 1179, in read\n    return self._sslobj.read(len, buffer)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nTimeoutError: The read operation timed out\n"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 22,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/22"
+      }
+    }
   }
 ]
