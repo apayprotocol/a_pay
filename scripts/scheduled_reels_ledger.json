@@ -412,5 +412,27 @@
         "url": "https://t.me/apay_protocol/27"
       }
     }
+  },
+  {
+    "reel_index": 20,
+    "hook": "Are you ready to stop server drain and 10X your content monetization with an AI paywall?",
+    "video": "/builds/apayprotocol/a_pay/scripts/assets/rendered_reels/reel_20.mp4",
+    "dispatched_at": "2026-10-24T19:36:55Z",
+    "results": {
+      "instagram": {
+        "media_id": "18083263838379230",
+        "url": "https://www.instagram.com/reel/18083263838379230/"
+      },
+      "linkedin": {
+        "success": true,
+        "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7519844378169851904/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 28,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/28"
+      }
+    }
   }
 ]
