@@ -324,5 +324,27 @@
         "url": "https://t.me/apay_protocol/23"
       }
     }
+  },
+  {
+    "reel_index": 16,
+    "hook": "How much server bandwidth is your WordPress site wasting on unmetered scraper monetization leaks?",
+    "video": "/builds/apayprotocol/a_pay/scripts/assets/rendered_reels/reel_16.mp4",
+    "dispatched_at": "2026-10-24T03:37:00Z",
+    "results": {
+      "instagram": {
+        "media_id": "17899261731671756",
+        "url": "https://www.instagram.com/reel/17899261731671756/"
+      },
+      "linkedin": {
+        "success": true,
+        "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7519602808984125440/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 24,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/24"
+      }
+    }
   }
 ]
