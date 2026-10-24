@@ -390,5 +390,27 @@
         "url": "https://t.me/apay_protocol/26"
       }
     }
+  },
+  {
+    "reel_index": 19,
+    "hook": "What if every AI bot crawling your WordPress content was forced into micro-monetization?",
+    "video": "/builds/apayprotocol/a_pay/scripts/assets/rendered_reels/reel_19.mp4",
+    "dispatched_at": "2026-10-24T15:37:40Z",
+    "results": {
+      "instagram": {
+        "media_id": "18168912880468864",
+        "url": "https://www.instagram.com/reel/18168912880468864/"
+      },
+      "linkedin": {
+        "success": true,
+        "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7519784170806603777/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 27,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/27"
+      }
+    }
   }
 ]
