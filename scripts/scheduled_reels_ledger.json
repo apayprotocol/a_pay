@@ -346,5 +346,27 @@
         "url": "https://t.me/apay_protocol/24"
       }
     }
+  },
+  {
+    "reel_index": 17,
+    "hook": "Is your proprietary research and news data safe from uncompensated AI monetization theft?",
+    "video": "/builds/apayprotocol/a_pay/scripts/assets/rendered_reels/reel_17.mp4",
+    "dispatched_at": "2026-10-24T07:36:51Z",
+    "results": {
+      "instagram": {
+        "media_id": "18114440657174908",
+        "url": "https://www.instagram.com/reel/18114440657174908/"
+      },
+      "linkedin": {
+        "success": true,
+        "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7519663168193867776/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 25,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/25"
+      }
+    }
   }
 ]
