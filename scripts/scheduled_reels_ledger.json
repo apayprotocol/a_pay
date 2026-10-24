@@ -368,5 +368,27 @@
         "url": "https://t.me/apay_protocol/25"
       }
     }
+  },
+  {
+    "reel_index": 18,
+    "hook": "Why let scrapers treat your WordPress blog like a free public database instead of monetizing access?",
+    "video": "/builds/apayprotocol/a_pay/scripts/assets/rendered_reels/reel_18.mp4",
+    "dispatched_at": "2026-10-24T11:37:07Z",
+    "results": {
+      "instagram": {
+        "media_id": "18126113584973323",
+        "url": "https://www.instagram.com/reel/18126113584973323/"
+      },
+      "linkedin": {
+        "success": true,
+        "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7519723636434595842/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 26,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/26"
+      }
+    }
   }
 ]
