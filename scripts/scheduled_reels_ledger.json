@@ -434,5 +434,27 @@
         "url": "https://t.me/apay_protocol/28"
       }
     }
+  },
+  {
+    "reel_index": 21,
+    "hook": "Why does Stripe's $0.30 fixed fee make micro-article monetization mathematically impossible?",
+    "video": "/builds/apayprotocol/a_pay/scripts/assets/rendered_reels/reel_21.mp4",
+    "dispatched_at": "2026-10-25T03:37:45Z",
+    "results": {
+      "instagram": {
+        "media_id": "18097931039637851",
+        "url": "https://www.instagram.com/reel/18097931039637851/"
+      },
+      "linkedin": {
+        "success": true,
+        "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7519965387183087616/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 29,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/29"
+      }
+    }
   }
 ]
