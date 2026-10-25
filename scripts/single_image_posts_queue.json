@@ -148,5 +148,80 @@
       "linkedin",
       "telegram"
     ]
+  },
+  {
+    "index": 11,
+    "slug": "011-smithery-5-tools",
+    "title": "The 5 Autonomous Tools Inside Claude Desktop (Smithery.ai)",
+    "day": 3,
+    "scheduled_at": "2026-10-27T06:02:50Z",
+    "image_path": "scripts/assets/rendered_posts/post_11.png",
+    "caption": "Autonomous AI agents can't receive SMS OTPs, enter credit card CVVs, or solve CAPTCHAs.\n\nWhen an AI agent running inside Claude Desktop or Cursor needs to call an external API, query a paid vector database, or access real-time compute, how does it pay?\n\nWith A-Pay Protocol MCP:\nNow verified on the official Smithery.ai tool hub (Score: 82/100)!\n\nHere are the 5 native tools our MCP server gives your agents:\n1. `apay_request`: Probes endpoints and automatically streams micro-settlements ($0.005) on Base L2.\n2. `apay_get_wallet_status`: Inspects active non-custodial address, chain ID, and current spend limits.\n3. `apay_set_budget`: Enforces strict hard spending caps ($5.00 default) to eliminate runaway loops.\n4. `apay_inspect_endpoint`: Quotes prices and verifies receiver before spending a single cent.\n5. `apay_get_balance`: Instant on-chain balance verification on Base L2.\n\nInstall in 1 command:\n\ud83d\udc49 `npx -y smithery mcp add apayprotocol/apay` or `uvx apay mcp`\n\nGive your AI agents the power to transact autonomously.\n\n\ud83d\udd17 Smithery Hub: https://smithery.ai/servers/apayprotocol/apay\n\ud83d\udcbb GitHub: https://github.com/apayprotocol/a_pay\n\ud83c\udf10 Protocol: https://apayprotocol.org\n\n#ModelContextProtocol #MCP #ClaudeAI #CursorAI #AIEngineering #Python #LangChain #MachineEconomy #BuildOnBase #Web3",
+    "platforms": [
+      "facebook",
+      "instagram",
+      "linkedin",
+      "telegram"
+    ]
+  },
+  {
+    "index": 12,
+    "slug": "012-wordpress-seo-free-humans",
+    "title": "Monetizing AI Scrapers Without Hurting SEO (WordPress Paywall)",
+    "day": 3,
+    "scheduled_at": "2026-10-27T09:32:50Z",
+    "image_path": "scripts/assets/rendered_posts/post_12.png",
+    "caption": "The biggest fear website owners have about paywalls:\n\"If I put up a paywall, will Google derank my website and will human visitors leave?\"\n\nThe answer with traditional paywalls is YES.\nHard paywalls block search crawlers and irritate human readers with aggressive popups.\n\nA-Pay Web3 AI Paywall (Live on WordPress.org) solves this with intelligent cryptographic dual-routing:\n\n\ud83d\udc49 100% Free for Real Humans: Human visitors on Chrome, Safari, Firefox, and mobile browsers browse your articles completely free with zero popups, zero captchas, and zero logins.\n\ud83d\udc49 SEO Protected: Googlebot, Bingbot, and DuckDuckBot are permanently whitelisted, keeping your search rankings and indexing 100% intact.\n\ud83d\udc49 HTTP 402 Web3 Challenge Gate: Unmetered AI bots (GPTBot, ClaudeBot, Bytespider) receive an HTTP 402 challenge and pay $0.001 per page directly into your Base L2 wallet!\n\nYou don't lose search traffic. You don't annoy readers. You just monetize the AI bots scraping your hard work.\n\nInstall in 60s from your WordPress Admin panel!\n\n\ud83d\udd17 WordPress.org: https://wordpress.org/plugins/apay-web3-ai-paywall/\n\u26a1 Protocol: https://apayprotocol.org\n\n#WordPress #Blogging #SEO #Webmasters #ContentCreators #PassiveIncome #AdSense #WebDev #BuildOnBase #HTTP402",
+    "platforms": [
+      "facebook",
+      "instagram",
+      "linkedin",
+      "telegram"
+    ]
+  },
+  {
+    "index": 13,
+    "slug": "013-pypi-fastapi-monetization",
+    "title": "pip install apay (FastAPI & Python Developers)",
+    "day": 3,
+    "scheduled_at": "2026-10-27T13:02:50Z",
+    "image_path": "scripts/assets/rendered_posts/post_13.png",
+    "caption": "Building billing infrastructure usually takes 2+ weeks:\nSetting up Stripe accounts, registering business KYC, configuring webhook handlers, managing failed credit cards, and designing subscription database tables.\n\nWith `pip install apay`, Python developers turn any API endpoint into an autonomous paywall in literally 3 lines of code:",
+    "platforms": [
+      "facebook",
+      "instagram",
+      "linkedin",
+      "telegram"
+    ]
+  },
+  {
+    "index": 14,
+    "slug": "014-aerodrome-liquidity-flow",
+    "title": "Why Pure Utility Beats Speculation ($APAY on Aerodrome)",
+    "day": 3,
+    "scheduled_at": "2026-10-27T16:32:50Z",
+    "image_path": "scripts/assets/rendered_posts/post_14.png",
+    "caption": "Over 99% of speculative crypto tokens crash to zero.\n\nWhy?\nBecause meme tokens and speculative tokens have zero economic velocity. They rely entirely on finding new buyers. The moment social media hype dies, trading volume drops to zero.\n\nIn contrast, the autonomous AI machine economy doesn't run on hype. It runs on code execution.\n\nProjected: over 10 billion API queries per day between AI agents by 2026.\nEvery single time an AI agent in Claude Desktop or Cursor calls a monetized tool, queries a dataset, or books compute, value must be settled programmatically.\n\nHere is how $APAY captures generational utility on Base Layer 2:\n\ud83d\udc8e 100,000,000 Fixed Token Supply (Zero inflation, non-mintable smart contract)\n\ud83d\udca7 Verified Aerodrome Finance DEX Pool: 0x6933dd2B7D72d8561005E475AFa147E47A3c7777\n\ud83d\udd12 Verified Base Mainnet Escrow: 0xd08c8a337e5339d1c083e06d74a9265956ceea16\n\u26a1 Sub-cent gas settlement ($0.0001 per ticket on Base L2)\n\nReal software execution. Real M2M transaction velocity. Code pays code automatically.\n\n\ud83d\udd17 Tokenomics Spec: https://apayprotocol.org/whitepaper\n\u26a1 Basename: apayprotocol.base.eth\n\n#Crypto #Tokenomics #Aerodrome #BaseL2 #BuildOnBase #DeFi #Ethereum #InvestInCrypto #Fintech #SmartContracts #Blockchain",
+    "platforms": [
+      "facebook",
+      "instagram",
+      "linkedin",
+      "telegram"
+    ]
+  },
+  {
+    "index": 15,
+    "slug": "015-github-bounties-grants",
+    "title": "Verified Open-Source & Developer Grants (GitHub Bounties)",
+    "day": 3,
+    "scheduled_at": "2026-10-27T20:02:50Z",
+    "image_path": "scripts/assets/rendered_posts/post_15.png",
+    "caption": "Closed proprietary billing platforms take a 30% cut of your revenue and lock your data inside walled gardens.\n\nA-Pay Protocol is built on a different principle:\n100% Verified Open-Source under the MIT License on Base Layer 2.\n\nWe believe the machine-to-machine financial rail of the internet belongs to the open developer ecosystem.\n\n\ud83d\ude80 WE ARE ACTIVELY FUNDING DEVELOPER GRANTS & BOUNTIES!\nAre you building:\n\u2022 Creative Next.js 15 or FastAPI templates with HTTP 402 paywalls?\n\u2022 Specialized MCP tools for Claude or Cursor?\n\u2022 WordPress or e-commerce plugins?\n\u2022 Autonomous agent workflows in LangChain or CrewAI?\n\nContribute to our repository, integrate A-Pay, and get funded directly by protocol grants!\n\nHow to get started:\n1. Star our GitHub repository: https://github.com/apayprotocol/a_pay\n2. Join our Discord developer hub: https://discord.gg/cW2WRSfb35\n3. Pick an open bounty issue and start building!\n\nThe future of software is open, autonomous, and monetized.\n\n\ud83d\udcbb GitHub: https://github.com/apayprotocol/a_pay\n\ud83d\udcac Discord: https://discord.gg/cW2WRSfb35\n\ud83c\udf10 Protocol: https://apayprotocol.org\n\n#OpenSource #GitHub #Developers #TypeScript #Python #Nextjs #FastAPI #BuildOnBase #Coding #IndieHackers #Bounties",
+    "platforms": [
+      "facebook",
+      "instagram",
+      "linkedin",
+      "telegram"
+    ]
   }
 ]
