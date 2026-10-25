@@ -136,11 +136,12 @@ def dispatch_post_by_index(target_index: int):
     return dispatch_single_image(target_item)
 
 def check_and_dispatch_due():
-    """Checks for any post whose scheduled_at has arrived and has not been dispatched."""
+    """Checks for any posts whose scheduled_at has arrived and have not been dispatched."""
     from dispatch_single_image_post import dispatch_single_image
     queue = load_queue()
     dispatched = get_dispatched_indices()
     now = datetime.now(timezone.utc)
+    dispatched_list = []
 
     for item in queue:
         idx = item.get("index")
@@ -154,12 +155,15 @@ def check_and_dispatch_due():
             print(f"🚀 Triggering automated multi-platform dispatch for #{idx} ({item.get('title')})...")
             try:
                 res = dispatch_single_image(item)
-                return {"dispatched": True, "index": idx, "results": res}
+                dispatched.add(idx)
+                dispatched_list.append(idx)
+                time.sleep(5)
             except Exception as e:
                 print(f"❌ Error during auto-dispatch for #{idx}: {e}")
-                return {"dispatched": False, "index": idx, "error": str(e)}
 
-    return {"dispatched": False, "index": None}
+    if dispatched_list:
+        return {"dispatched": True, "indices": dispatched_list}
+    return {"dispatched": False, "indices": []}
 
 def run_daemon():
     print("\n" + "="*80)
@@ -175,7 +179,7 @@ def run_daemon():
         try:
             res = check_and_dispatch_due()
             if res.get("dispatched"):
-                print(f"✅ Successfully dispatched post #{res.get('index')}! Resting 30s before next check...")
+                print(f"✅ Successfully dispatched posts {res.get('indices')}! Resting 30s before next check...")
                 time.sleep(30)
         except Exception as e:
             print(f"⚠️ Scheduler loop error: {e}")
