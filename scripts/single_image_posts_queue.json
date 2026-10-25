@@ -223,5 +223,155 @@
       "linkedin",
       "telegram"
     ]
+  },
+  {
+    "index": 16,
+    "slug": "016-telegram-mini-app-superapp",
+    "title": "Turn Telegram into an AI Agent Command Center (TMA)",
+    "day": 4,
+    "scheduled_at": "2026-10-27T23:32:50Z",
+    "image_path": "scripts/assets/rendered_posts/post_16.png",
+    "caption": "Over 950 million users access Telegram daily.\n\nWhat if your Telegram app was also your autonomous AI agent command center?\n\nIntroducing the A-Pay Telegram Mini App (TMA):\nNow live at https://apayprotocol.org/tma and accessible directly via @APay_Protocol_Bot!\n\n\u26a1 7 Quick Mobile Cards in 1 Tap:\n1. Base Sepolia Faucet: Claim testnet tokens instantly for your agents\n2. AI Bot Scanner: Audit any website URL for AI crawler paywall defenses\n3. Real-Time Gas Tracker: Monitor live Base L2 gas ($0.0001)\n4. Solvency & Escrow Inspector: Inspect live contracts on BaseScan\n5. Agent Simulation Sandbox: Test programmatic HTTP 402 challenges\n6. Marketplace & Directory: Browse monetized agent APIs\n7. 1-Tap Full Web Console: Toggle into full desktop tools, API keys, and WooCommerce settings\n\nZero App Store friction. Zero downloads. Instant Web3 settlement directly inside chat.\n\nLaunch the bot:\n\ud83d\udc49 Telegram Bot: https://telegram.me/APay_Protocol_Bot\n\ud83d\udcf1 WebApp: https://apayprotocol.org/tma\n\ud83c\udf10 Protocol: https://apayprotocol.org\n\n#Telegram #TelegramMiniApp #TMA #AIAgents #Web3Mobile #BuildOnBase #Crypto #IndieHackers #SoftwareEngineering #TechTrends",
+    "platforms": [
+      "facebook",
+      "instagram",
+      "linkedin",
+      "telegram"
+    ]
+  },
+  {
+    "index": 17,
+    "slug": "017-coinbase-agentkit-actions",
+    "title": "Giving Autonomous Agents Spending Cards with AgentKit",
+    "day": 4,
+    "scheduled_at": "2026-10-28T03:02:50Z",
+    "image_path": "scripts/assets/rendered_posts/post_17.png",
+    "caption": "Autonomous AI agents in LangChain or CrewAI can read documentation, write code, and call webhooks.\n\nBut the moment they hit a paid API wall, they freeze.\n\nWhy? Because traditional payment rails require human verification:\n\u2022 A credit card CVV\n\u2022 An SMS one-time password\n\u2022 A reCAPTCHA puzzle\n\nAI agents have none of these.\n\nThat is why we built the official A-Pay Action Provider for Coinbase AgentKit:\nNow live and verified on Glama.ai (Score: 83%)!\n\nWith A-Pay AgentKit:\n\u26a1 Agents get an instant non-custodial crypto wallet on Base Layer 2\n\u26a1 When an endpoint returns HTTP 402 Payment Required, the agent automatically inspects the price\n\u26a1 If the price is within session limits, the agent signs a micro-ticket in memory and receives the data\n\u26a1 Built-in spending safeguards eliminate runaway token drainage\n\nFrom thinking agents to transacting economic actors.\n\n\ud83d\udc49 Pip Install: `pip install apay`\n\ud83d\udc49 Glama Hub: https://glama.ai/mcp/servers/apayprotocol/a_pay\n\ud83d\udcbb GitHub: https://github.com/apayprotocol/a_pay\n\n#Coinbase #AgentKit #LangChain #AIAgents #Python #BuildOnBase #SoftwareEngineering #MachineEconomy #Developers #Fintech",
+    "platforms": [
+      "facebook",
+      "instagram",
+      "linkedin",
+      "telegram"
+    ]
+  },
+  {
+    "index": 18,
+    "slug": "018-base-l2-gas-economics",
+    "title": "The Base L2 Gas Math ($0.0001 Gas Reality vs Stripe)",
+    "day": 4,
+    "scheduled_at": "2026-10-28T06:32:50Z",
+    "image_path": "scripts/assets/rendered_posts/post_18.png",
+    "caption": "The unit economics of the autonomous AI machine economy are completely different from human commerce.\n\nWhen an AI agent queries an API 10,000 times a day for $0.005 per query:\n\n\u274c Stripe charges $0.30 fixed fee + 2.9% on every transaction.\nOn 10,000 queries ($50 of data), the Stripe fee alone is $3,000! That is a 6,000% processor penalty.\n\n\u274c Ethereum L1 averages $4.50 in gas per transfer with 12-second block times.\nCompletely financially unviable for sub-cent micropayments.\n\n\u2705 Base Layer 2 + A-Pay Protocol:\n\u2022 $0.0001 per ticket stream settlement\n\u2022 0 gas off-chain cryptographic ticket exchange (EIP-712)\n\u2022 Sub-second transaction finality\n\u2022 Non-custodial escrow protection (EscrowVault: 0xd08c8a337e5339d1c083e06d74a9265956ceea16)\n\nOn 10,000 queries, total processor settlement cost is under $0.10.\n\nMath beats legacy rails every single time.\n\n\ud83d\udd17 Full Economic Spec: https://apayprotocol.org/whitepaper\n\u26a1 Basename: apayprotocol.base.eth\n\ud83c\udf10 Portal: https://apayprotocol.org\n\n#Fintech #FintechTrends #BaseL2 #BuildOnBase #Ethereum #Stripe #UnitEconomics #AIAgents #CryptoInvesting #SmartContracts #APIs",
+    "platforms": [
+      "facebook",
+      "instagram",
+      "linkedin",
+      "telegram"
+    ]
+  },
+  {
+    "index": 19,
+    "slug": "019-woocommerce-digital-products",
+    "title": "Sell Digital Downloads via WooCommerce on Base L2",
+    "day": 4,
+    "scheduled_at": "2026-10-28T10:02:50Z",
+    "image_path": "scripts/assets/rendered_posts/post_19.png",
+    "caption": "Over 5 million online storefronts run on WooCommerce.\n\nYet most store owners still pay 2.9% + $0.30 on digital goods, deal with credit card chargebacks, and get their product data scraped by AI bots for free.\n\nOur official WordPress plugin (v0.1.9) introduces the A-Pay Web3 WooCommerce Gateway:\n\n\ud83d\udecd\ufe0f Dual-Customer Monetization:\n1. Human Customers: Click \"Pay with Web3\" and checkout seamlessly using MetaMask, Coinbase Wallet, or Phantom on Base L2. Zero chargeback risk.\n2. AI Agent Bots: If an autonomous agent attempts to scrape your product catalog or query premium digital files, the plugin serves an HTTP 402 challenge and collects sub-cent payments automatically!\n\n\u26a1 1-Click On-Chain Refunds:\nIssue customer refunds directly from the standard WooCommerce admin dashboard back to the customer's wallet address.\n\nZero configuration required. Auto-binds to verified Base Mainnet escrow contracts.\n\nInstall directly from WordPress Admin:\n\ud83d\udc49 Plugins \u2794 Add New \u2794 Search \"A-Pay Web3 AI Paywall\"\n\ud83c\udf10 Plugin Directory: https://wordpress.org/plugins/apay-web3-ai-paywall/\n\n#WooCommerce #WordPress #Ecommerce #WebDev #OnlineBusiness #PassiveIncome #BuildOnBase #CryptoPayments #DigitalProducts #Webmasters",
+    "platforms": [
+      "facebook",
+      "instagram",
+      "linkedin",
+      "telegram"
+    ]
+  },
+  {
+    "index": 20,
+    "slug": "020-developer-community-hub",
+    "title": "Join 500+ Engineers Building the M2M Economy (Bounties)",
+    "day": 4,
+    "scheduled_at": "2026-10-28T13:32:50Z",
+    "image_path": "scripts/assets/rendered_posts/post_20.png",
+    "caption": "The infrastructure for autonomous machine-to-machine commerce cannot be closed or proprietary.\n\nIt belongs to the open developer ecosystem.\n\nToday, the A-Pay Protocol community spans:\n\ud83d\udcac Official Discord Hub: Direct access to core protocol architects and weekly build challenges\n\u25b6\ufe0f YouTube Masterclasses: Architecture walkthroughs on EIP-712 state channels and Base L2 contracts\n\ud83d\udcbb GitHub Organization: 100% MIT-licensed repositories, SDKs, and templates\n\n\ud83d\ude80 WE ARE FUNDING DEVELOPER GRANTS!\nAre you building:\n\u2022 Creative Next.js 15 or FastAPI templates with HTTP 402 paywalls?\n\u2022 Custom MCP tools for Claude Desktop or Cursor?\n\u2022 LangChain / CrewAI autonomous agent workflows?\n\u2022 WordPress or e-commerce plugins?\n\nSubmit a pull request or starter template to our GitHub repository and get funded directly through protocol grants!\n\nJoin our developer collective today:\n\ud83d\udcac Discord: https://discord.gg/cW2WRSfb35\n\ud83d\udcbb GitHub: https://github.com/apayprotocol/a_pay\n\ud83c\udf10 Ecosystem: https://apayprotocol.org\n\n#OpenSource #Developers #Programming #TypeScript #Python #Nextjs #BuildOnBase #WebDev #CodingLife #IndieHackers #Bounties",
+    "platforms": [
+      "facebook",
+      "instagram",
+      "linkedin",
+      "telegram"
+    ]
+  },
+  {
+    "index": 21,
+    "slug": "021-nextjs15-checkout-widget",
+    "title": "Integrate Base L2 Web3 Checkout into Next.js 15 in 3 Lines",
+    "day": 5,
+    "scheduled_at": "2026-10-28T17:02:50Z",
+    "image_path": "scripts/assets/rendered_posts/post_21.png",
+    "caption": "Adding crypto payments to a modern React / Next.js application used to mean wrestling with complex web3 provider wrappers, hydration errors, and clunky modal styling.\n\nNot anymore.\n\nWith the official `apay-gateway` package on NPM:\nAdd verified Base L2 Web3 checkout to your Next.js 15 app in just 3 lines of code!",
+    "platforms": [
+      "facebook",
+      "instagram",
+      "linkedin",
+      "telegram"
+    ]
+  },
+  {
+    "index": 22,
+    "slug": "022-eip712-zero-gas-streaming",
+    "title": "How EIP-712 Micro-Tickets Enable Zero-Gas Streaming for AI",
+    "day": 5,
+    "scheduled_at": "2026-10-28T20:32:50Z",
+    "image_path": "scripts/assets/rendered_posts/post_22.png",
+    "caption": "What happens when an autonomous AI agent makes 50 tool calls per second?\n\nIf each call sent an on-chain blockchain transaction:\n1. Gas fees would burn up the user's wallet\n2. Sequencer latency would introduce 2-second lag per call\n3. The mempool would get clogged with dust transactions\n\nHere is how A-Pay Protocol solves this using EIP-712 state channels:\n\n1\ufe0f\u20e3 Step 1: Deposit to Vault\nThe client deposits their spending budget once into the non-custodial EscrowVault contract on Base Layer 2.\n\n2\ufe0f\u20e3 Step 2: Stream Micro-Tickets in Memory (0 Gas)\nFor each API call, the client signs a cryptographic typed data structure (EIP-712) in RAM.\nLatency: 5 milliseconds. Gas cost: Exactly $0.00.\n\n3\ufe0f\u20e3 Step 3: Atomic Batch Settlement\nThe merchant verifies signatures instantly off-chain. When the session closes, only the final cumulative ticket is submitted to the smart contract.\n1 single transaction settles thousands of queries atomically on Base L2!\n\nHigh-throughput, real-time machine micropayments are finally here.\n\n\ud83d\udcd6 Read the full architecture spec: https://apayprotocol.org/whitepaper\n\u26a1 Basename: apayprotocol.base.eth\n\n#Cryptography #Blockchain #EIP712 #Solidity #Ethereum #BaseL2 #BuildOnBase #SystemDesign #SoftwareArchitecture #Fintech",
+    "platforms": [
+      "facebook",
+      "instagram",
+      "linkedin",
+      "telegram"
+    ]
+  },
+  {
+    "index": 23,
+    "slug": "023-100m-fixed-tokenomics",
+    "title": "The 100M Fixed Token Cap ($APAY On-Chain Proof)",
+    "day": 5,
+    "scheduled_at": "2026-10-29T00:02:50Z",
+    "image_path": "scripts/assets/rendered_posts/post_23.png",
+    "caption": "In crypto, the biggest enemy of long-term token value is hidden inflationary minting.\n\nFoundations and teams quietly mint billions of new tokens to fund operating expenses, diluting early community members and token holders.\n\nA-Pay Protocol is architected on a foundation of cryptographic scarcity:\n\n\ud83d\udc8e 100,000,000 Fixed Token Supply\nNo mint function exists in the Solidity smart contract. No founder, team member, or multisig has the technical capability to create even 1 additional token.\n\n\ud83d\udd12 Key Contract Invariants:\n\u2022 Contract Address: 0x8dd4ff9035c7d4e0bef30aa64fc30d128a4066c3 (Base Mainnet)\n\u2022 100% Fixed Cap: 100,000,000 $APAY\n\u2022 Verified On-Chain: Source code fully verified and matched on BaseScan\n\u2022 Liquidity Pool: Active on Aerodrome Finance (Pool: 0x6933dd2B7D72d8561005E475AFa147E47A3c7777)\n\nValue in the AI machine economy should come from real software utility and transaction velocity\u2014not token inflation.\n\n\ud83d\udd0d Verify on BaseScan: https://basescan.org/token/0x8dd4ff9035c7d4e0bef30aa64fc30d128a4066c3\n\ud83d\udcc4 Whitepaper: https://apayprotocol.org/whitepaper\n\n#Tokenomics #Crypto #BaseL2 #BuildOnBase #Aerodrome #DeFi #Ethereum #SmartContracts #InvestInCrypto #Blockchain",
+    "platforms": [
+      "facebook",
+      "instagram",
+      "linkedin",
+      "telegram"
+    ]
+  },
+  {
+    "index": 24,
+    "slug": "024-fastapi-python-paywall",
+    "title": "Protect Expensive ML Endpoints from Scraping in 1 Line",
+    "day": 5,
+    "scheduled_at": "2026-10-29T03:32:50Z",
+    "image_path": "scripts/assets/rendered_posts/post_24.png",
+    "caption": "You spend months fine-tuning an open-source LLM or diffusion model. You spin up an expensive GPU instance (A100 or H100) to serve real-time predictions.\n\nWithin 48 hours, unauthorized web scrapers and bot swarms discover your endpoint and hammer it with 100,000 requests an hour.\n\nYour cloud compute bill explodes.\n\nTraditional solutions either block all bots (hurting visibility) or force complex API key registration workflows that bots cannot complete.\n\nHere is the modern solution:\nThe official `apay` Python package on PyPI:",
+    "platforms": [
+      "facebook",
+      "instagram",
+      "linkedin",
+      "telegram"
+    ]
+  },
+  {
+    "index": 25,
+    "slug": "025-whitepaper-founder-vision",
+    "title": "The Official A-Pay Whitepaper: M2M Financial Standard",
+    "day": 5,
+    "scheduled_at": "2026-10-29T07:02:50Z",
+    "image_path": "scripts/assets/rendered_posts/post_25.png",
+    "caption": "The next billion economic transactions won't be made with plastic credit cards or bank transfers.\n\nThey will be executed autonomously between AI agent swarms querying datasets, leasing GPU compute, and executing cross-model workflows in milliseconds.\n\nToday, we officially publish the A-Pay Protocol Technical Whitepaper!\n\nAuthored by Founder & Lead Protocol Architect Sagar Yadav:\nAvailable for public review at:\n\ud83d\udc49 https://apayprotocol.org/whitepaper\n\n\ud83d\udcd6 What's Inside:\n1. The HTTP 402 Genesis: Reviving the 33-year-old internet standard for machine payments\n2. Sub-Cent Settlement Mechanics: How Base Layer 2 and EIP-712 state channels achieve $0.0001 fees\n3. Non-Custodial Session Keys: Why user wallets stay safe during automated agent execution\n4. The 100,000,000 Fixed Tokenomics: Allocation models, builder grants, and Aerodrome liquidity\n5. Enterprise Compliance & Verification: Public audits, BaseScan verification, and multi-chain roadmaps\n\nJoin the revolution building the native monetary rail of the artificial intelligence era.\n\n\ud83d\udcc4 Read the Whitepaper: https://apayprotocol.org/whitepaper\n\ud83d\udcbc Founder Profile: https://www.linkedin.com/in/sagar-yadav-6b0804182/\n\ud83d\udcac Discord Community: https://discord.gg/cW2WRSfb35\n\ud83c\udf10 Protocol: https://apayprotocol.org\n\n#Whitepaper #AIAgents #MachineEconomy #Fintech #BuildOnBase #Crypto #Ethereum #Web3 #FutureOfWork #DeepTech",
+    "platforms": [
+      "facebook",
+      "instagram",
+      "linkedin",
+      "telegram"
+    ]
   }
 ]
