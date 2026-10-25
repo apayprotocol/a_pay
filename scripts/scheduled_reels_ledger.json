@@ -500,5 +500,24 @@
         "url": "https://t.me/apay_protocol/31"
       }
     }
+  },
+  {
+    "reel_index": 24,
+    "hook": "Why wait 7 business days for payouts when Web3 monetization settles in 2 seconds?",
+    "video": "/builds/apayprotocol/a_pay/scripts/assets/rendered_reels/reel_24.mp4",
+    "dispatched_at": "2026-10-25T15:36:46Z",
+    "results": {
+      "instagram": {
+        "media_id": "17908901946333144",
+        "url": "https://www.instagram.com/reel/17908901946333144/"
+      },
+      "linkedin": {
+        "success": true,
+        "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7520146340601876480/"
+      },
+      "telegram": {
+        "error": "<urlopen error [Errno 104] Connection reset by peer>"
+      }
+    }
   }
 ]
