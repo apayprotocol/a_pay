@@ -1,0 +1,62 @@
+[
+  {
+    "index": 1,
+    "title": "Stripe Micro-Billing Trap: Why 98% of AI Agents Cannot Use Credit Cards",
+    "dispatched_at": "2026-10-25T20:08:26.865476+00:00",
+    "image_path": "/home/sagar/a_pay/social-studio/single-posts/001-stripe-ai-breakdown/dist/post.png",
+    "results": {
+      "facebook": {
+        "success": true,
+        "post_id": "1356833567513986_122112597987502911",
+        "photo_id": "122112597969502911",
+        "url": "https://www.facebook.com/1356833567513986_122112597987502911"
+      },
+      "instagram": {
+        "success": true,
+        "media_id": "18118822931279151",
+        "url": "https://www.instagram.com/p/De7h7VHny_d/"
+      },
+      "linkedin": {
+        "success": true,
+        "post_urn": "urn:li:share:7520214712207269888",
+        "url": "https://www.linkedin.com/feed/update/urn:li:share:7520214712207269888/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 33,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/33"
+      }
+    }
+  },
+  {
+    "index": 2,
+    "title": "Google AdSense Down 60%? (WordPress Paywall)",
+    "dispatched_at": "2026-10-25T22:33:30.737711+00:00",
+    "image_path": "/home/sagar/a_pay/social-studio/single-posts/002-wordpress-bot-monetization/dist/post.png",
+    "results": {
+      "facebook": {
+        "success": true,
+        "post_id": "1356833567513986_122112627303502911",
+        "photo_id": "122112627285502911",
+        "url": "https://www.facebook.com/1356833567513986_122112627303502911"
+      },
+      "instagram": {
+        "success": true,
+        "media_id": "17894657508439934",
+        "url": "https://www.instagram.com/p/De7yhZEn8OD/"
+      },
+      "linkedin": {
+        "success": true,
+        "post_urn": "urn:li:share:7520251208624795648",
+        "url": "https://www.linkedin.com/feed/update/urn:li:share:7520251208624795648/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 34,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/34"
+      }
+    }
+  }
+]

@@ -94,6 +94,55 @@ def format_caption(text: str, max_length: int = 1024, footer: str = "\n\n🔗 ht
 
     return truncated.strip() + "..." + footer
 
+def publish_telegram_photo(photo_path: str, caption: str, channel: str = None) -> dict:
+    """
+    Publishes a single photo to Telegram channel via sendPhoto.
+    """
+    token, default_channel = load_telegram_credentials()
+    target_channel = channel or default_channel
+
+    if not os.path.exists(photo_path):
+        raise FileNotFoundError(f"Photo file not found: {photo_path}")
+
+    with open(photo_path, "rb") as f:
+        photo_bytes = f.read()
+
+    safe_caption = format_caption(caption)
+
+    fields = {
+        "chat_id": target_channel,
+        "caption": safe_caption
+    }
+    filename = os.path.basename(photo_path)
+    mime = "image/png" if filename.lower().endswith(".png") else "image/jpeg"
+    files = [
+        ("photo", filename, mime, photo_bytes)
+    ]
+
+    body, content_type = make_multipart_body(fields, files)
+
+    url = f"https://api.telegram.org/bot{token}/sendPhoto"
+    req = urllib.request.Request(url, data=body, method="POST")
+    req.add_header("Content-Type", content_type)
+
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        res = json.loads(resp.read().decode("utf-8"))
+
+    if not res.get("ok"):
+        raise RuntimeError(f"Telegram sendPhoto failed: {res}")
+
+    result = res.get("result", {})
+    message_id = result.get("message_id")
+    clean_channel = target_channel.lstrip("@")
+    post_url = f"https://t.me/{clean_channel}/{message_id}"
+
+    return {
+        "success": True,
+        "message_id": message_id,
+        "channel": target_channel,
+        "url": post_url
+    }
+
 def publish_telegram_video(video_path: str, caption: str, channel: str = None) -> dict:
     """
     Publishes an MP4 video reel to Telegram channel via sendVideo.
@@ -211,6 +260,7 @@ def publish_telegram_carousel(slide_paths: list[str], caption: str, channel: str
 
 def main():
     parser = argparse.ArgumentParser(description="A-Pay Telegram Channel Publisher")
+    parser.add_argument("--photo", type=str, help="Single image photo path to publish via sendPhoto")
     parser.add_argument("--video", type=str, help="MP4 video path to publish via sendVideo")
     parser.add_argument("--slides", nargs="+", help="Image slide paths for carousel album via sendMediaGroup")
     parser.add_argument("--caption", type=str, required=True, help="Post caption")
@@ -218,7 +268,12 @@ def main():
 
     args = parser.parse_args()
 
-    if args.video:
+    if args.photo:
+        print(f"🚀 Publishing Single Photo to Telegram Channel ({args.channel or '@apay_protocol'})...")
+        res = publish_telegram_photo(args.photo, args.caption, args.channel)
+        print(f"✅ TELEGRAM PHOTO LIVE: {res['url']}")
+        print(json.dumps(res, indent=2))
+    elif args.video:
         print(f"🚀 Publishing Video Reel to Telegram Channel ({args.channel or '@apay_protocol'})...")
         res = publish_telegram_video(args.video, args.caption, args.channel)
         print(f"✅ TELEGRAM VIDEO LIVE: {res['url']}")
@@ -229,7 +284,7 @@ def main():
         print(f"✅ TELEGRAM CAROUSEL LIVE: {res['url']}")
         print(json.dumps(res, indent=2))
     else:
-        print("❌ Error: Must specify either --video or --slides")
+        print("❌ Error: Must specify either --photo, --video or --slides")
         sys.exit(1)
 
 if __name__ == "__main__":

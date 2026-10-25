@@ -34,6 +34,33 @@ publish_reels_cloud:
       if git diff --cached --quiet; then
         echo "No ledger changes to push."
       else
+        git pull --rebase origin ${CI_COMMIT_BRANCH} || true
         git commit -m "chore(social): update scheduled reels ledger [skip ci]" || true
         git push origin HEAD:${CI_COMMIT_BRANCH} -o ci.skip || true
       fi
+
+# Runs on GitLab Schedule or manual Web trigger to dispatch single image posts across social platforms
+publish_single_posts_cloud:
+  stage: publish
+  image: python:3.11-slim
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "web"'
+  before_script:
+    - apt-get update && apt-get install -y curl git
+    - git config --global user.name "A-Pay CI Bot"
+    - git config --global user.email "bot@apayprotocol.org"
+  script:
+    - python3 scripts/single_image_scheduler_daemon.py --check-due
+  after_script:
+    - git remote set-url origin "https://oauth2:${GITLAB_PUSH_TOKEN:-$CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
+    - git add scripts/single_image_posts_ledger.json
+    - |
+      if git diff --cached --quiet; then
+        echo "No single image ledger changes to push."
+      else
+        git pull --rebase origin ${CI_COMMIT_BRANCH} || true
+        git commit -m "chore(social): update scheduled single image posts ledger [skip ci]" || true
+        git push origin HEAD:${CI_COMMIT_BRANCH} -o ci.skip || true
+      fi
+
