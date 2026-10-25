@@ -478,5 +478,27 @@
         "url": "https://t.me/apay_protocol/30"
       }
     }
+  },
+  {
+    "reel_index": 23,
+    "hook": "Why let credit card chargebacks threaten your blog monetization when crypto settlement is irreversible?",
+    "video": "/builds/apayprotocol/a_pay/scripts/assets/rendered_reels/reel_23.mp4",
+    "dispatched_at": "2026-10-25T11:36:58Z",
+    "results": {
+      "instagram": {
+        "media_id": "17938224615388684",
+        "url": "https://www.instagram.com/reel/17938224615388684/"
+      },
+      "linkedin": {
+        "success": true,
+        "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7520085978728927232/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 31,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/31"
+      }
+    }
   }
 ]
