@@ -207,5 +207,35 @@
         "url": "https://t.me/apay_protocol/40"
       }
     }
+  },
+  {
+    "index": 8,
+    "title": "Inside WordPress Admin with 1-Click Install (Content Publishers)",
+    "dispatched_at": "2026-10-26T19:35:50.493236+00:00",
+    "image_path": "/builds/apayprotocol/a_pay/scripts/assets/rendered_posts/post_08.png",
+    "results": {
+      "facebook": {
+        "success": true,
+        "post_id": "1356833567513986_122112982785502911",
+        "photo_id": "122112982767502911",
+        "url": "https://www.facebook.com/1356833567513986_122112982785502911"
+      },
+      "instagram": {
+        "success": true,
+        "media_id": "17992586220064775",
+        "url": "https://www.instagram.com/p/De-C_i8jE0x/"
+      },
+      "linkedin": {
+        "success": true,
+        "post_urn": "urn:li:share:7520568886946123776",
+        "url": "https://www.linkedin.com/feed/update/urn:li:share:7520568886946123776/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 41,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/41"
+      }
+    }
   }
 ]
