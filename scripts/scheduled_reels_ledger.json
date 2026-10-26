@@ -541,5 +541,27 @@
         "url": "https://t.me/apay_protocol/32"
       }
     }
+  },
+  {
+    "reel_index": 26,
+    "hook": "Why let merchant account freezes put your online publication monetization at risk?",
+    "video": "/builds/apayprotocol/a_pay/scripts/assets/rendered_reels/reel_26.mp4",
+    "dispatched_at": "2026-10-26T03:37:50Z",
+    "results": {
+      "instagram": {
+        "media_id": "17942025579385579",
+        "url": "https://www.instagram.com/reel/17942025579385579/"
+      },
+      "linkedin": {
+        "success": true,
+        "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:7520327795152011264/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 36,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/36"
+      }
+    }
   }
 ]
