@@ -147,5 +147,35 @@
         "url": "https://t.me/apay_protocol/38"
       }
     }
+  },
+  {
+    "index": 6,
+    "title": "The Death of Monthly SaaS (AI Developers & LangChain)",
+    "dispatched_at": "2026-10-26T12:45:40.390134+00:00",
+    "image_path": "/builds/apayprotocol/a_pay/scripts/assets/rendered_posts/post_06.png",
+    "results": {
+      "facebook": {
+        "success": true,
+        "post_id": "1356833567513986_122112848331502911",
+        "photo_id": "122112848307502911",
+        "url": "https://www.facebook.com/1356833567513986_122112848331502911"
+      },
+      "instagram": {
+        "success": true,
+        "media_id": "18168679666487433",
+        "url": "https://www.instagram.com/p/De9UDFKIOQn/"
+      },
+      "linkedin": {
+        "success": true,
+        "post_urn": "urn:li:share:7520465661601550337",
+        "url": "https://www.linkedin.com/feed/update/urn:li:share:7520465661601550337/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 39,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/39"
+      }
+    }
   }
 ]
