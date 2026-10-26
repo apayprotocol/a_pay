@@ -58,5 +58,34 @@
         "url": "https://t.me/apay_protocol/34"
       }
     }
+  },
+  {
+    "index": 3,
+    "title": "Claude Desktop MCP Monetization (AI Developers)",
+    "dispatched_at": "2026-10-26T02:49:07.003786+00:00",
+    "image_path": "/builds/apayprotocol/a_pay/scripts/assets/rendered_posts/post_03.png",
+    "results": {
+      "facebook": {
+        "success": true,
+        "post_id": "1356833567513986_122112678525502911",
+        "photo_id": "122112678507502911",
+        "url": "https://www.facebook.com/1356833567513986_122112678525502911"
+      },
+      "instagram": {
+        "success": false,
+        "error": "HTTP Error 500: Internal Server Error"
+      },
+      "linkedin": {
+        "success": true,
+        "post_urn": "urn:li:share:7520315536514396160",
+        "url": "https://www.linkedin.com/feed/update/urn:li:share:7520315536514396160/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 35,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/35"
+      }
+    }
   }
 ]
