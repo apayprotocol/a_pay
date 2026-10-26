@@ -117,5 +117,35 @@
         "url": "https://t.me/apay_protocol/37"
       }
     }
+  },
+  {
+    "index": 5,
+    "title": "AI Builders & Tech Creators Collab (Partnerships)",
+    "dispatched_at": "2026-10-26T09:36:20.230915+00:00",
+    "image_path": "/builds/apayprotocol/a_pay/scripts/assets/rendered_posts/post_05.png",
+    "results": {
+      "facebook": {
+        "success": true,
+        "post_id": "1356833567513986_122112793173502911",
+        "photo_id": "122112793155502911",
+        "url": "https://www.facebook.com/1356833567513986_122112793173502911"
+      },
+      "instagram": {
+        "success": true,
+        "media_id": "18031901222683217",
+        "url": "https://www.instagram.com/p/De8-Yl3oIDy/"
+      },
+      "linkedin": {
+        "success": true,
+        "post_urn": "urn:li:share:7520418015679578113",
+        "url": "https://www.linkedin.com/feed/update/urn:li:share:7520418015679578113/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 38,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/38"
+      }
+    }
   }
 ]
