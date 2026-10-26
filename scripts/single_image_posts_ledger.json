@@ -177,5 +177,35 @@
         "url": "https://t.me/apay_protocol/39"
       }
     }
+  },
+  {
+    "index": 7,
+    "title": "The 33-Year Internet Mystery (HTTP 402 History & Architecture)",
+    "dispatched_at": "2026-10-26T16:36:07.943038+00:00",
+    "image_path": "/builds/apayprotocol/a_pay/scripts/assets/rendered_posts/post_07.png",
+    "results": {
+      "facebook": {
+        "success": true,
+        "post_id": "1356833567513986_122112934041502911",
+        "photo_id": "122112934011502911",
+        "url": "https://www.facebook.com/1356833567513986_122112934041502911"
+      },
+      "instagram": {
+        "success": true,
+        "media_id": "18075573932738648",
+        "url": "https://www.instagram.com/p/De9ubN7IJ4G/"
+      },
+      "linkedin": {
+        "success": true,
+        "post_urn": "urn:li:share:7520523661246763008",
+        "url": "https://www.linkedin.com/feed/update/urn:li:share:7520523661246763008/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 40,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/40"
+      }
+    }
   }
 ]
