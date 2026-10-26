@@ -87,5 +87,35 @@
         "url": "https://t.me/apay_protocol/35"
       }
     }
+  },
+  {
+    "index": 4,
+    "title": "The $1T Machine Economy & $APAY Tokenomics (Investors)",
+    "dispatched_at": "2026-10-26T05:36:03.312964+00:00",
+    "image_path": "/builds/apayprotocol/a_pay/scripts/assets/rendered_posts/post_04.png",
+    "results": {
+      "facebook": {
+        "success": true,
+        "post_id": "1356833567513986_122112733029502911",
+        "photo_id": "122112733005502911",
+        "url": "https://www.facebook.com/1356833567513986_122112733029502911"
+      },
+      "instagram": {
+        "success": true,
+        "media_id": "17897357583415262",
+        "url": "https://www.instagram.com/p/De8i4o_HBVY/"
+      },
+      "linkedin": {
+        "success": true,
+        "post_urn": "urn:li:share:7520357546487037953",
+        "url": "https://www.linkedin.com/feed/update/urn:li:share:7520357546487037953/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 37,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/37"
+      }
+    }
   }
 ]
