@@ -415,5 +415,35 @@
         "url": "https://t.me/apay_protocol/46"
       }
     }
+  },
+  {
+    "index": 15,
+    "title": "Verified Open-Source & Developer Grants (GitHub Bounties)",
+    "dispatched_at": "2026-10-27T20:36:05.579594+00:00",
+    "image_path": "/builds/apayprotocol/a_pay/scripts/assets/rendered_posts/post_15.png",
+    "results": {
+      "facebook": {
+        "success": true,
+        "post_id": "1356833567513986_122113382985502911",
+        "photo_id": "122113382967502911",
+        "url": "https://www.facebook.com/1356833567513986_122113382985502911"
+      },
+      "instagram": {
+        "success": true,
+        "media_id": "18035714849665913",
+        "url": "https://www.instagram.com/p/DfAurguDRhL/"
+      },
+      "linkedin": {
+        "success": true,
+        "post_urn": "urn:li:share:7520946436017025025",
+        "url": "https://www.linkedin.com/feed/update/urn:li:share:7520946436017025025/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 47,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/47"
+      }
+    }
   }
 ]
