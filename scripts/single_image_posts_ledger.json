@@ -267,5 +267,33 @@
         "url": "https://t.me/apay_protocol/42"
       }
     }
+  },
+  {
+    "index": 10,
+    "title": "Launch a Monetized AI Agent API in 60s (Dev Collabs & Bounties)",
+    "dispatched_at": "2026-10-27T02:36:03.669674+00:00",
+    "image_path": "/builds/apayprotocol/a_pay/scripts/assets/rendered_posts/post_10.png",
+    "results": {
+      "facebook": {
+        "success": true,
+        "post_id": "1356833567513986_122113077489502911",
+        "photo_id": "122113077453502911",
+        "url": "https://www.facebook.com/1356833567513986_122113077489502911"
+      },
+      "instagram": {
+        "success": true,
+        "media_id": "18147743017602758",
+        "url": "https://www.instagram.com/p/De-zFblDrG7/"
+      },
+      "linkedin": {
+        "success": true,
+        "post_urn": "urn:li:share:7520674646082469888",
+        "url": "https://www.linkedin.com/feed/update/urn:li:share:7520674646082469888/"
+      },
+      "telegram": {
+        "success": false,
+        "error": "<urlopen error [Errno 104] Connection reset by peer>"
+      }
+    }
   }
 ]
