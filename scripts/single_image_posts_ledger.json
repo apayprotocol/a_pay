@@ -385,5 +385,35 @@
         "url": "https://t.me/apay_protocol/45"
       }
     }
+  },
+  {
+    "index": 14,
+    "title": "Why Pure Utility Beats Speculation ($APAY on Aerodrome)",
+    "dispatched_at": "2026-10-27T16:35:55.307559+00:00",
+    "image_path": "/builds/apayprotocol/a_pay/scripts/assets/rendered_posts/post_14.png",
+    "results": {
+      "facebook": {
+        "success": true,
+        "post_id": "1356833567513986_122113320813502911",
+        "photo_id": "122113320777502911",
+        "url": "https://www.facebook.com/1356833567513986_122113320813502911"
+      },
+      "instagram": {
+        "success": true,
+        "media_id": "17908888650333357",
+        "url": "https://www.instagram.com/p/DfATMbUCf1_/"
+      },
+      "linkedin": {
+        "success": true,
+        "post_urn": "urn:li:share:7520885992342347776",
+        "url": "https://www.linkedin.com/feed/update/urn:li:share:7520885992342347776/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 46,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/46"
+      }
+    }
   }
 ]
