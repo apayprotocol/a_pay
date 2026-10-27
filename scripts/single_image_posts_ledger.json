@@ -445,5 +445,35 @@
         "url": "https://t.me/apay_protocol/47"
       }
     }
+  },
+  {
+    "index": 16,
+    "title": "Turn Telegram into an AI Agent Command Center (TMA)",
+    "dispatched_at": "2026-10-27T23:36:06.998139+00:00",
+    "image_path": "/builds/apayprotocol/a_pay/scripts/assets/rendered_posts/post_16.png",
+    "results": {
+      "facebook": {
+        "success": true,
+        "post_id": "1356833567513986_122113423137502911",
+        "photo_id": "122113423107502911",
+        "url": "https://www.facebook.com/1356833567513986_122113423137502911"
+      },
+      "instagram": {
+        "success": true,
+        "media_id": "18112664414612274",
+        "url": "https://www.instagram.com/p/DfBDSC8m2kp/"
+      },
+      "linkedin": {
+        "success": true,
+        "post_urn": "urn:li:share:7520991741433462784",
+        "url": "https://www.linkedin.com/feed/update/urn:li:share:7520991741433462784/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 48,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/48"
+      }
+    }
   }
 ]
