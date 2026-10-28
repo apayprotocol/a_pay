@@ -535,5 +535,35 @@
         "url": "https://t.me/apay_protocol/50"
       }
     }
+  },
+  {
+    "index": 19,
+    "title": "Sell Digital Downloads via WooCommerce on Base L2",
+    "dispatched_at": "2026-10-28T10:36:11.840865+00:00",
+    "image_path": "/builds/apayprotocol/a_pay/scripts/assets/rendered_posts/post_19.png",
+    "results": {
+      "facebook": {
+        "success": true,
+        "post_id": "1356833567513986_122113582461502911",
+        "photo_id": "122113582443502911",
+        "url": "https://www.facebook.com/1356833567513986_122113582461502911"
+      },
+      "instagram": {
+        "success": true,
+        "media_id": "17966586035982659",
+        "url": "https://www.instagram.com/p/DfCO0yHjkOW/"
+      },
+      "linkedin": {
+        "success": true,
+        "post_urn": "urn:li:share:7521157857170501632",
+        "url": "https://www.linkedin.com/feed/update/urn:li:share:7521157857170501632/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 51,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/51"
+      }
+    }
   }
 ]
