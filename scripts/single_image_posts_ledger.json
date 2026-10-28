@@ -565,5 +565,35 @@
         "url": "https://t.me/apay_protocol/51"
       }
     }
+  },
+  {
+    "index": 20,
+    "title": "Join 500+ Engineers Building the M2M Economy (Bounties)",
+    "dispatched_at": "2026-10-28T13:38:18.215118+00:00",
+    "image_path": "/builds/apayprotocol/a_pay/scripts/assets/rendered_posts/post_20.png",
+    "results": {
+      "facebook": {
+        "success": true,
+        "post_id": "1356833567513986_122113636701502911",
+        "photo_id": "122113636683502911",
+        "url": "https://www.facebook.com/1356833567513986_122113636701502911"
+      },
+      "instagram": {
+        "success": true,
+        "media_id": "18075940667727521",
+        "url": "https://www.instagram.com/p/DfCjqQkj0j_/"
+      },
+      "linkedin": {
+        "success": true,
+        "post_urn": "urn:li:share:7521203682273591296",
+        "url": "https://www.linkedin.com/feed/update/urn:li:share:7521203682273591296/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 52,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/52"
+      }
+    }
   }
 ]
