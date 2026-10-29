@@ -685,5 +685,35 @@
         "url": "https://t.me/apay_protocol/55"
       }
     }
+  },
+  {
+    "index": 24,
+    "title": "Protect Expensive ML Endpoints from Scraping in 1 Line",
+    "dispatched_at": "2026-10-29T03:36:02.970870+00:00",
+    "image_path": "/builds/apayprotocol/a_pay/scripts/assets/rendered_posts/post_24.png",
+    "results": {
+      "facebook": {
+        "success": true,
+        "post_id": "1356833567513986_122113847493502911",
+        "photo_id": "122113847475502911",
+        "url": "https://www.facebook.com/1356833567513986_122113847493502911"
+      },
+      "instagram": {
+        "success": true,
+        "media_id": "18123860566900510",
+        "url": "https://www.instagram.com/p/DfEDicEHJga/"
+      },
+      "linkedin": {
+        "success": true,
+        "post_urn": "urn:li:share:7521414510981664768",
+        "url": "https://www.linkedin.com/feed/update/urn:li:share:7521414510981664768/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 56,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/56"
+      }
+    }
   }
 ]
