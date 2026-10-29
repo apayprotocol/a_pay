@@ -775,5 +775,35 @@
         "url": "https://t.me/apay_protocol/58"
       }
     }
+  },
+  {
+    "index": 27,
+    "title": "Why Static API Keys Are Dead for Autonomous AI Agents",
+    "dispatched_at": "2026-10-29T17:36:07.969334+00:00",
+    "image_path": "/builds/apayprotocol/a_pay/scripts/assets/rendered_posts/post_27.png",
+    "results": {
+      "facebook": {
+        "success": true,
+        "post_id": "1356833567513986_122114089203502911",
+        "photo_id": "122114089185502911",
+        "url": "https://www.facebook.com/1356833567513986_122114089203502911"
+      },
+      "instagram": {
+        "success": true,
+        "media_id": "18191628148407061",
+        "url": "https://www.instagram.com/p/DfFjrQdDhmA/"
+      },
+      "linkedin": {
+        "success": true,
+        "post_urn": "urn:li:share:7521625923662577664",
+        "url": "https://www.linkedin.com/feed/update/urn:li:share:7521625923662577664/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 59,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/59"
+      }
+    }
   }
 ]
