@@ -745,5 +745,35 @@
         "url": "https://t.me/apay_protocol/57"
       }
     }
+  },
+  {
+    "index": 26,
+    "title": "The 100ms HTTP 402 Handshake: How AI Agents Pay for APIs in Real-Time",
+    "dispatched_at": "2026-10-29T12:36:12.895986+00:00",
+    "image_path": "/builds/apayprotocol/a_pay/scripts/assets/rendered_posts/post_26.png",
+    "results": {
+      "facebook": {
+        "success": true,
+        "post_id": "1356833567513986_122113995117502911",
+        "photo_id": "122113995099502911",
+        "url": "https://www.facebook.com/1356833567513986_122113995117502911"
+      },
+      "instagram": {
+        "success": true,
+        "media_id": "18130002589868469",
+        "url": "https://www.instagram.com/p/DfFBWDrDsHm/"
+      },
+      "linkedin": {
+        "success": true,
+        "post_urn": "urn:li:share:7521550443160936449",
+        "url": "https://www.linkedin.com/feed/update/urn:li:share:7521550443160936449/"
+      },
+      "telegram": {
+        "success": true,
+        "message_id": 58,
+        "channel": "@apay_protocol",
+        "url": "https://t.me/apay_protocol/58"
+      }
+    }
   }
 ]
