@@ -4,6 +4,25 @@
     "version": "0.1.11",
     "description": "Universal Micropayment & Autonomous Economic Settlement Engine for AI Agents on Base L2."
   },
+  "protocolVersion": "2024-11-05",
+  "capabilities": {
+    "tools": {},
+    "extensions": [
+      {
+        "uri": "https://sealkeeper.run/ext/seal/v1",
+        "description": "SealKeeper SEAL, Signed Evidence of Agent Legitimacy. GET params.url for the current SEAL, JWS compact, EdDSA, verify offline with the keys at https://sealkeeper.run/.well-known/seal.json",
+        "params": {
+          "url": "https://api.sealkeeper.run/v1/agents/V5lJJJTqp19SyP1l0D5tLusQdPdEGrxBrK0WwKRd3Ic/seal"
+        }
+      },
+      {
+        "uri": "https://sealkeeper.run/ext/claim",
+        "params": {
+          "token": "UBy1_qatm4HmUd_krlrLaPTqBwkj5amwEWskfyq-hRs"
+        }
+      }
+    ]
+  },
   "authentication": {
     "required": false
   },

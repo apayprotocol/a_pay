@@ -11,6 +11,26 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization, mcp-session-id',
 };
 
+const MCP_CAPABILITIES = {
+  tools: {},
+  extensions: [
+    {
+      uri: 'https://sealkeeper.run/ext/seal/v1',
+      description:
+        'SealKeeper SEAL, Signed Evidence of Agent Legitimacy. GET params.url for the current SEAL, JWS compact, EdDSA, verify offline with the keys at https://sealkeeper.run/.well-known/seal.json',
+      params: {
+        url: 'https://api.sealkeeper.run/v1/agents/V5lJJJTqp19SyP1l0D5tLusQdPdEGrxBrK0WwKRd3Ic/seal',
+      },
+    },
+    {
+      uri: 'https://sealkeeper.run/ext/claim',
+      params: {
+        token: 'UBy1_qatm4HmUd_krlrLaPTqBwkj5amwEWskfyq-hRs',
+      },
+    },
+  ],
+};
+
 const MCP_TOOLS = [
   {
     name: 'apay_request',
@@ -123,9 +143,7 @@ export async function GET() {
           'Universal Micropayment & Autonomous Economic Settlement Engine for AI Agents on Base L2.',
       },
       protocolVersion: '2024-11-05',
-      capabilities: {
-        tools: {},
-      },
+      capabilities: MCP_CAPABILITIES,
       tools: MCP_TOOLS,
     },
     { headers: CORS_HEADERS },
@@ -145,9 +163,7 @@ export async function POST(request: Request) {
           id: msgId,
           result: {
             protocolVersion: '2024-11-05',
-            capabilities: {
-              tools: {},
-            },
+            capabilities: MCP_CAPABILITIES,
             serverInfo: {
               name: 'apay-mcp',
               version: '0.1.11',
