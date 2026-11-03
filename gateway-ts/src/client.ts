@@ -123,15 +123,94 @@ export class AgentWalletTS {
 
 export interface APayClientOptions {
   preferredCurrency?: 'USDC' | 'APAY';
+  verifySellerSeal?: boolean;
+}
+
+export interface SellerSealCheckResult {
+  verified: boolean;
+  proven: boolean;
+  handle?: string;
+  seal?: string;
+  reason?: string;
+}
+
+/**
+ * Checks if a seller's payment receiver wallet has a verified SealKeeper SEAL.
+ * Validates whether the wallet is proven ('wallet.proven === true').
+ */
+export async function checkSellerSeal(
+  payToWallet: string,
+  network: string = 'eip155:8453',
+  timeoutMs: number = 3000
+): Promise<SellerSealCheckResult> {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const url = `https://api.sealkeeper.run/v1/services/seal?pay_to=${encodeURIComponent(
+      payToWallet
+    )}&network=${encodeURIComponent(network)}`;
+    const res = await fetch(url, {
+      headers: { Accept: 'application/json' },
+      signal: controller.signal,
+    });
+
+    if (res.status === 404) {
+      return { verified: false, proven: false, reason: 'Seller not listed on SealKeeper' };
+    }
+
+    if (!res.ok) {
+      return { verified: false, proven: false, reason: `SealKeeper HTTP ${res.status}` };
+    }
+
+    const data = (await res.json()) as {
+      services?: Array<{
+        handle?: string;
+        seal?: string;
+        wallet?: {
+          proven?: boolean;
+          changes_30d?: number;
+          last_change_at?: string | null;
+          last_change_confirmed?: boolean | null;
+        };
+      }>;
+    };
+
+    const services = data.services || [];
+    if (services.length === 0) {
+      return { verified: false, proven: false, reason: 'No matching service found' };
+    }
+
+    const service = services[0];
+    const isProven = service.wallet?.proven === true;
+
+    return {
+      verified: true,
+      proven: isProven,
+      handle: service.handle,
+      seal: service.seal,
+      reason: isProven ? undefined : 'Seller wallet has not proven ownership (wallet.proven is false)',
+    };
+  } catch (err: any) {
+    return {
+      verified: false,
+      proven: false,
+      reason: err?.message || 'SealKeeper check timeout or connection failure',
+    };
+  } finally {
+    clearTimeout(id);
+  }
 }
 
 export class APayClientTS {
   public wallet: AgentWalletTS;
   public preferredCurrency: 'USDC' | 'APAY';
+  public verifySellerSeal: boolean;
 
   constructor(wallet: AgentWalletTS, options: APayClientOptions = {}) {
     this.wallet = wallet;
     this.preferredCurrency = options.preferredCurrency ?? 'USDC';
+    this.verifySellerSeal = options.verifySellerSeal ?? false;
   }
 
   /**
@@ -161,6 +240,17 @@ export class APayClientTS {
     if (!receiver || !nonce) {
       // Incomplete challenge headers, return 402 as is
       return originalResponse;
+    }
+
+    if (this.verifySellerSeal) {
+      const sealCheck = await checkSellerSeal(receiver, `eip155:${chainId}`);
+      if (!sealCheck.proven) {
+        throw new Error(
+          `[A-Pay SealKeeper Guardrail] Payment blocked: seller wallet ${receiver} is not proven on SealKeeper (${
+            sealCheck.reason || 'unproven wallet'
+          })`
+        );
+      }
     }
 
     let selectedCurrency: 'USDC' | 'APAY' = 'USDC';

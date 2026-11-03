@@ -1,5 +1,6 @@
 """Async & Sync HTTP Clients with Automatic HTTP 402 Micropayment Negotiation."""
 
+import urllib.parse
 from typing import Any
 
 import httpx
@@ -7,13 +8,94 @@ import httpx
 from .wallet import DEFAULT_CHAIN_ID, DEFAULT_ROUTER_ADDRESS, AgentWallet
 
 
+def check_seller_seal(
+    pay_to_wallet: str,
+    network: str = "eip155:8453",
+    timeout: float = 3.0,
+) -> dict[str, Any]:
+    """Inspect SealKeeper API to verify if seller wallet is proven."""
+    url = (
+        f"https://api.sealkeeper.run/v1/services/seal"
+        f"?pay_to={urllib.parse.quote(pay_to_wallet)}"
+        f"&network={urllib.parse.quote(network)}"
+    )
+    try:
+        with httpx.Client(timeout=timeout) as client:
+            res = client.get(url, headers={"Accept": "application/json"})
+            if res.status_code == 404:
+                return {"verified": False, "proven": False, "reason": "Seller not listed on SealKeeper"}
+            if not res.is_success:
+                return {"verified": False, "proven": False, "reason": f"SealKeeper HTTP {res.status_code}"}
+            data = res.json()
+            services = data.get("services", [])
+            if not services:
+                return {"verified": False, "proven": False, "reason": "No matching service found"}
+            service = services[0]
+            is_proven = bool(service.get("wallet", {}).get("proven") is True)
+            return {
+                "verified": True,
+                "proven": is_proven,
+                "handle": service.get("handle"),
+                "seal": service.get("seal"),
+                "reason": None
+                if is_proven
+                else "Seller wallet has not proven ownership (wallet.proven is false)",
+            }
+    except Exception as exc:
+        return {"verified": False, "proven": False, "reason": str(exc)}
+
+
+async def acheck_seller_seal(
+    pay_to_wallet: str,
+    network: str = "eip155:8453",
+    timeout: float = 3.0,
+) -> dict[str, Any]:
+    """Inspect SealKeeper API asynchronously to verify if seller wallet is proven."""
+    url = (
+        f"https://api.sealkeeper.run/v1/services/seal"
+        f"?pay_to={urllib.parse.quote(pay_to_wallet)}"
+        f"&network={urllib.parse.quote(network)}"
+    )
+    try:
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            res = await client.get(url, headers={"Accept": "application/json"})
+            if res.status_code == 404:
+                return {"verified": False, "proven": False, "reason": "Seller not listed on SealKeeper"}
+            if not res.is_success:
+                return {"verified": False, "proven": False, "reason": f"SealKeeper HTTP {res.status_code}"}
+            data = res.json()
+            services = data.get("services", [])
+            if not services:
+                return {"verified": False, "proven": False, "reason": "No matching service found"}
+            service = services[0]
+            is_proven = bool(service.get("wallet", {}).get("proven") is True)
+            return {
+                "verified": True,
+                "proven": is_proven,
+                "handle": service.get("handle"),
+                "seal": service.get("seal"),
+                "reason": None
+                if is_proven
+                else "Seller wallet has not proven ownership (wallet.proven is false)",
+            }
+    except Exception as exc:
+        return {"verified": False, "proven": False, "reason": str(exc)}
+
+
 class APayClient:
     """Asynchronous HTTP Client for AI Agents with auto-settling 402 handling."""
 
-    def __init__(self, wallet: AgentWallet, timeout: float = 30.0, use_eip712: bool = True) -> None:
+    def __init__(
+        self,
+        wallet: AgentWallet,
+        timeout: float = 30.0,
+        use_eip712: bool = True,
+        verify_seller_seal: bool = False,
+    ) -> None:
         self.wallet = wallet
         self.client = httpx.AsyncClient(timeout=timeout)
         self.use_eip712 = use_eip712
+        self.verify_seller_seal = verify_seller_seal
 
     async def get(self, url: str, **kwargs: Any) -> httpx.Response:
         return await self._request("GET", url, **kwargs)
@@ -94,6 +176,14 @@ class APayClient:
         chain_id = int(headers.get("X-APay-Chain-Id", str(DEFAULT_CHAIN_ID)))
         router = headers.get("X-APay-Router", DEFAULT_ROUTER_ADDRESS)
 
+        if self.verify_seller_seal:
+            seal_res = await acheck_seller_seal(receiver, network=f"eip155:{chain_id}")
+            if not seal_res.get("proven"):
+                reason = seal_res.get("reason") or "wallet.proven is false"
+                raise PermissionError(
+                    f"[A-Pay SealKeeper Guardrail] Payment blocked: seller wallet {receiver} is not proven on SealKeeper ({reason})"
+                )
+
         if self.use_eip712 and scheme == "eip712":
             signature = self.wallet.sign_typed_payment(
                 receiver=receiver,
@@ -122,10 +212,17 @@ class APayClient:
 class APaySession:
     """Synchronous HTTP Session for simple Python scripts, LangChain, and CrewAI."""
 
-    def __init__(self, wallet: AgentWallet, timeout: float = 30.0, use_eip712: bool = True) -> None:
+    def __init__(
+        self,
+        wallet: AgentWallet,
+        timeout: float = 30.0,
+        use_eip712: bool = True,
+        verify_seller_seal: bool = False,
+    ) -> None:
         self.wallet = wallet
         self.client = httpx.Client(timeout=timeout)
         self.use_eip712 = use_eip712
+        self.verify_seller_seal = verify_seller_seal
 
     def get(self, url: str, **kwargs: Any) -> httpx.Response:
         return self._request("GET", url, **kwargs)
@@ -195,6 +292,14 @@ class APaySession:
             scheme = headers.get("X-APay-Scheme", "eip712" if self.use_eip712 else "legacy")
             chain_id = int(headers.get("X-APay-Chain-Id", str(DEFAULT_CHAIN_ID)))
             router = headers.get("X-APay-Router", DEFAULT_ROUTER_ADDRESS)
+
+            if self.verify_seller_seal:
+                seal_res = check_seller_seal(receiver, network=f"eip155:{chain_id}")
+                if not seal_res.get("proven"):
+                    reason = seal_res.get("reason") or "wallet.proven is false"
+                    raise PermissionError(
+                        f"[A-Pay SealKeeper Guardrail] Payment blocked: seller wallet {receiver} is not proven on SealKeeper ({reason})"
+                    )
 
             if self.use_eip712 and scheme == "eip712":
                 signature = self.wallet.sign_typed_payment(

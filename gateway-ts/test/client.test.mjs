@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { AgentWalletTS, APayClientTS, fetchWithAPay, discoverServices } from '../dist/client.js';
+import { AgentWalletTS, APayClientTS, fetchWithAPay, discoverServices, checkSellerSeal } from '../dist/client.js';
 
 test('AgentWalletTS generates valid non-custodial address and enforces guardrails', () => {
   const wallet = AgentWalletTS.create({
@@ -170,6 +170,165 @@ test('discoverServices queries public registry endpoint and returns service arra
     assert.equal(services.length, 1);
     assert.equal(services[0].targetDomain, 'https://api.alpha.network');
     assert.equal(services[0].price, '0.001 USDC');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('checkSellerSeal correctly inspects SealKeeper API for wallet.proven', async () => {
+  const originalFetch = globalThis.fetch;
+
+  // Case 1: Proven seller
+  globalThis.fetch = async (url) => {
+    assert.ok(url.includes('api.sealkeeper.run/v1/services/seal'));
+    return new Response(
+      JSON.stringify({
+        services: [
+          {
+            handle: 'alpha-api',
+            seal: 'valid-seal-token',
+            wallet: {
+              proven: true,
+              changes_30d: 0,
+            },
+          },
+        ],
+      }),
+      { status: 200 }
+    );
+  };
+
+  try {
+    const res = await checkSellerSeal('0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc');
+    assert.equal(res.verified, true);
+    assert.equal(res.proven, true);
+    assert.equal(res.handle, 'alpha-api');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+
+  // Case 2: Unproven seller
+  globalThis.fetch = async () => {
+    return new Response(
+      JSON.stringify({
+        services: [
+          {
+            handle: 'unproven-api',
+            wallet: {
+              proven: false,
+            },
+          },
+        ],
+      }),
+      { status: 200 }
+    );
+  };
+
+  try {
+    const res = await checkSellerSeal('0x1111111111111111111111111111111111111111');
+    assert.equal(res.verified, true);
+    assert.equal(res.proven, false);
+    assert.match(res.reason, /wallet\.proven is false/);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('APayClientTS with verifySellerSeal blocks payment when seller is unproven', async () => {
+  const wallet = AgentWalletTS.create({ maxPerCallUsdc: 0.05 });
+
+  const mockFetch = async (input) => {
+    const urlStr = input.toString();
+    if (urlStr.includes('api.sealkeeper.run')) {
+      return new Response(
+        JSON.stringify({
+          services: [
+            {
+              handle: 'unproven-api',
+              wallet: { proven: false },
+            },
+          ],
+        }),
+        { status: 200 }
+      );
+    }
+
+    return new Response(JSON.stringify({ error: 'Payment Required' }), {
+      status: 402,
+      headers: {
+        'X-APay-Receiver': '0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc',
+        'X-APay-Nonce': 'mock-seal-nonce',
+        'X-APay-Currency': 'USDC',
+        'X-APay-Amount': '1000',
+        'X-APay-Chain-Id': '8453',
+      },
+    });
+  };
+
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = mockFetch;
+
+  try {
+    const client = new APayClientTS(wallet, { verifySellerSeal: true });
+    await assert.rejects(
+      async () => {
+        await client.fetch('https://api.suspect.com/data');
+      },
+      /\[A-Pay SealKeeper Guardrail\] Payment blocked: seller wallet.*is not proven on SealKeeper/
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('APayClientTS with verifySellerSeal allows payment when seller is proven on SealKeeper', async () => {
+  const wallet = AgentWalletTS.create({ maxPerCallUsdc: 0.05 });
+
+  let calls = 0;
+  const mockFetch = async (input) => {
+    const urlStr = input.toString();
+    if (urlStr.includes('api.sealkeeper.run')) {
+      return new Response(
+        JSON.stringify({
+          services: [
+            {
+              handle: 'verified-api',
+              wallet: { proven: true },
+            },
+          ],
+        }),
+        { status: 200 }
+      );
+    }
+
+    calls++;
+    if (calls === 1) {
+      return new Response(JSON.stringify({ error: 'Payment Required' }), {
+        status: 402,
+        headers: {
+          'X-APay-Receiver': '0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc',
+          'X-APay-Nonce': 'mock-proven-nonce',
+          'X-APay-Currency': 'USDC',
+          'X-APay-Amount': '1000',
+          'X-APay-Chain-Id': '8453',
+        },
+      });
+    }
+
+    return new Response(JSON.stringify({ data: 'SECURE_DATA_RECEIVED' }), {
+      status: 200,
+    });
+  };
+
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = mockFetch;
+
+  try {
+    const client = new APayClientTS(wallet, { verifySellerSeal: true });
+    const res = await client.fetch('https://api.verified.com/data');
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(body.data, 'SECURE_DATA_RECEIVED');
   } finally {
     globalThis.fetch = originalFetch;
   }

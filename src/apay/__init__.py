@@ -9,7 +9,7 @@ __version__ = "0.1.11"
 
 from .burn_engine import AerodromeRoute, BurnEngine, DexSwapParams
 from .channel import ChannelPayerSession, ChannelReceiverValidator, ChannelVoucher
-from .client import APayClient, APaySession
+from .client import APayClient, APaySession, acheck_seller_seal, check_seller_seal
 from .discovery import discover_services
 from .escrow import (
     AgentSessionAuth,
@@ -87,6 +87,8 @@ __all__ = [
     "DEFAULT_ROUTER_ADDRESS",
     "DailyLimitExceededError",
     "DexSwapParams",
+    "acheck_seller_seal",
+    "check_seller_seal",
     "discover_services",
     "EscrowSolvencyValidator",
     "EscrowVaultClient",
