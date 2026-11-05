@@ -19,7 +19,7 @@ const MCP_CAPABILITIES = {
       description:
         'SealKeeper SEAL, Signed Evidence of Agent Legitimacy. GET params.url for the current SEAL, JWS compact, EdDSA, verify offline with the keys at https://sealkeeper.run/.well-known/seal.json',
       params: {
-        url: 'https://api.sealkeeper.run/v1/agents/V5lJJJTqp19SyP1l0D5tLusQdPdEGrxBrK0WwKRd3Ic/seal',
+        url: 'https://api.sealkeeper.run/v1/agents/V5lJJJTqp19SyP11OD5tLusQdPdEGrxBrK0WwKRd3Ic/seal',
       },
     },
     {
@@ -138,7 +138,7 @@ export async function GET() {
     {
       serverInfo: {
         name: 'apay-mcp',
-        version: '0.1.12',
+        version: '0.1.13',
         description:
           'Universal Micropayment & Autonomous Economic Settlement Engine for AI Agents on Base L2.',
       },
@@ -166,7 +166,7 @@ export async function POST(request: Request) {
             capabilities: MCP_CAPABILITIES,
             serverInfo: {
               name: 'apay-mcp',
-              version: '0.1.12',
+              version: '0.1.13',
             },
           },
         },

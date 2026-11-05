@@ -11,9 +11,9 @@ from .wallet import DEFAULT_CHAIN_ID, DEFAULT_ROUTER_ADDRESS, AgentWallet
 def check_seller_seal(
     pay_to_wallet: str,
     network: str = "eip155:8453",
-    timeout: float = 3.0,
+    timeout: float = 4.0,
 ) -> dict[str, Any]:
-    """Inspect SealKeeper API to verify if seller wallet is proven."""
+    """Inspect SealKeeper API to verify seller SEAL signature and wallet.proven."""
     url = (
         f"https://api.sealkeeper.run/v1/services/seal"
         f"?pay_to={urllib.parse.quote(pay_to_wallet)}"
@@ -31,15 +31,85 @@ def check_seller_seal(
             if not services:
                 return {"verified": False, "proven": False, "reason": "No matching service found"}
             service = services[0]
-            is_proven = bool(service.get("wallet", {}).get("proven") is True)
+            seal = service.get("seal") or service.get("credential")
+            if not seal:
+                err_code = service.get("error", {}).get("code", "no_seal")
+                return {
+                    "verified": False,
+                    "proven": False,
+                    "handle": service.get("handle"),
+                    "reason": f"Service holds no valid SEAL ({err_code})",
+                }
+
+            # Step 4: Verify SEAL signature
+            verified_payload = service.get("payload")
+            try:
+                verify_res = client.post(
+                    "https://api.sealkeeper.run/v1/seal/verify",
+                    json={"seal": seal},
+                    headers={"Content-Type": "application/json", "Accept": "application/json"},
+                )
+                if verify_res.is_success:
+                    verify_data = verify_res.json()
+                    if not verify_data.get("valid"):
+                        return {
+                            "verified": False,
+                            "proven": False,
+                            "handle": service.get("handle"),
+                            "seal": seal,
+                            "reason": "SEAL signature verification failed (invalid signature)",
+                        }
+                    if verify_data.get("payload"):
+                        verified_payload = verify_data["payload"]
+                else:
+                    return {
+                        "verified": False,
+                        "proven": False,
+                        "handle": service.get("handle"),
+                        "seal": seal,
+                        "reason": f"SEAL signature verification failed (HTTP {verify_res.status_code})",
+                    }
+            except Exception as v_exc:
+                return {
+                    "verified": False,
+                    "proven": False,
+                    "handle": service.get("handle"),
+                    "seal": seal,
+                    "reason": f"SEAL verification error: {v_exc}",
+                }
+
+            # Step 4 cont.: Check that subject.kind is 'service'
+            subject = verified_payload.get("subject", {}) if verified_payload else {}
+            if subject.get("kind") != "service":
+                return {
+                    "verified": True,
+                    "proven": False,
+                    "handle": service.get("handle"),
+                    "seal": seal,
+                    "reason": f"SEAL subject is not a service (kind: {subject.get('kind')})",
+                }
+
+            # Step 5: Read the wallet from x402_check evidence
+            evidence = verified_payload.get("evidence", []) if verified_payload else []
+            x402_check = next((e for e in evidence if e.get("type") == "x402_check"), None)
+            if not x402_check:
+                return {
+                    "verified": True,
+                    "proven": False,
+                    "handle": service.get("handle"),
+                    "seal": seal,
+                    "reason": "No x402_check evidence found in service SEAL",
+                }
+
+            is_proven = bool(x402_check.get("wallet", {}).get("proven") is True)
             return {
                 "verified": True,
                 "proven": is_proven,
                 "handle": service.get("handle"),
-                "seal": service.get("seal"),
+                "seal": seal,
                 "reason": None
                 if is_proven
-                else "Seller wallet has not proven ownership (wallet.proven is false)",
+                else "Seller wallet has not proven ownership in SEAL (wallet.proven is false)",
             }
     except Exception as exc:
         return {"verified": False, "proven": False, "reason": str(exc)}
@@ -48,9 +118,9 @@ def check_seller_seal(
 async def acheck_seller_seal(
     pay_to_wallet: str,
     network: str = "eip155:8453",
-    timeout: float = 3.0,
+    timeout: float = 4.0,
 ) -> dict[str, Any]:
-    """Inspect SealKeeper API asynchronously to verify if seller wallet is proven."""
+    """Inspect SealKeeper API asynchronously to verify seller SEAL signature and wallet.proven."""
     url = (
         f"https://api.sealkeeper.run/v1/services/seal"
         f"?pay_to={urllib.parse.quote(pay_to_wallet)}"
@@ -68,15 +138,85 @@ async def acheck_seller_seal(
             if not services:
                 return {"verified": False, "proven": False, "reason": "No matching service found"}
             service = services[0]
-            is_proven = bool(service.get("wallet", {}).get("proven") is True)
+            seal = service.get("seal") or service.get("credential")
+            if not seal:
+                err_code = service.get("error", {}).get("code", "no_seal")
+                return {
+                    "verified": False,
+                    "proven": False,
+                    "handle": service.get("handle"),
+                    "reason": f"Service holds no valid SEAL ({err_code})",
+                }
+
+            # Step 4: Verify SEAL signature
+            verified_payload = service.get("payload")
+            try:
+                verify_res = await client.post(
+                    "https://api.sealkeeper.run/v1/seal/verify",
+                    json={"seal": seal},
+                    headers={"Content-Type": "application/json", "Accept": "application/json"},
+                )
+                if verify_res.is_success:
+                    verify_data = verify_res.json()
+                    if not verify_data.get("valid"):
+                        return {
+                            "verified": False,
+                            "proven": False,
+                            "handle": service.get("handle"),
+                            "seal": seal,
+                            "reason": "SEAL signature verification failed (invalid signature)",
+                        }
+                    if verify_data.get("payload"):
+                        verified_payload = verify_data["payload"]
+                else:
+                    return {
+                        "verified": False,
+                        "proven": False,
+                        "handle": service.get("handle"),
+                        "seal": seal,
+                        "reason": f"SEAL signature verification failed (HTTP {verify_res.status_code})",
+                    }
+            except Exception as v_exc:
+                return {
+                    "verified": False,
+                    "proven": False,
+                    "handle": service.get("handle"),
+                    "seal": seal,
+                    "reason": f"SEAL verification error: {v_exc}",
+                }
+
+            # Step 4 cont.: Check that subject.kind is 'service'
+            subject = verified_payload.get("subject", {}) if verified_payload else {}
+            if subject.get("kind") != "service":
+                return {
+                    "verified": True,
+                    "proven": False,
+                    "handle": service.get("handle"),
+                    "seal": seal,
+                    "reason": f"SEAL subject is not a service (kind: {subject.get('kind')})",
+                }
+
+            # Step 5: Read the wallet from x402_check evidence
+            evidence = verified_payload.get("evidence", []) if verified_payload else []
+            x402_check = next((e for e in evidence if e.get("type") == "x402_check"), None)
+            if not x402_check:
+                return {
+                    "verified": True,
+                    "proven": False,
+                    "handle": service.get("handle"),
+                    "seal": seal,
+                    "reason": "No x402_check evidence found in service SEAL",
+                }
+
+            is_proven = bool(x402_check.get("wallet", {}).get("proven") is True)
             return {
                 "verified": True,
                 "proven": is_proven,
                 "handle": service.get("handle"),
-                "seal": service.get("seal"),
+                "seal": seal,
                 "reason": None
                 if is_proven
-                else "Seller wallet has not proven ownership (wallet.proven is false)",
+                else "Seller wallet has not proven ownership in SEAL (wallet.proven is false)",
             }
     except Exception as exc:
         return {"verified": False, "proven": False, "reason": str(exc)}

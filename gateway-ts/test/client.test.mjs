@@ -180,17 +180,26 @@ test('checkSellerSeal correctly inspects SealKeeper API for wallet.proven', asyn
 
   // Case 1: Proven seller
   globalThis.fetch = async (url) => {
-    assert.ok(url.includes('api.sealkeeper.run/v1/services/seal'));
+    const urlStr = url.toString();
+    if (urlStr.includes('seal/verify')) {
+      return new Response(
+        JSON.stringify({
+          valid: true,
+          payload: {
+            subject: { kind: 'service', interfaces: ['x402'] },
+            evidence: [{ type: 'x402_check', wallet: { proven: true, changes_30d: 0 } }],
+          },
+        }),
+        { status: 200 }
+      );
+    }
+    assert.ok(urlStr.includes('api.sealkeeper.run/v1/services/seal'));
     return new Response(
       JSON.stringify({
         services: [
           {
             handle: 'alpha-api',
             seal: 'valid-seal-token',
-            wallet: {
-              proven: true,
-              changes_30d: 0,
-            },
           },
         ],
       }),
@@ -208,15 +217,26 @@ test('checkSellerSeal correctly inspects SealKeeper API for wallet.proven', asyn
   }
 
   // Case 2: Unproven seller
-  globalThis.fetch = async () => {
+  globalThis.fetch = async (url) => {
+    const urlStr = url.toString();
+    if (urlStr.includes('seal/verify')) {
+      return new Response(
+        JSON.stringify({
+          valid: true,
+          payload: {
+            subject: { kind: 'service', interfaces: ['x402'] },
+            evidence: [{ type: 'x402_check', wallet: { proven: false } }],
+          },
+        }),
+        { status: 200 }
+      );
+    }
     return new Response(
       JSON.stringify({
         services: [
           {
             handle: 'unproven-api',
-            wallet: {
-              proven: false,
-            },
+            seal: 'unproven-seal-token',
           },
         ],
       }),
@@ -239,13 +259,25 @@ test('APayClientTS with verifySellerSeal blocks payment when seller is unproven'
 
   const mockFetch = async (input) => {
     const urlStr = input.toString();
+    if (urlStr.includes('seal/verify')) {
+      return new Response(
+        JSON.stringify({
+          valid: true,
+          payload: {
+            subject: { kind: 'service', interfaces: ['x402'] },
+            evidence: [{ type: 'x402_check', wallet: { proven: false } }],
+          },
+        }),
+        { status: 200 }
+      );
+    }
     if (urlStr.includes('api.sealkeeper.run')) {
       return new Response(
         JSON.stringify({
           services: [
             {
               handle: 'unproven-api',
-              wallet: { proven: false },
+              seal: 'unproven-seal-token',
             },
           ],
         }),
@@ -287,13 +319,25 @@ test('APayClientTS with verifySellerSeal allows payment when seller is proven on
   let calls = 0;
   const mockFetch = async (input) => {
     const urlStr = input.toString();
+    if (urlStr.includes('seal/verify')) {
+      return new Response(
+        JSON.stringify({
+          valid: true,
+          payload: {
+            subject: { kind: 'service', interfaces: ['x402'] },
+            evidence: [{ type: 'x402_check', wallet: { proven: true, changes_30d: 0 } }],
+          },
+        }),
+        { status: 200 }
+      );
+    }
     if (urlStr.includes('api.sealkeeper.run')) {
       return new Response(
         JSON.stringify({
           services: [
             {
               handle: 'verified-api',
-              wallet: { proven: true },
+              seal: 'verified-seal-token',
             },
           ],
         }),

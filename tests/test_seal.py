@@ -16,14 +16,33 @@ def test_check_seller_seal_sync_proven(monkeypatch):
                     {
                         "handle": "verified-mcp-service",
                         "seal": "test-seal-compact",
-                        "wallet": {"proven": True, "changes_30d": 0},
                     }
                 ]
             },
             request=httpx.Request("GET", str(url)),
         )
 
+    def mock_post(self, url, *args, **kwargs):
+        assert "seal/verify" in str(url)
+        return httpx.Response(
+            200,
+            json={
+                "valid": True,
+                "payload": {
+                    "subject": {"kind": "service", "interfaces": ["x402"]},
+                    "evidence": [
+                        {
+                            "type": "x402_check",
+                            "wallet": {"proven": True, "changes_30d": 0},
+                        }
+                    ],
+                },
+            },
+            request=httpx.Request("POST", str(url)),
+        )
+
     monkeypatch.setattr(httpx.Client, "get", mock_get)
+    monkeypatch.setattr(httpx.Client, "post", mock_post)
 
     res = check_seller_seal("0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc")
     assert res["verified"] is True
@@ -40,14 +59,33 @@ def test_check_seller_seal_sync_unproven(monkeypatch):
                 "services": [
                     {
                         "handle": "unproven-service",
-                        "wallet": {"proven": False},
+                        "seal": "unproven-seal",
                     }
                 ]
             },
             request=httpx.Request("GET", str(url)),
         )
 
+    def mock_post(self, url, *args, **kwargs):
+        return httpx.Response(
+            200,
+            json={
+                "valid": True,
+                "payload": {
+                    "subject": {"kind": "service", "interfaces": ["x402"]},
+                    "evidence": [
+                        {
+                            "type": "x402_check",
+                            "wallet": {"proven": False},
+                        }
+                    ],
+                },
+            },
+            request=httpx.Request("POST", str(url)),
+        )
+
     monkeypatch.setattr(httpx.Client, "get", mock_get)
+    monkeypatch.setattr(httpx.Client, "post", mock_post)
 
     res = check_seller_seal("0x0000000000000000000000000000000000000000")
     assert res["verified"] is True
@@ -80,14 +118,33 @@ async def test_acheck_seller_seal_async(monkeypatch):
                 "services": [
                     {
                         "handle": "async-proven-service",
-                        "wallet": {"proven": True},
+                        "seal": "async-seal",
                     }
                 ]
             },
             request=httpx.Request("GET", str(url)),
         )
 
+    async def mock_async_post(self, url, *args, **kwargs):
+        return httpx.Response(
+            200,
+            json={
+                "valid": True,
+                "payload": {
+                    "subject": {"kind": "service", "interfaces": ["x402"]},
+                    "evidence": [
+                        {
+                            "type": "x402_check",
+                            "wallet": {"proven": True},
+                        }
+                    ],
+                },
+            },
+            request=httpx.Request("POST", str(url)),
+        )
+
     monkeypatch.setattr(httpx.AsyncClient, "get", mock_async_get)
+    monkeypatch.setattr(httpx.AsyncClient, "post", mock_async_post)
 
     res = await acheck_seller_seal("0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc")
     assert res["verified"] is True

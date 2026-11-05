@@ -44,7 +44,7 @@ export async function POST(request: Request) {
       targetDomain: sanitizedDomain,
       price: price || existing?.price || '0.001 USDC',
       network: network || existing?.network || 'base',
-      version: version || existing?.version || '0.1.12',
+      version: version || existing?.version || '0.1.13',
       firstSeen: existing ? existing.firstSeen : now,
       lastHeartbeat: now,
       status: status === 'idle' ? 'idle' : 'online',
@@ -56,7 +56,7 @@ export async function POST(request: Request) {
       description:
         description ||
         existing?.description ||
-        `HTTP 402 Paywalled M2M microservice registered via A-Pay Gateway (${version || existing?.version || '0.1.12'}).`,
+        `HTTP 402 Paywalled M2M microservice registered via A-Pay Gateway (${version || existing?.version || '0.1.13'}).`,
     };
 
     await registryStore.saveMerchant(record);
