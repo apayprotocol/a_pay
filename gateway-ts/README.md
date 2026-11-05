@@ -110,6 +110,37 @@ console.log('Unlocked secret data:', data);
 
 ---
 
+### 5. 🛡️ Verified Seller Guardrail (SealKeeper SEAL Integration)
+
+Protect buyer agents against rogue, spoofed, or withheld API paywalls by requiring the seller to hold an active, verified **SealKeeper SEAL** with proven on-chain wallet ownership (`x402_check.wallet.proven === true`):
+
+```typescript
+import { APayClientTS, AgentWalletTS, checkSellerSeal } from 'apay-gateway';
+
+const wallet = AgentWalletTS.create({ maxPerCallUsdc: 0.05 });
+
+// Initialize client with opt-in SealKeeper verified seller guardrail
+const client = new APayClientTS(wallet, {
+  verifySellerSeal: true, // Off by default. When enabled, checks all matching services
+});
+
+// Automatically queries https://api.sealkeeper.run/v1/services/seal?pay_to=<receiver>,
+// cryptographically validates EdDSA signature offline / via API, checks subject.kind === 'service',
+// and asserts x402_check.wallet.proven === true before signing payment challenge!
+const response = await client.fetch('https://verified-seller.com/v1/alpha');
+console.log(await response.json());
+
+// Or inspect any seller wallet standalone:
+const seal = await checkSellerSeal('0x7dfc75477f00c65f7b611f194d282d8b5a6f30dc');
+if (seal.proven) {
+  console.log(`✓ Seller proven: ${seal.handle}`);
+} else {
+  console.warn(`✗ Seller blocked: ${seal.reason}`);
+}
+```
+
+---
+
 ### 5. Coinbase AgentKit Integration (Autonomous On-Chain Actions)
 
 Equip Coinbase AgentKit agents on Base L2 with autonomous micropayment settlement capabilities in 1 line:

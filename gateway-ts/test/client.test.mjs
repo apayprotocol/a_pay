@@ -378,3 +378,67 @@ test('APayClientTS with verifySellerSeal allows payment when seller is proven on
   }
 });
 
+test('checkSellerSeal checks every service entry until a proven one is found', async () => {
+  const mockFetch = async (input, init) => {
+    const urlStr = input.toString();
+    if (urlStr.includes('seal/verify')) {
+      const body = JSON.parse(init?.body || '{}');
+      if (body.seal === 'unproven-token-1') {
+        return new Response(
+          JSON.stringify({
+            valid: true,
+            payload: {
+              subject: { kind: 'service', interfaces: ['x402'] },
+              evidence: [{ type: 'x402_check', wallet: { proven: false } }],
+            },
+          }),
+          { status: 200 }
+        );
+      }
+      return new Response(
+        JSON.stringify({
+          valid: true,
+          payload: {
+            subject: { kind: 'service', interfaces: ['x402'] },
+            evidence: [{ type: 'x402_check', wallet: { proven: true, changes_30d: 0 } }],
+          },
+        }),
+        { status: 200 }
+      );
+    }
+
+    if (urlStr.includes('api.sealkeeper.run')) {
+      return new Response(
+        JSON.stringify({
+          services: [
+            {
+              handle: 'unproven-svc-1',
+              seal: 'unproven-token-1',
+            },
+            {
+              handle: 'proven-svc-2',
+              seal: 'proven-token-2',
+            },
+          ],
+        }),
+        { status: 200 }
+      );
+    }
+
+    return new Response(JSON.stringify({}), { status: 404 });
+  };
+
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = mockFetch;
+
+  try {
+    const result = await checkSellerSeal('0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc');
+    assert.equal(result.verified, true);
+    assert.equal(result.proven, true);
+    assert.equal(result.handle, 'proven-svc-2');
+    assert.equal(result.reason, undefined);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+

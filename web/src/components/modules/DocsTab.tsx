@@ -430,22 +430,29 @@ wallet = AgentWallet(
     max_per_call_usdc=0.01,           # Strict cap per individual API call ($0.01 USDC)
     daily_budget_usdc=5.0             # Strict 24h rolling budget cap ($5.00 USDC)
 )
-session = APaySession(wallet)
 
-# 2. Automatically intercepts HTTP 402, cryptographically signs EIP-712 voucher & delivers data
+# 2. Autonomous HTTP session with opt-in SealKeeper verified seller guardrail
+# (Verifies seller's EdDSA SEAL signature and asserts wallet.proven == True)
+session = APaySession(wallet, verify_seller_seal=True)
+
+# 3. Automatically intercepts HTTP 402, cryptographically signs EIP-712 voucher & delivers data
 response = session.get("https://api.domain.com/v1/intelligence")
 print(response.json())`,
-    ts: `import { APayClient } from 'apay-gateway';
+    ts: `import { APayClientTS, AgentWalletTS } from 'apay-gateway';
 
 // 1. Initialize TypeScript Agent Client on ${networkDisplayName}
-const client = new APayClient({
-  privateKey: process.env.AGENT_PRIVATE_KEY || '0x...',
+const wallet = AgentWalletTS.create({
+  privateKey: (process.env.AGENT_PRIVATE_KEY || '0x...') as \`0x\${string}\`,
   maxPerCallUsdc: 0.01,
   dailyBudgetUsdc: 5.0,
-  network: '${networkFlag}'
 });
 
-// 2. Fetch monetized endpoint with auto-intercepted HTTP 402 settlement
+// 2. Initialize client with opt-in SealKeeper verified seller guardrail
+const client = new APayClientTS(wallet, {
+  verifySellerSeal: true, // Rejects unproven, withheld, or invalid seller SEALs
+});
+
+// 3. Fetch monetized endpoint with auto-intercepted HTTP 402 settlement
 const response = await client.fetch('https://api.domain.com/v1/intelligence');
 const data = await response.json();
 console.log('Unlocked Intelligence:', data);`,

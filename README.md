@@ -96,8 +96,8 @@ Turn unmetered AI crawler traffic into instant, automated revenue:
 ### Pillar 2: Autonomous Agent Wallet & MCP Server (For AI Agents & LLMs)
 Give AI agents economic agency with programmatic safety rails:
 * **Model Context Protocol (MCP)**: Native integration for **Claude Desktop, Cursor, Cline, Windsurf**, and custom LLM tool runners.
-* **Spending Guardrails**: Define hard spending limits (`daily_budget_usdc=2.00`, `max_per_call_usdc=0.01`). The agent cannot exceed its delegated allowance even if prompted maliciously.
-* **Auto-Settling HTTP Client**: `APaySession` automatically catches `402` headers, signs the EIP-712 challenge, and retrieves data in a single round-trip without human intervention.
+* **Spending & Counterparty Guardrails**: Define hard spending limits (`daily_budget_usdc=2.00`, `max_per_call_usdc=0.01`) and opt-in verified seller verification (`verify_seller_seal=True` via [SealKeeper](https://sealkeeper.run/partners)). The agent cannot exceed its delegated allowance or settle with unproven/withheld sellers.
+* **Auto-Settling HTTP Client**: `APaySession` automatically catches `402` headers, checks seller reputation/SEAL, signs the EIP-712 challenge, and retrieves data in a single round-trip without human intervention.
 
 ### Pillar 3: On-Chain Base L2 Settlement & Escrow Vault (For Enterprise Web3 Security)
 Enterprise-grade cryptographic settlement built on Coinbase's Base Layer 2:
@@ -140,7 +140,7 @@ async def get_alpha_feed():
 
 #### Call Protected APIs with an Autonomous Agent:
 ```python
-from apay import APaySession, AgentWallet
+from apay import APaySession, AgentWallet, check_seller_seal
 
 # Create an agent wallet with strict safety caps
 wallet = AgentWallet(
@@ -148,11 +148,19 @@ wallet = AgentWallet(
     max_per_call_usdc=0.01,
     daily_budget_usdc=5.00
 )
-session = APaySession(wallet)
+
+# Enable verified seller guardrail (SealKeeper SEAL integration)
+# When True, verifies seller's cryptographic EdDSA SEAL signature and ensures
+# wallet ownership is proven (wallet.proven === True) before signing payment.
+session = APaySession(wallet, verify_seller_seal=True)
 
 # Automatically handles HTTP 402 challenges & settles on the fly (<15ms)
 response = session.get("https://api.example.com/api/alpha-feed")
 print(response.json())
+
+# Standalone seller SEAL lookup:
+status = check_seller_seal("0x7dfc75477f00c65f7b611f194d282d8b5a6f30dc")
+print("Seller proven:", status["proven"], "Handle:", status.get("handle"))
 ```
 
 ---
@@ -163,23 +171,33 @@ Scaffold a complete fullstack project in 30 seconds:
 npx create-apay-app my-autonomous-agent
 ```
 
-Or install the client library:
+Or install the gateway & agent library:
 ```bash
-npm install apay-client
+npm install apay-gateway viem
 ```
 
 ```typescript
-import { APayClient } from "apay-client";
+import { APayClientTS, AgentWalletTS, checkSellerSeal } from "apay-gateway";
 
-const client = new APayClient({
-  privateKey: process.env.AGENT_PRIVATE_KEY!,
-  network: "base-mainnet",
-  maxPerCallUsdc: 0.05
+const wallet = AgentWalletTS.create({
+  privateKey: process.env.AGENT_PRIVATE_KEY as `0x${string}`,
+  maxPerCallUsdc: 0.05,
+  dailyBudgetUsdc: 2.0,
 });
 
-// Auto-settling request
-const data = await client.fetchWithPaywall("https://data-provider.com/market-depth");
+// Initialize client with opt-in SealKeeper verified seller guardrail
+const client = new APayClientTS(wallet, {
+  verifySellerSeal: true, // Rejects unproven, withheld, or invalid seller SEALs
+});
+
+// Auto-settling request with verified seller check (<15ms)
+const res = await client.fetch("https://data-provider.com/market-depth");
+const data = await res.json();
 console.log(data);
+
+// Standalone seller SEAL verification:
+const seal = await checkSellerSeal("0x7dfc75477f00c65f7b611f194d282d8b5a6f30dc");
+console.log("Seller proven:", seal.proven, "Handle:", seal.handle);
 ```
 
 ---

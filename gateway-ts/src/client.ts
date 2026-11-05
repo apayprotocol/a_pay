@@ -178,98 +178,84 @@ export async function checkSellerSeal(
       return { verified: false, proven: false, reason: 'No matching service found' };
     }
 
-    const service = services[0];
-    const seal = service.seal || service.credential;
-    if (!seal) {
-      const errCode = service.error?.code || 'no_seal';
-      return {
-        verified: false,
-        proven: false,
-        handle: service.handle,
-        reason: `Service holds no valid SEAL (${errCode})`,
-      };
-    }
+    let atLeastOneVerified = false;
+    let lastFailureReason: string | undefined = undefined;
 
-    // Step 4: Verify SEAL signature via SealKeeper verify endpoint
-    let verifiedPayload = service.payload;
-    try {
-      const verifyRes = await fetch('https://api.sealkeeper.run/v1/seal/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({ seal }),
-        signal: controller.signal,
-      });
+    // Check every service entry rather than only the first
+    for (const service of services) {
+      const seal = service.seal || service.credential;
+      if (!seal) {
+        const errCode = service.error?.code || 'no_seal';
+        lastFailureReason = `Service holds no valid SEAL (${errCode})`;
+        continue;
+      }
 
-      if (verifyRes.ok) {
-        const verifyData = (await verifyRes.json()) as { valid?: boolean; payload?: any };
-        if (!verifyData.valid) {
-          return {
-            verified: false,
-            proven: false,
-            handle: service.handle,
-            seal,
-            reason: 'SEAL signature verification failed (invalid signature)',
-          };
+      // Step 4: Verify SEAL signature via SealKeeper verify endpoint
+      let verifiedPayload = service.payload;
+      try {
+        const verifyRes = await fetch('https://api.sealkeeper.run/v1/seal/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ seal }),
+          signal: controller.signal,
+        });
+
+        if (verifyRes.ok) {
+          const verifyData = (await verifyRes.json()) as { valid?: boolean; payload?: any };
+          if (!verifyData.valid) {
+            lastFailureReason = 'SEAL signature verification failed (invalid signature)';
+            continue;
+          }
+          if (verifyData.payload) {
+            verifiedPayload = verifyData.payload;
+          }
+        } else {
+          lastFailureReason = `SEAL signature verification failed (HTTP ${verifyRes.status})`;
+          continue;
         }
-        if (verifyData.payload) {
-          verifiedPayload = verifyData.payload;
-        }
-      } else {
+      } catch (verifyErr: any) {
+        lastFailureReason = `SEAL verification error: ${verifyErr?.message || 'verification failed'}`;
+        continue;
+      }
+
+      // Step 4 cont.: Check that subject.kind is 'service'
+      if (verifiedPayload?.subject?.kind !== 'service') {
+        atLeastOneVerified = true;
+        lastFailureReason = `SEAL subject is not a service (kind: ${verifiedPayload?.subject?.kind || 'unknown'})`;
+        continue;
+      }
+
+      // Step 5: Read the wallet from x402_check evidence
+      const evidenceList: any[] = Array.isArray(verifiedPayload?.evidence)
+        ? verifiedPayload.evidence
+        : [];
+      const x402Check = evidenceList.find((e: any) => e?.type === 'x402_check');
+
+      if (!x402Check) {
+        atLeastOneVerified = true;
+        lastFailureReason = 'No x402_check evidence found in service SEAL';
+        continue;
+      }
+
+      atLeastOneVerified = true;
+      if (x402Check.wallet?.proven === true) {
         return {
-          verified: false,
-          proven: false,
+          verified: true,
+          proven: true,
           handle: service.handle,
           seal,
-          reason: `SEAL signature verification failed (HTTP ${verifyRes.status})`,
+          reason: undefined,
         };
+      } else {
+        lastFailureReason = 'Seller wallet has not proven ownership in SEAL (wallet.proven is false)';
       }
-    } catch (verifyErr: any) {
-      return {
-        verified: false,
-        proven: false,
-        handle: service.handle,
-        seal,
-        reason: `SEAL verification error: ${verifyErr?.message || 'verification failed'}`,
-      };
     }
-
-    // Step 4 cont.: Check that subject.kind is 'service'
-    if (verifiedPayload?.subject?.kind !== 'service') {
-      return {
-        verified: true,
-        proven: false,
-        handle: service.handle,
-        seal,
-        reason: `SEAL subject is not a service (kind: ${verifiedPayload?.subject?.kind || 'unknown'})`,
-      };
-    }
-
-    // Step 5: Read the wallet from x402_check evidence
-    const evidenceList: any[] = Array.isArray(verifiedPayload?.evidence)
-      ? verifiedPayload.evidence
-      : [];
-    const x402Check = evidenceList.find((e: any) => e?.type === 'x402_check');
-
-    if (!x402Check) {
-      return {
-        verified: true,
-        proven: false,
-        handle: service.handle,
-        seal,
-        reason: 'No x402_check evidence found in service SEAL',
-      };
-    }
-
-    const isProven = x402Check.wallet?.proven === true;
 
     return {
-      verified: true,
-      proven: isProven,
-      handle: service.handle,
-      seal,
-      reason: isProven
-        ? undefined
-        : 'Seller wallet has not proven ownership in SEAL (wallet.proven is false)',
+      verified: atLeastOneVerified,
+      proven: false,
+      handle: services[0]?.handle,
+      reason: lastFailureReason || 'None of the matching services have a proven seller wallet in SEAL',
     };
   } catch (err: any) {
     return {
