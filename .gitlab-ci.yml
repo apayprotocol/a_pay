@@ -1,5 +1,20 @@
 # A-Pay Protocol — Multi-Platform Reels Cloud Scheduler & Codebase Integrity
 # Runs on GitLab Cloud Shared Runners (100% Free & 24/7 Autopilot)
+#
+# NOTE: Automated social publishing is currently PAUSED (`ENABLE_SOCIAL_AUTOPUBLISH: "false"`).
+# To re-enable later without editing this file:
+#   1. Refresh META_USER_TOKEN in GitLab CI/CD Variables (Settings -> CI/CD -> Variables)
+#   2. Set GitLab CI/CD Variable ENABLE_SOCIAL_AUTOPUBLISH="true" (or pass it on manual web trigger)
+#   3. Re-activate the Pipeline Schedule in GitLab UI (Build -> Pipeline schedules)
+
+variables:
+  ENABLE_SOCIAL_AUTOPUBLISH: "false"
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+    - if: '$ENABLE_SOCIAL_AUTOPUBLISH == "true" && $CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$ENABLE_SOCIAL_AUTOPUBLISH == "true" && $CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "web"'
 
 stages:
   - test
@@ -14,13 +29,13 @@ audit_security:
   script:
     - python3 scripts/scan_secrets.py
 
-# Runs on GitLab Schedule or manual Web trigger to dispatch reels across social platforms
+# Runs on GitLab Schedule or manual Web trigger to dispatch reels across social platforms (when ENABLE_SOCIAL_AUTOPUBLISH=true)
 publish_reels_cloud:
   stage: publish
   image: python:3.11-slim
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "web"'
+    - if: '$ENABLE_SOCIAL_AUTOPUBLISH == "true" && $CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$ENABLE_SOCIAL_AUTOPUBLISH == "true" && $CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "web"'
   before_script:
     - apt-get update && apt-get install -y ffmpeg curl git
     - git config --global user.name "A-Pay CI Bot"
@@ -39,13 +54,13 @@ publish_reels_cloud:
         git push origin HEAD:${CI_COMMIT_BRANCH} -o ci.skip || true
       fi
 
-# Runs on GitLab Schedule or manual Web trigger to dispatch single image posts across social platforms
+# Runs on GitLab Schedule or manual Web trigger to dispatch single image posts across social platforms (when ENABLE_SOCIAL_AUTOPUBLISH=true)
 publish_single_posts_cloud:
   stage: publish
   image: python:3.11-slim
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "web"'
+    - if: '$ENABLE_SOCIAL_AUTOPUBLISH == "true" && $CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$ENABLE_SOCIAL_AUTOPUBLISH == "true" && $CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "web"'
   before_script:
     - apt-get update && apt-get install -y curl git
     - git config --global user.name "A-Pay CI Bot"
