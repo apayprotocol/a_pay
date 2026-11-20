@@ -6,14 +6,70 @@ to discover, inspect, and pay for HTTP 402 protected APIs on the fly.
 
 from __future__ import annotations
 
+import ipaddress
 import json
+import math
 import os
 import sys
+import urllib.parse
 from typing import Any
 
 from . import __version__
 from .client import APaySession
 from .wallet import AgentWallet
+
+
+def _is_safe_public_url(url: str) -> tuple[bool, str]:
+    """Validates that a URL is safe to fetch and not targeting internal subnets or cloud metadata."""
+    if not url or not isinstance(url, str):
+        return False, "URL must be a non-empty string"
+    try:
+        parsed = urllib.parse.urlparse(url.strip())
+    except Exception:
+        return False, f"Invalid URL format: '{url}'"
+
+    if parsed.scheme.lower() not in ("http", "https"):
+        return False, f"Forbidden URL scheme '{parsed.scheme}'. Only HTTP and HTTPS are permitted."
+
+    hostname = (parsed.hostname or "").lower()
+    if not hostname:
+        return False, "URL hostname is missing"
+
+    # Cloud metadata defense (AWS, GCP, Azure, OpenStack)
+    blocked_hosts = {
+        "169.254.169.254",
+        "169.254.169.253",
+        "metadata.google.internal",
+        "metadata",
+        "instance-data",
+        "fd00:ec2::254",
+    }
+    if hostname in blocked_hosts:
+        return False, "Access to cloud instance metadata service is strictly forbidden."
+
+    # Blocked suffixes for internal/private domains
+    blocked_suffixes = (".local", ".internal", ".lan", ".corp", ".home", ".onion", ".arpa")
+    if any(hostname.endswith(sfx) for sfx in blocked_suffixes):
+        return False, f"Access to private internal domain '{hostname}' is forbidden."
+
+    # Loopback / local host check (allow only if explicit env flag set)
+    allow_local = os.getenv("APAY_ALLOW_LOCALHOST", "").lower() in ("true", "1")
+    if hostname in ("localhost", "127.0.0.1", "::1", "0.0.0.0"):
+        if not allow_local:
+            return False, "Access to localhost/loopback addresses is forbidden in production."
+
+    # Check for direct private IP literals
+    try:
+        ip = ipaddress.ip_address(hostname)
+        if ip.is_loopback:
+            if not allow_local:
+                return False, "Access to loopback IP addresses is forbidden in production."
+        elif ip.is_private or ip.is_link_local or ip.is_reserved or ip.is_multicast:
+            return False, f"Access to private/reserved IP '{hostname}' is forbidden."
+    except ValueError:
+        pass
+
+    return True, ""
 
 
 class APayMCPServer:
@@ -84,15 +140,18 @@ class APayMCPServer:
                 continue
         return None
 
-    def _fetch_onchain_balances(self) -> dict[str, Any]:
+    def _fetch_onchain_balances(self, address: str | None = None) -> dict[str, Any]:
         """Fetches live on-chain balances for ETH, USDC, and $APAY tokens."""
+        target_addr = (
+            address if (address and address.startswith("0x") and len(address) == 42) else self.wallet.address
+        )
         # 1. Native ETH balance
-        eth_bal_hex = self._call_rpc("eth_getBalance", [self.wallet.address, "latest"])
+        eth_bal_hex = self._call_rpc("eth_getBalance", [target_addr, "latest"])
         eth_wei = int(eth_bal_hex, 16) if eth_bal_hex else 0
         eth_bal = eth_wei / 1e18
 
         # 2. USDC balance (balanceOf selector 0x70a08231)
-        addr_padded = self.wallet.address[2:].lower().zfill(64)
+        addr_padded = target_addr[2:].lower().zfill(64)
         balance_of_data = "0x70a08231" + addr_padded
 
         usdc_res_hex = self._call_rpc(
@@ -109,7 +168,7 @@ class APayMCPServer:
         apay_bal = apay_base / 1e18
 
         return {
-            "wallet_address": self.wallet.address,
+            "wallet_address": target_addr,
             "network": f"Base L2 ({self.network_name} - Chain ID: {self.chain_id})",
             "balances": {
                 "native_eth": f"{eth_bal:.6f} ETH",
@@ -120,7 +179,7 @@ class APayMCPServer:
         }
 
     def get_tool_definitions(self) -> list[dict[str, Any]]:
-        """Returns MCP-compliant tool specifications."""
+        """Returns MCP-compliant tool specifications with full annotations and parameter schemas."""
         return [
             {
                 "name": "apay_request",
@@ -130,26 +189,48 @@ class APayMCPServer:
                     "A-Pay automatically signs the cryptographic payment authorization "
                     "within your budget limits and unlocks the data in <25ms."
                 ),
+                "annotations": {
+                    "readOnlyHint": False,
+                    "destructiveHint": True,
+                    "idempotentHint": False,
+                    "openWorldHint": True,
+                },
+                "readOnlyHint": False,
+                "destructiveHint": True,
+                "idempotentHint": False,
+                "openWorldHint": True,
                 "inputSchema": {
                     "type": "object",
                     "properties": {
                         "url": {
                             "type": "string",
-                            "description": "Target endpoint URL to fetch or query",
+                            "description": (
+                                "Target endpoint URL to fetch or query with HTTP 402 payment support "
+                                "(e.g. 'https://api.example.com/v1/market-data' or 'https://apayprotocol.org/api/ping')."
+                            ),
                         },
                         "method": {
                             "type": "string",
                             "enum": ["GET", "POST", "PUT", "DELETE"],
                             "default": "GET",
-                            "description": "HTTP request method (default: GET)",
+                            "description": (
+                                "HTTP request method to execute against the target URL. "
+                                "Allowed values: 'GET', 'POST', 'PUT', 'DELETE' (default: 'GET')."
+                            ),
                         },
                         "json_body": {
                             "type": "object",
-                            "description": "Optional JSON payload for POST/PUT requests",
+                            "description": (
+                                "Optional JSON payload object for POST or PUT requests "
+                                '(e.g. {"query": "ETH-USD", "limit": 10}).'
+                            ),
                         },
                         "headers": {
                             "type": "object",
-                            "description": "Optional additional HTTP headers",
+                            "description": (
+                                "Optional additional HTTP request headers as key-value pairs "
+                                '(e.g. {"Accept": "application/json", "User-Agent": "APayAgent/1.0"}).'
+                            ),
                         },
                     },
                     "required": ["url"],
@@ -161,6 +242,16 @@ class APayMCPServer:
                     "Inspect the agent's active non-custodial wallet address, "
                     "current spending guardrails, and total spent in USDC and $APAY."
                 ),
+                "annotations": {
+                    "readOnlyHint": True,
+                    "destructiveHint": False,
+                    "idempotentHint": True,
+                    "openWorldHint": False,
+                },
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
                 "inputSchema": {
                     "type": "object",
                     "properties": {},
@@ -172,24 +263,34 @@ class APayMCPServer:
                     "Configure agent safety invariants and spending guardrails. "
                     "Prevents runaway loops or overcharging."
                 ),
+                "annotations": {
+                    "readOnlyHint": False,
+                    "destructiveHint": False,
+                    "idempotentHint": True,
+                    "openWorldHint": False,
+                },
+                "readOnlyHint": False,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
                 "inputSchema": {
                     "type": "object",
                     "properties": {
                         "max_per_call_usdc": {
                             "type": "number",
-                            "description": "Maximum USDC allowance for a single API call",
+                            "description": "Maximum USDC allowance for a single API call (e.g. 0.05).",
                         },
                         "daily_budget_usdc": {
                             "type": "number",
-                            "description": "Maximum USDC rolling 24-hour spending budget",
+                            "description": "Maximum USDC rolling 24-hour spending budget (e.g. 2.0).",
                         },
                         "max_per_call_apay": {
                             "type": "number",
-                            "description": "Maximum $APAY token allowance for a single API call",
+                            "description": "Maximum $APAY token allowance for a single API call (e.g. 10.0).",
                         },
                         "daily_budget_apay": {
                             "type": "number",
-                            "description": "Maximum $APAY token rolling 24-hour spending budget",
+                            "description": "Maximum $APAY token rolling 24-hour spending budget (e.g. 100.0).",
                         },
                     },
                 },
@@ -200,12 +301,25 @@ class APayMCPServer:
                     "Inspect an endpoint to check if it requires an A-Pay micropayment, "
                     "inspect the exact price quote, currency, and payout receiver without spending any funds."
                 ),
+                "annotations": {
+                    "readOnlyHint": True,
+                    "destructiveHint": False,
+                    "idempotentHint": True,
+                    "openWorldHint": True,
+                },
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": True,
                 "inputSchema": {
                     "type": "object",
                     "properties": {
                         "url": {
                             "type": "string",
-                            "description": "The URL to probe for HTTP 402 payment requirements",
+                            "description": (
+                                "The HTTP or HTTPS URL to probe for HTTP 402 payment requirements "
+                                "(e.g. 'https://api.example.com/premium-feed')."
+                            ),
                         },
                     },
                     "required": ["url"],
@@ -217,9 +331,27 @@ class APayMCPServer:
                     "Inspect the agent's live on-chain balances on Base Layer 2, "
                     "including native ETH (for gas), USDC, and $APAY tokens."
                 ),
+                "annotations": {
+                    "readOnlyHint": True,
+                    "destructiveHint": False,
+                    "idempotentHint": True,
+                    "openWorldHint": False,
+                },
+                "readOnlyHint": True,
+                "destructiveHint": False,
+                "idempotentHint": True,
+                "openWorldHint": False,
                 "inputSchema": {
                     "type": "object",
-                    "properties": {},
+                    "properties": {
+                        "address": {
+                            "type": "string",
+                            "description": (
+                                "Optional EVM address to inspect balances for (e.g. '0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc'). "
+                                "Defaults to the agent's active wallet address if omitted."
+                            ),
+                        },
+                    },
                 },
             },
         ]
@@ -231,6 +363,13 @@ class APayMCPServer:
                 url = arguments.get("url")
                 if not url:
                     return {"isError": True, "content": [{"type": "text", "text": "Missing 'url' argument"}]}
+                safe, err_msg = _is_safe_public_url(url)
+                if not safe:
+                    return {
+                        "isError": True,
+                        "content": [{"type": "text", "text": f"Security Policy Violation: {err_msg}"}],
+                    }
+
                 method = arguments.get("method", "GET").upper()
                 json_body = arguments.get("json_body")
                 headers = arguments.get("headers", {})
@@ -258,7 +397,23 @@ class APayMCPServer:
                 return {"content": [{"type": "text", "text": json.dumps(result_data, indent=2)}]}
 
             elif name == "apay_get_balance":
-                balances = self._fetch_onchain_balances()
+                target_address = arguments.get("address")
+                if target_address:
+                    if (
+                        not isinstance(target_address, str)
+                        or not target_address.startswith("0x")
+                        or len(target_address) != 42
+                    ):
+                        return {
+                            "isError": True,
+                            "content": [
+                                {
+                                    "type": "text",
+                                    "text": "Invalid EVM 'address' format. Must be a 42-character 0x-prefixed hex string.",
+                                }
+                            ],
+                        }
+                balances = self._fetch_onchain_balances(address=target_address)
                 return {"content": [{"type": "text", "text": json.dumps(balances, indent=2)}]}
 
             elif name == "apay_get_wallet_status":
@@ -288,18 +443,38 @@ class APayMCPServer:
 
             elif name == "apay_set_budget":
                 updated = {}
-                if "max_per_call_usdc" in arguments and arguments["max_per_call_usdc"] is not None:
-                    self.wallet.max_per_call_usdc = float(arguments["max_per_call_usdc"])
-                    updated["max_per_call_usdc"] = self.wallet.max_per_call_usdc
-                if "daily_budget_usdc" in arguments and arguments["daily_budget_usdc"] is not None:
-                    self.wallet.daily_budget_usdc = float(arguments["daily_budget_usdc"])
-                    updated["daily_budget_usdc"] = self.wallet.daily_budget_usdc
-                if "max_per_call_apay" in arguments and arguments["max_per_call_apay"] is not None:
-                    self.wallet.max_per_call_apay = float(arguments["max_per_call_apay"])
-                    updated["max_per_call_apay"] = self.wallet.max_per_call_apay
-                if "daily_budget_apay" in arguments and arguments["daily_budget_apay"] is not None:
-                    self.wallet.daily_budget_apay = float(arguments["daily_budget_apay"])
-                    updated["daily_budget_apay"] = self.wallet.daily_budget_apay
+                numeric_keys = [
+                    ("max_per_call_usdc", "max_per_call_usdc"),
+                    ("daily_budget_usdc", "daily_budget_usdc"),
+                    ("max_per_call_apay", "max_per_call_apay"),
+                    ("daily_budget_apay", "daily_budget_apay"),
+                ]
+                for arg_key, wallet_attr in numeric_keys:
+                    if arg_key in arguments and arguments[arg_key] is not None:
+                        try:
+                            val = float(arguments[arg_key])
+                            if val < 0 or math.isnan(val) or math.isinf(val):
+                                return {
+                                    "isError": True,
+                                    "content": [
+                                        {
+                                            "type": "text",
+                                            "text": f"Invalid budget value for '{arg_key}': must be a finite non-negative number.",
+                                        }
+                                    ],
+                                }
+                            setattr(self.wallet, wallet_attr, val)
+                            updated[arg_key] = val
+                        except (ValueError, TypeError):
+                            return {
+                                "isError": True,
+                                "content": [
+                                    {
+                                        "type": "text",
+                                        "text": f"Invalid numeric value for '{arg_key}'.",
+                                    }
+                                ],
+                            }
 
                 return {
                     "content": [
@@ -316,6 +491,12 @@ class APayMCPServer:
                 url = arguments.get("url")
                 if not url:
                     return {"isError": True, "content": [{"type": "text", "text": "Missing 'url' argument"}]}
+                safe, err_msg = _is_safe_public_url(url)
+                if not safe:
+                    return {
+                        "isError": True,
+                        "content": [{"type": "text", "text": f"Security Policy Violation: {err_msg}"}],
+                    }
 
                 # Raw probe using underlying client without sending payment header
                 probe_resp = self.session.client.get(url)
@@ -358,12 +539,23 @@ class APayMCPServer:
         msg_id = message.get("id")
 
         if method == "initialize":
+            params = message.get("params") or {}
+            client_version = params.get("protocolVersion")
+            supported_versions = ["2025-06-18", "2024-11-05"]
+            negotiated_version = client_version if client_version in supported_versions else "2025-06-18"
             return {
                 "jsonrpc": "2.0",
                 "id": msg_id,
                 "result": {
-                    "protocolVersion": "2024-11-05",
-                    "capabilities": {"tools": {}},
+                    "protocolVersion": negotiated_version,
+                    "capabilities": {
+                        "tools": {
+                            "listChanged": False,
+                        },
+                        "resources": {},
+                        "prompts": {},
+                        "logging": {},
+                    },
                     "serverInfo": {
                         "name": "apay-mcp",
                         "version": __version__,

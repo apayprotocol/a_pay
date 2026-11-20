@@ -413,17 +413,49 @@ def test_mcp_server_protocol():
     init_res = server.process_rpc_message({"jsonrpc": "2.0", "id": 1, "method": "initialize"})
     assert init_res is not None
     assert init_res["result"]["serverInfo"]["name"] == "apay-mcp"
-    assert "protocolVersion" in init_res["result"]
+    assert init_res["result"]["protocolVersion"] == "2025-06-18"
 
-    # 2. tools/list
+    # Backward compatibility: negotiate 2024-11-05 if requested
+    init_legacy = server.process_rpc_message(
+        {"jsonrpc": "2.0", "id": 10, "method": "initialize", "params": {"protocolVersion": "2024-11-05"}}
+    )
+    assert init_legacy is not None
+    assert init_legacy["result"]["protocolVersion"] == "2024-11-05"
+
+    # 2. tools/list: full Glimind readiness check
     tools_res = server.process_rpc_message({"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
     assert tools_res is not None
-    tool_names = [t["name"] for t in tools_res["result"]["tools"]]
+    tools = tools_res["result"]["tools"]
+    tool_names = [t["name"] for t in tools]
     assert "apay_request" in tool_names
     assert "apay_get_wallet_status" in tool_names
     assert "apay_get_balance" in tool_names
     assert "apay_set_budget" in tool_names
     assert "apay_inspect_endpoint" in tool_names
+
+    # Verify annotations and parameter descriptions on all 5 tools
+    for tool in tools:
+        assert "annotations" in tool, f"Tool {tool['name']} missing annotations"
+        ann = tool["annotations"]
+        assert "readOnlyHint" in ann, f"Tool {tool['name']} missing readOnlyHint"
+        assert "destructiveHint" in ann, f"Tool {tool['name']} missing destructiveHint"
+        assert "idempotentHint" in ann, f"Tool {tool['name']} missing idempotentHint"
+
+        # Check every parameter has a non-empty description
+        props = tool.get("inputSchema", {}).get("properties", {})
+        for param_name, param_def in props.items():
+            assert "description" in param_def and len(param_def["description"].strip()) > 0, (
+                f"Tool {tool['name']} parameter {param_name} missing description"
+            )
+
+    # Specific annotation invariants
+    tools_by_name = {t["name"]: t for t in tools}
+    assert tools_by_name["apay_request"]["annotations"]["readOnlyHint"] is False
+    assert tools_by_name["apay_request"]["annotations"]["destructiveHint"] is True
+    assert tools_by_name["apay_get_balance"]["annotations"]["readOnlyHint"] is True
+    assert tools_by_name["apay_get_balance"]["annotations"]["destructiveHint"] is False
+    assert tools_by_name["apay_get_wallet_status"]["annotations"]["readOnlyHint"] is True
+    assert tools_by_name["apay_inspect_endpoint"]["annotations"]["readOnlyHint"] is True
 
     # 3. tools/call: apay_get_wallet_status
     status_res = server.process_rpc_message(
@@ -467,6 +499,53 @@ def test_mcp_server_protocol():
     )
     assert bal_res is not None
     assert "native_eth" in bal_res["result"]["content"][0]["text"]
+
+    # 6. tools/call: apay_get_balance with explicit target address
+    bal_addr_res = server.process_rpc_message(
+        {
+            "jsonrpc": "2.0",
+            "id": 6,
+            "method": "tools/call",
+            "params": {
+                "name": "apay_get_balance",
+                "arguments": {"address": "0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc"},
+            },
+        }
+    )
+    assert bal_addr_res is not None
+    assert "0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc" in bal_addr_res["result"]["content"][0]["text"]
+
+    # 7. Security: SSRF rejection in apay_request and apay_inspect_endpoint
+    ssrf_req = server.process_rpc_message(
+        {
+            "jsonrpc": "2.0",
+            "id": 7,
+            "method": "tools/call",
+            "params": {
+                "name": "apay_request",
+                "arguments": {"url": "http://169.254.169.254/latest/meta-data/"},
+            },
+        }
+    )
+    assert ssrf_req is not None
+    assert ssrf_req["result"]["isError"] is True
+    assert "Security Policy Violation" in ssrf_req["result"]["content"][0]["text"]
+
+    # 8. Security: Negative budget rejection
+    neg_budget = server.process_rpc_message(
+        {
+            "jsonrpc": "2.0",
+            "id": 8,
+            "method": "tools/call",
+            "params": {
+                "name": "apay_set_budget",
+                "arguments": {"max_per_call_usdc": -10.0},
+            },
+        }
+    )
+    assert neg_budget is not None
+    assert neg_budget["result"]["isError"] is True
+    assert "non-negative" in neg_budget["result"]["content"][0]["text"]
 
 
 def test_batch_settle_relayer(tmp_path):

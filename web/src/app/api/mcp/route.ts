@@ -35,26 +35,41 @@ const MCP_TOOLS = [
   {
     name: 'apay_request',
     description:
-      'Probe and automatically pay HTTP 402 crypto micropayments on Base Layer 2 with USDC or $APAY within pre-configured budget limits.',
+      'Make an HTTP request (GET, POST, etc.) to any API or website. If the endpoint returns an HTTP 402 Payment Required challenge, A-Pay automatically signs the cryptographic payment authorization within your budget limits and unlocks the data in <25ms.',
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: false,
+    openWorldHint: true,
     inputSchema: {
       type: 'object',
       properties: {
         url: {
           type: 'string',
-          description: 'The target endpoint URL',
+          description:
+            'Target endpoint URL to fetch or query with HTTP 402 payment support (e.g. "https://api.example.com/v1/market-data" or "https://apayprotocol.org/api/ping").',
         },
         method: {
           type: 'string',
           enum: ['GET', 'POST', 'PUT', 'DELETE'],
           default: 'GET',
+          description:
+            'HTTP request method to execute against the target URL (default: "GET"). Allowed values: GET, POST, PUT, DELETE.',
         },
         json_body: {
           type: 'object',
-          description: 'Optional JSON request body',
+          description:
+            'Optional JSON payload object for POST or PUT requests (e.g. {"query": "ETH-USD", "limit": 10}).',
         },
         headers: {
           type: 'object',
-          description: 'Optional additional HTTP headers',
+          description:
+            'Optional additional HTTP request headers as key-value pairs (e.g. {"Accept": "application/json", "User-Agent": "APayAgent/1.0"}).',
         },
       },
       required: ['url'],
@@ -64,6 +79,16 @@ const MCP_TOOLS = [
     name: 'apay_get_wallet_status',
     description:
       "Inspect the agent's active non-custodial wallet address, network, current spending guardrails, and total spent in USDC and $APAY.",
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
     inputSchema: {
       type: 'object',
       properties: {},
@@ -73,24 +98,34 @@ const MCP_TOOLS = [
     name: 'apay_set_budget',
     description:
       'Configure agent safety invariants and spending guardrails. Prevents runaway loops or overcharging.',
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
     inputSchema: {
       type: 'object',
       properties: {
         max_per_call_usdc: {
           type: 'number',
-          description: 'Maximum USDC allowance for a single API call',
+          description: 'Maximum USDC allowance for a single API call (e.g. 0.05).',
         },
         daily_budget_usdc: {
           type: 'number',
-          description: 'Maximum USDC rolling 24-hour spending budget',
+          description: 'Maximum USDC rolling 24-hour spending budget (e.g. 2.0).',
         },
         max_per_call_apay: {
           type: 'number',
-          description: 'Maximum $APAY token allowance for a single API call',
+          description: 'Maximum $APAY token allowance for a single API call (e.g. 10.0).',
         },
         daily_budget_apay: {
           type: 'number',
-          description: 'Maximum $APAY token rolling 24-hour spending budget',
+          description: 'Maximum $APAY token rolling 24-hour spending budget (e.g. 100.0).',
         },
       },
     },
@@ -99,12 +134,23 @@ const MCP_TOOLS = [
     name: 'apay_inspect_endpoint',
     description:
       'Inspect an endpoint to check if it requires an A-Pay micropayment, inspect the exact price quote, currency, and payout receiver without spending any funds.',
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: true,
     inputSchema: {
       type: 'object',
       properties: {
         url: {
           type: 'string',
-          description: 'The URL to probe for HTTP 402 payment requirements',
+          description:
+            'The HTTP or HTTPS URL to probe for HTTP 402 payment requirements (e.g. "https://api.example.com/premium-feed").',
         },
       },
       required: ['url'],
@@ -114,12 +160,23 @@ const MCP_TOOLS = [
     name: 'apay_get_balance',
     description:
       "Inspect the agent's live on-chain balances on Base Layer 2, including native ETH (for gas), USDC, and $APAY tokens.",
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
     inputSchema: {
       type: 'object',
       properties: {
         address: {
           type: 'string',
-          description: 'Optional target EVM address to inspect balances for',
+          description:
+            'Optional EVM address to inspect balances for (e.g. "0x5eC06f4219C6b44CfE7c91463dD65B7B8E0fbEfc"). Defaults to active protocol treasury/wallet if omitted.',
         },
       },
     },
@@ -138,11 +195,11 @@ export async function GET() {
     {
       serverInfo: {
         name: 'apay-mcp',
-        version: '0.1.13',
+        version: '0.1.14',
         description:
           'Universal Micropayment & Autonomous Economic Settlement Engine for AI Agents on Base L2.',
       },
-      protocolVersion: '2024-11-05',
+      protocolVersion: '2025-06-18',
       capabilities: MCP_CAPABILITIES,
       tools: MCP_TOOLS,
     },
@@ -157,16 +214,20 @@ export async function POST(request: Request) {
     const msgId = message.id ?? null;
 
     if (method === 'initialize') {
+      const clientVersion = message.params?.protocolVersion;
+      const supportedVersions = ['2025-06-18', '2024-11-05'];
+      const negotiatedVersion =
+        clientVersion && supportedVersions.includes(clientVersion) ? clientVersion : '2025-06-18';
       return NextResponse.json(
         {
           jsonrpc: '2.0',
           id: msgId,
           result: {
-            protocolVersion: '2024-11-05',
+            protocolVersion: negotiatedVersion,
             capabilities: MCP_CAPABILITIES,
             serverInfo: {
               name: 'apay-mcp',
-              version: '0.1.13',
+              version: '0.1.14',
             },
           },
         },
@@ -414,20 +475,136 @@ export async function POST(request: Request) {
         }
       }
 
-      // Default fallback for set_budget or apay_request
+      if (toolName === 'apay_request') {
+        const url = args.url;
+        if (!url) {
+          return NextResponse.json(
+            {
+              jsonrpc: '2.0',
+              id: msgId,
+              result: {
+                isError: true,
+                content: [{ type: 'text', text: "Missing 'url' argument" }],
+              },
+            },
+            { headers: CORS_HEADERS },
+          );
+        }
+
+        const urlCheck = validateSafePublicUrl(url, { allowLocalhostInDev: true });
+        if (!urlCheck.safe) {
+          return NextResponse.json(
+            {
+              jsonrpc: '2.0',
+              id: msgId,
+              result: {
+                isError: true,
+                content: [
+                  {
+                    type: 'text',
+                    text: `Security Policy Violation: ${urlCheck.error || 'Access to restricted IP/URL'}`,
+                  },
+                ],
+              },
+            },
+            { headers: CORS_HEADERS },
+          );
+        }
+
+        return NextResponse.json(
+          {
+            jsonrpc: '2.0',
+            id: msgId,
+            result: {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(
+                    {
+                      tool: 'apay_request',
+                      status: 'acknowledged',
+                      target_url: url,
+                      method: (args.method || 'GET').toUpperCase(),
+                      network: 'Base Mainnet (Chain ID 8453)',
+                      message:
+                        'Endpoint validated and ready for high-speed cryptographic micropayment execution via A-Pay Gateway.',
+                    },
+                    null,
+                    2,
+                  ),
+                },
+              ],
+            },
+          },
+          { headers: CORS_HEADERS },
+        );
+      }
+
+      if (toolName === 'apay_set_budget') {
+        const numericArgs = [
+          'max_per_call_usdc',
+          'daily_budget_usdc',
+          'max_per_call_apay',
+          'daily_budget_apay',
+        ];
+        for (const k of numericArgs) {
+          if (k in args && args[k] !== undefined && args[k] !== null) {
+            const num = Number(args[k]);
+            if (Number.isNaN(num) || !Number.isFinite(num) || num < 0) {
+              return NextResponse.json(
+                {
+                  jsonrpc: '2.0',
+                  id: msgId,
+                  result: {
+                    isError: true,
+                    content: [
+                      {
+                        type: 'text',
+                        text: `Invalid budget value for '${k}': must be a finite non-negative number.`,
+                      },
+                    ],
+                  },
+                },
+                { headers: CORS_HEADERS },
+              );
+            }
+          }
+        }
+        return NextResponse.json(
+          {
+            jsonrpc: '2.0',
+            id: msgId,
+            result: {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify(
+                    {
+                      status: 'success',
+                      updated_guardrails: args,
+                    },
+                    null,
+                    2,
+                  ),
+                },
+              ],
+            },
+          },
+          { headers: CORS_HEADERS },
+        );
+      }
+
+      // Default fallback for unrecognized tools
       return NextResponse.json(
         {
           jsonrpc: '2.0',
           id: msgId,
           result: {
+            isError: true,
             content: [
               {
                 type: 'text',
-                text: JSON.stringify({
-                  tool: toolName,
-                  status: 'acknowledged',
-                  message: `Tool ${toolName} ready for execution via A-Pay Gateway on Base Mainnet.`,
-                }),
+                text: `Unknown tool: ${toolName}`,
               },
             ],
           },

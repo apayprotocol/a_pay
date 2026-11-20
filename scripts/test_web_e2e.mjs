@@ -351,7 +351,7 @@ async function main() {
 	);
 
 	await runStep(
-		"GET /api/mcp returns MCP server catalog and available tools",
+		"GET /api/mcp returns MCP server catalog and available tools with 2025-06-18 readiness",
 		async () => {
 			const res = await fetch(`${BASE_URL}/api/mcp`);
 			assert(res.status === 200, `Expected status 200, got ${res.status}`);
@@ -359,6 +359,10 @@ async function main() {
 			assert(
 				data.serverInfo && data.serverInfo.name === "apay-mcp",
 				"Expected apay-mcp serverInfo",
+			);
+			assert(
+				data.protocolVersion === "2025-06-18",
+				`Expected protocolVersion 2025-06-18, got ${data.protocolVersion}`,
 			);
 			assert(Array.isArray(data.tools), "Expected tools array");
 			const toolNames = data.tools.map((t) => t.name);
@@ -370,6 +374,115 @@ async function main() {
 			assert(
 				toolNames.includes("apay_set_budget"),
 				"Expected apay_set_budget tool",
+			);
+			assert(
+				toolNames.includes("apay_inspect_endpoint"),
+				"Expected apay_inspect_endpoint tool",
+			);
+			assert(
+				toolNames.includes("apay_get_balance"),
+				"Expected apay_get_balance tool",
+			);
+
+			// Glimind readiness: verify annotations and parameter descriptions across all 5 tools
+			for (const tool of data.tools) {
+				assert(
+					tool.annotations && typeof tool.annotations.readOnlyHint === "boolean",
+					`Tool ${tool.name} missing readOnlyHint annotation`,
+				);
+				assert(
+					typeof tool.annotations.destructiveHint === "boolean",
+					`Tool ${tool.name} missing destructiveHint annotation`,
+				);
+				assert(
+					typeof tool.annotations.idempotentHint === "boolean",
+					`Tool ${tool.name} missing idempotentHint annotation`,
+				);
+
+				const props = tool.inputSchema?.properties || {};
+				for (const [pName, pDef] of Object.entries(props)) {
+					assert(
+						pDef.description && pDef.description.trim().length > 0,
+						`Tool ${tool.name} parameter ${pName} missing description`,
+					);
+				}
+			}
+		},
+	);
+
+	await runStep(
+		"POST /api/mcp handles initialize with version negotiation & security checks",
+		async () => {
+			// 1. Initialize default (2025-06-18)
+			const initRes = await fetch(`${BASE_URL}/api/mcp`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "initialize" }),
+			});
+			assert(initRes.status === 200, "Expected status 200");
+			const initData = await initRes.json();
+			assert(
+				initData.result.protocolVersion === "2025-06-18",
+				"Expected 2025-06-18 negotiated protocol",
+			);
+
+			// 2. Initialize legacy negotiation (2024-11-05)
+			const legacyRes = await fetch(`${BASE_URL}/api/mcp`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					jsonrpc: "2.0",
+					id: 2,
+					method: "initialize",
+					params: { protocolVersion: "2024-11-05" },
+				}),
+			});
+			const legacyData = await legacyRes.json();
+			assert(
+				legacyData.result.protocolVersion === "2024-11-05",
+				"Expected 2024-11-05 negotiated protocol",
+			);
+
+			// 3. Security: SSRF rejection in apay_request
+			const ssrfRes = await fetch(`${BASE_URL}/api/mcp`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					jsonrpc: "2.0",
+					id: 3,
+					method: "tools/call",
+					params: {
+						name: "apay_request",
+						arguments: { url: "http://169.254.169.254/latest/meta-data/" },
+					},
+				}),
+			});
+			const ssrfData = await ssrfRes.json();
+			assert(ssrfData.result.isError === true, "Expected SSRF request to be rejected");
+			assert(
+				ssrfData.result.content[0].text.includes("Security Policy Violation"),
+				"Expected Security Policy Violation message",
+			);
+
+			// 4. Security: Negative budget rejection in apay_set_budget
+			const budgetRes = await fetch(`${BASE_URL}/api/mcp`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					jsonrpc: "2.0",
+					id: 4,
+					method: "tools/call",
+					params: {
+						name: "apay_set_budget",
+						arguments: { max_per_call_usdc: -1.0 },
+					},
+				}),
+			});
+			const budgetData = await budgetRes.json();
+			assert(budgetData.result.isError === true, "Expected negative budget to be rejected");
+			assert(
+				budgetData.result.content[0].text.includes("non-negative"),
+				"Expected non-negative error text",
 			);
 		},
 	);
