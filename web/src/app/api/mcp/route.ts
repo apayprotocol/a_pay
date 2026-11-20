@@ -195,7 +195,7 @@ export async function GET() {
     {
       serverInfo: {
         name: 'apay-mcp',
-        version: '0.1.14',
+        version: '0.1.15',
         description:
           'Universal Micropayment & Autonomous Economic Settlement Engine for AI Agents on Base L2.',
       },
@@ -227,7 +227,7 @@ export async function POST(request: Request) {
             capabilities: MCP_CAPABILITIES,
             serverInfo: {
               name: 'apay-mcp',
-              version: '0.1.14',
+              version: '0.1.15',
             },
           },
         },
