@@ -15,7 +15,39 @@ A-Pay enforces:
 
 ---
 
-## 2. Component Breakdown
+## 2. The Three Architectural Pillars
+
+```
+   [PILLAR 1: SELLER]                 [PILLAR 2: BUYER]               [PILLAR 3: SETTLEMENT]
+   -------------------                -----------------               ----------------------
+   API / Site Owner                   Autonomous Agent                Base L2 Smart Contracts
+   • HTTP 402 Paywall                 • AgentWallet                   • EscrowVault
+   • FastAPI / Express / Next.js      • Spending Guardrails           • APayRouter V2 Enterprise
+   • WordPress 1-Click Reverse Proxy  • MCP Tool Server               • EIP-712 Challenge Settlement
+   • Pricing & Receiver Config        • Auto-Settling HTTP Client     • Dual Token: USDC & $APAY
+```
+
+### Pillar 1: HTTP 402 Paywall & Monetization Layer (For Publishers & Sellers)
+Turn unmetered AI crawler traffic into instant, automated revenue:
+* **Zero-Setup Middlewares**: 1-line integrations for **FastAPI, Express.js**, and **Next.js 15**.
+* **WordPress 1-Click Reverse Proxy**: Instant paywall for any WordPress site or WooCommerce store with auto domain escrow.
+* **Granular Price Negotiation**: Per-endpoint pricing in `USDC` (micro-cents) or `$APAY` (protocol token).
+
+### Pillar 2: Autonomous Agent Wallet & MCP Server (For AI Agents & LLMs)
+Give AI agents economic agency with programmatic safety rails:
+* **Model Context Protocol (MCP)**: Native integration for **Claude Desktop, Cursor, Cline, Windsurf**, and custom LLM tool runners (Grade A verified).
+* **Spending & Counterparty Guardrails**: Define hard spending limits (`daily_budget_usdc=2.00`, `max_per_call_usdc=0.01`) and opt-in verified seller verification (`verify_seller_seal=True` via SealKeeper). The agent cannot exceed its delegated allowance or settle with unproven sellers.
+* **Auto-Settling HTTP Client**: `APaySession` automatically catches `402` headers, checks seller reputation/SEAL, signs the EIP-712 challenge, and retrieves data in a single round-trip (<15ms).
+
+### Pillar 3: On-Chain Base L2 Settlement & Escrow Vault (For Enterprise Web3 Security)
+Enterprise-grade cryptographic settlement built on Coinbase's Base Layer 2:
+* **EIP-712 Off-Chain Signatures**: Agents sign cryptographically binding micro-payment authorizations off-chain (0 gas, <15ms).
+* **EscrowVault with Session Keys**: Deposit funds once, authorize temporary session keys, and withdraw anytime. Private keys never touch third-party servers.
+* **Dynamic Multi-Token Support**: Native settlement in **USDC** (Circle) and **$APAY** (Fixed 100M supply utility token).
+
+---
+
+## 3. Component Breakdown
 
 ### A. Client SDK (`src/apay` - PyPI: `apay`)
 - **Wallet Abstraction**: Generates or imports an EVM/Solana keypair into an ephemeral session.
@@ -40,7 +72,7 @@ A-Pay enforces:
 
 ---
 
-## 3. The HTTP 402 Protocol Flow
+## 4. The HTTP 402 Protocol Flow
 
 ```http
 [1. AI Agent -> Server]
@@ -88,7 +120,7 @@ X-APay-Settled: true
 
 ---
 
-## 4. Why Base (EVM L2) as the Primary Rail?
+## 5. Why Base (EVM L2) as the Primary Rail?
 - **Cost**: < $0.0005 average gas fee per transfer.
 - **Finality**: 200ms block intervals (OP Stack).
 - **USDC Liquidity**: Native Circle deployment (not bridged).
