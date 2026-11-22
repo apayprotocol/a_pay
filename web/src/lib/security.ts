@@ -177,14 +177,20 @@ export function isAuthorizedFounder(request: Request, founderWallet: string): bo
 }
 
 /**
- * Detects whether a domain or URL is a placeholder/demo domain
+ * Detects whether a domain or URL is a placeholder/demo domain, pentest probe,
+ * wildcard/DNS rebinding service, or unverified high-authority domain
  * that should not be published to live registries or eligible for production genesis grants.
  */
 export function isPlaceholderOrDemoDomain(urlOrDomain: string): boolean {
   if (!urlOrDomain || typeof urlOrDomain !== 'string') return true;
-  const clean = urlOrDomain
-    .trim()
-    .toLowerCase()
+  const raw = urlOrDomain.trim().toLowerCase();
+
+  // 1. Detect command injection / shell metacharacters / template tags
+  if (/[${}();|&`"<>\\ \t\r\n]/.test(raw)) {
+    return true;
+  }
+
+  const clean = raw
     .replace(/^https?:\/\//, '')
     .split('/')[0]
     .split(':')[0];
@@ -198,6 +204,47 @@ export function isPlaceholderOrDemoDomain(urlOrDomain: string): boolean {
     return false;
   }
 
+  // 2. Cloud metadata, loopback & private subnets (even when embedded in fake hostnames)
+  if (
+    clean === '169.254.169.254' ||
+    clean.includes('169.254.') ||
+    clean === '127.0.0.1' ||
+    clean.startsWith('127.') ||
+    clean === '0.0.0.0' ||
+    clean === 'localhost'
+  ) {
+    return true;
+  }
+
+  // 3. DNS rebinding & wildcard DNS services commonly abused for SSRF
+  const rebindingSuffixes = [
+    'sslip.io',
+    'nip.io',
+    '1u.ms',
+    'xip.io',
+    'localtest.me',
+    'vcap.me',
+    'lvh.me',
+  ];
+  if (rebindingSuffixes.some((s) => clean === s || clean.endsWith(`.${s}`))) {
+    return true;
+  }
+
+  // 4. Out-of-band capture / pentest callback webhooks
+  const pentestSuffixes = [
+    'webhook.site',
+    'burpcollaborator.net',
+    'oastify.com',
+    'interactsh.com',
+    'canarytokens.com',
+    'requestcatcher.com',
+    'pipedream.net',
+  ];
+  if (pentestSuffixes.some((s) => clean === s || clean.endsWith(`.${s}`))) {
+    return true;
+  }
+
+  // 5. Classic demo & placeholder domains
   const demoPatterns = [
     'yourdomain.com',
     'api.yourdomain.com',
@@ -205,13 +252,33 @@ export function isPlaceholderOrDemoDomain(urlOrDomain: string): boolean {
     'example.org',
     'example.net',
     'httpbin.org',
-    'localhost',
-    '127.0.0.1',
     'test.com',
     'mysite.com',
     'foo.com',
     'bar.com',
   ];
+  if (demoPatterns.some((pattern) => clean === pattern || clean.endsWith(`.${pattern}`))) {
+    return true;
+  }
 
-  return demoPatterns.some((pattern) => clean === pattern || clean.endsWith(`.${pattern}`));
+  // 6. High-authority search / big-tech domains cannot be registered into the M2M merchant registry via unauthenticated heartbeat
+  const unverifiedMajorPlatforms = [
+    'google.com',
+    'apple.com',
+    'microsoft.com',
+    'amazon.com',
+    'facebook.com',
+    'meta.com',
+    'twitter.com',
+    'x.com',
+    'openai.com',
+    'anthropic.com',
+    'github.com',
+    'youtube.com',
+  ];
+  if (unverifiedMajorPlatforms.some((p) => clean === p || clean.endsWith(`.${p}`))) {
+    return true;
+  }
+
+  return false;
 }

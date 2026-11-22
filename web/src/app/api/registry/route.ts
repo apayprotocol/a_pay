@@ -281,8 +281,9 @@ export async function GET(request: Request) {
       const dynamicServices = allMerchants
         .filter(
           (m) =>
-            m.status === 'online' ||
-            (!m.targetDomain.includes('e2e-') && !m.targetDomain.includes('127.0.0.1')),
+            !isPlaceholderOrDemoDomain(m.targetDomain) &&
+            (m.status === 'online' ||
+              (!m.targetDomain.includes('e2e-') && !m.targetDomain.includes('127.0.0.1'))),
         )
         .map((m) => ({
           id: m.id,
