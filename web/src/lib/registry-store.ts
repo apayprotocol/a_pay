@@ -14,6 +14,8 @@ export interface MerchantRecord {
   name?: string;
   category?: string;
   description?: string;
+  verified?: boolean;
+  verificationMethod?: 'dns_txt' | 'well_known' | 'protocol_core' | 'community';
 }
 
 const REGISTRY_CACHE_FILE = path.join('/tmp', 'apay_registry.json');

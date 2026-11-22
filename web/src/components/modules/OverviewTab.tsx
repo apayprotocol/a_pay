@@ -115,6 +115,7 @@ export function OverviewTab({
   const [streamTab, setStreamTab] = useState<'transfers' | 'router'>('transfers');
   const [isLoadingLogs, setIsLoadingLogs] = useState(false);
   const [registeredMerchants, setRegisteredMerchants] = useState<any[]>([]);
+  const [merchantFilter, setMerchantFilter] = useState<'all' | 'verified' | 'community'>('all');
   const [isLoadingRegistry, setIsLoadingRegistry] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
   const [isMounted, setIsMounted] = useState(false);
@@ -273,6 +274,8 @@ export function OverviewTab({
               s.network || (activeNetwork === 'base-mainnet' ? 'base-mainnet' : 'base-sepolia'),
             version: s.version || '0.1.8',
             status: s.status || 'online',
+            verified: Boolean(s.verified),
+            verificationMethod: s.verificationMethod || (s.verified ? 'well_known' : 'community'),
           }));
           setRegisteredMerchants(formatted);
         }
@@ -1252,6 +1255,57 @@ export function OverviewTab({
           </div>
         </div>
 
+        {/* Merchant Directory Filter Bar */}
+        {registeredMerchants.length > 0 && (
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-100 dark:border-slate-800/60 text-xs">
+            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 font-mono text-[11px]">
+              <button
+                type="button"
+                onClick={() => setMerchantFilter('all')}
+                className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
+                  merchantFilter === 'all'
+                    ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold shadow-xs'
+                    : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                }`}
+              >
+                All ({registeredMerchants.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setMerchantFilter('verified')}
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg transition-colors cursor-pointer ${
+                  merchantFilter === 'verified'
+                    ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/30'
+                    : 'text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400'
+                }`}
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                <span>Verified ({registeredMerchants.filter((m) => m.verified).length})</span>
+              </button>
+              {registeredMerchants.some((m) => !m.verified) && (
+                <button
+                  type="button"
+                  onClick={() => setMerchantFilter('community')}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg transition-colors cursor-pointer ${
+                    merchantFilter === 'community'
+                      ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold border border-amber-500/30'
+                      : 'text-slate-500 hover:text-amber-600 dark:hover:text-amber-400'
+                  }`}
+                >
+                  <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Community ({registeredMerchants.filter((m) => !m.verified).length})</span>
+                </button>
+              )}
+            </div>
+            <div className="text-[11px] font-mono text-slate-500 dark:text-slate-400 flex items-center gap-2">
+              <span className="inline-flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+                Domain Proved via DNS/Site-File
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Founder Action Feedback Banner */}
         {founderActionFeedback && (
           <div
@@ -1319,216 +1373,236 @@ export function OverviewTab({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-mono">
-                {registeredMerchants.map((m) => {
-                  const cleanDomain = (m.targetDomain || '').trim().replace(/\/+$/, '');
-                  const isDemoDomain = isPlaceholderOrDemoDomain(cleanDomain);
-                  const isFounderWallet = Boolean(
-                    m.wallet && m.wallet.toLowerCase() === CONTRACTS.founder.toLowerCase(),
-                  );
-                  const isStakingWallet = Boolean(
-                    m.wallet &&
-                      m.wallet.toLowerCase() === CONTRACTS.StakingVault.address.toLowerCase(),
-                  );
-                  const isEscrowWallet = Boolean(
-                    m.wallet &&
-                      m.wallet.toLowerCase() === CONTRACTS.EscrowVault.address.toLowerCase(),
-                  );
-                  const isContractWallet = isStakingWallet || isEscrowWallet;
-                  const isDemoOrEcosystem = isDemoDomain || isFounderWallet || isContractWallet;
+                {registeredMerchants
+                  .filter((m) => {
+                    if (merchantFilter === 'verified') return m.verified;
+                    if (merchantFilter === 'community') return !m.verified;
+                    return true;
+                  })
+                  .map((m) => {
+                    const cleanDomain = (m.targetDomain || '').trim().replace(/\/+$/, '');
+                    const isDemoDomain = isPlaceholderOrDemoDomain(cleanDomain);
+                    const isFounderWallet = Boolean(
+                      m.wallet && m.wallet.toLowerCase() === CONTRACTS.founder.toLowerCase(),
+                    );
+                    const isStakingWallet = Boolean(
+                      m.wallet &&
+                        m.wallet.toLowerCase() === CONTRACTS.StakingVault.address.toLowerCase(),
+                    );
+                    const isEscrowWallet = Boolean(
+                      m.wallet &&
+                        m.wallet.toLowerCase() === CONTRACTS.EscrowVault.address.toLowerCase(),
+                    );
+                    const isContractWallet = isStakingWallet || isEscrowWallet;
+                    const isDemoOrEcosystem = isDemoDomain || isFounderWallet || isContractWallet;
 
-                  let categoryBadge = null;
-                  if (isFounderWallet) {
-                    categoryBadge = (
-                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
-                        Founder Vault
-                      </span>
-                    );
-                  } else if (isStakingWallet) {
-                    categoryBadge = (
-                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
-                        Staking Vault
-                      </span>
-                    );
-                  } else if (isDemoDomain) {
-                    categoryBadge = (
-                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                        Demo Showcase
-                      </span>
-                    );
-                  } else {
-                    categoryBadge = (
-                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                        Live Merchant
-                      </span>
-                    );
-                  }
-
-                  return (
-                    <tr
-                      key={m.id}
-                      className="hover:bg-slate-50/80 dark:hover:bg-slate-900/60 transition-colors"
-                    >
-                      <td className="py-3 px-4 text-blue-600 dark:text-sky-400 font-bold">
-                        {m.wallet?.startsWith('0x')
-                          ? `${m.wallet.slice(0, 6)}...${m.wallet.slice(-4)}`
-                          : m.wallet || 'Base L2 Node'}
-                      </td>
-                      <td className="py-3 px-4 text-slate-800 dark:text-slate-200 font-medium">
-                        <div className="flex items-center gap-2">
-                          <span>{cleanDomain}</span>
-                          {categoryBadge}
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-emerald-600 dark:text-emerald-400 font-bold">
-                        {m.price}
-                      </td>
-                      <td className="py-3 px-4 text-slate-500 uppercase">{m.network || 'base'}</td>
-                      <td className="py-3 px-4 text-slate-500">v{m.version}</td>
-                      <td className="py-3 px-4 text-right">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                            m.status === 'online'
-                              ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800'
-                              : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
-                          }`}
-                        >
-                          <span
-                            className={`w-1.5 h-1.5 rounded-full ${
-                              m.status === 'online'
-                                ? 'bg-emerald-500 animate-pulse'
-                                : 'bg-slate-400'
-                            }`}
-                          />
-                          {m.status === 'online' ? 'LIVE' : 'IDLE'}
+                    let categoryBadge = null;
+                    if (isFounderWallet) {
+                      categoryBadge = (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                          Founder Vault
                         </span>
-                      </td>
-                      {isFounder && (
-                        <td className="py-3 px-4 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
-                            {/* 1. Gift 10 $APAY Welcome Grant Button */}
-                            {(() => {
-                              const isGifted = Boolean(
-                                giftedMerchants[m.id] ||
-                                  (m.wallet && giftedMerchants[m.wallet.toLowerCase()]),
-                              );
-                              const giftInfo =
-                                giftedMerchants[m.id] ||
-                                (m.wallet ? giftedMerchants[m.wallet.toLowerCase()] : null);
-                              const isGifting = activeFounderAction === `gift-${m.id}`;
-                              const disableGift = isGifting || isGifted || isDemoOrEcosystem;
+                      );
+                    } else if (isStakingWallet) {
+                      categoryBadge = (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
+                          Staking Vault
+                        </span>
+                      );
+                    } else if (isDemoDomain) {
+                      categoryBadge = (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                          Demo Showcase
+                        </span>
+                      );
+                    } else if (m.verified) {
+                      categoryBadge = (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shadow-xs">
+                          <ShieldCheck className="w-3 h-3 text-emerald-500" />
+                          Verified Merchant
+                        </span>
+                      );
+                    } else {
+                      categoryBadge = (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-mono font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                          <AlertCircle className="w-2.5 h-2.5 text-amber-500" />
+                          Community Node
+                        </span>
+                      );
+                    }
 
-                              const giftTooltip = isGifted
-                                ? `10 $APAY Welcome Grant Sent! (Tx: ${giftInfo?.txHash ? `${giftInfo.txHash.slice(0, 10)}...` : 'Confirmed'})`
-                                : isFounderWallet
-                                  ? 'Founder Vault (Self-transfer not needed)'
-                                  : isStakingWallet
-                                    ? 'Staking Vault Contract (Direct grant disabled)'
-                                    : isDemoDomain
-                                      ? 'Demo Showcase Service (Reserved for live external merchants)'
-                                      : 'Gift 10 $APAY On-Chain Welcome Grant to Merchant';
-
-                              return (
-                                <button
-                                  type="button"
-                                  onClick={() => !disableGift && handleGiftTokens(m)}
-                                  disabled={disableGift}
-                                  className={`relative p-1.5 rounded-lg transition-all ${
-                                    isGifted
-                                      ? 'bg-amber-500/10 text-amber-500 border border-amber-500/30 cursor-default opacity-90'
-                                      : isGifting
-                                        ? 'bg-amber-500/20 text-amber-400 animate-pulse cursor-wait'
-                                        : isDemoOrEcosystem
-                                          ? 'bg-slate-100 dark:bg-slate-800/40 text-slate-400 dark:text-slate-600 cursor-not-allowed opacity-40'
-                                          : 'hover:bg-amber-500/20 text-slate-400 hover:text-amber-400 hover:scale-110 cursor-pointer active:scale-95'
-                                  }`}
-                                  title={giftTooltip}
-                                >
-                                  {isGifting ? (
-                                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-amber-400" />
-                                  ) : isGifted ? (
-                                    <span className="flex items-center justify-center">
-                                      <Gift className="w-3.5 h-3.5 text-amber-500" />
-                                      <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-500 rounded-full border border-slate-900" />
-                                    </span>
-                                  ) : (
-                                    <Gift className="w-3.5 h-3.5" />
-                                  )}
-                                </button>
-                              );
-                            })()}
-
-                            {/* 2. Test Paywall & Micro-Payment Button */}
-                            {(() => {
-                              const isTested = Boolean(
-                                testedMerchants[m.id] ||
-                                  (m.wallet && testedMerchants[m.wallet.toLowerCase()]),
-                              );
-                              const testInfo =
-                                testedMerchants[m.id] ||
-                                (m.wallet ? testedMerchants[m.wallet.toLowerCase()] : null);
-                              const isTesting = activeFounderAction === `test-${m.id}`;
-                              const payPrice = parseApayPrice(m.price);
-
-                              return (
-                                <button
-                                  type="button"
-                                  onClick={() => handleTestPaywallPayment(m)}
-                                  disabled={isTesting || isTested}
-                                  className={`relative p-1.5 rounded-lg transition-all ${
-                                    isTested
-                                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 cursor-default opacity-90'
-                                      : isTesting
-                                        ? 'bg-blue-500/20 text-blue-400 animate-pulse cursor-wait'
-                                        : 'hover:bg-blue-500/20 text-slate-400 hover:text-blue-400 hover:scale-110 cursor-pointer active:scale-95'
-                                  }`}
-                                  title={
-                                    isTested
-                                      ? `Paywall Tested & Paid ${testInfo?.price || `${payPrice} $APAY`}! (Tx: ${testInfo?.txHash ? `${testInfo.txHash.slice(0, 10)}...` : 'Confirmed'})`
-                                      : `Test Paywall & Send Payment (${payPrice} $APAY)`
-                                  }
-                                >
-                                  {isTesting ? (
-                                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-blue-400" />
-                                  ) : isTested ? (
-                                    <span className="flex items-center justify-center">
-                                      <Zap className="w-3.5 h-3.5 text-emerald-400 fill-emerald-400/40" />
-                                      <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-500 rounded-full border border-slate-900" />
-                                    </span>
-                                  ) : (
-                                    <Zap className="w-3.5 h-3.5" />
-                                  )}
-                                </button>
-                              );
-                            })()}
-
-                            {/* 3. Delete from registry */}
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteMerchant(cleanDomain, m.wallet)}
-                              disabled={deletingMerchant === cleanDomain}
-                              className={`p-1.5 rounded-lg transition-colors ${
-                                deletingMerchant === cleanDomain
-                                  ? 'bg-red-500/20 text-red-400 cursor-wait'
-                                  : 'hover:bg-red-500/10 text-slate-400 hover:text-red-500 cursor-pointer'
-                              }`}
-                              title={
-                                deletingMerchant === cleanDomain
-                                  ? 'Deleting merchant from registry...'
-                                  : 'Delete merchant from registry'
-                              }
-                            >
-                              {deletingMerchant === cleanDomain ? (
-                                <RefreshCw className="w-3.5 h-3.5 animate-spin text-red-400" />
-                              ) : (
-                                <Trash2 className="w-3.5 h-3.5" />
-                              )}
-                            </button>
+                    return (
+                      <tr
+                        key={m.id}
+                        className="hover:bg-slate-50/80 dark:hover:bg-slate-900/60 transition-colors"
+                      >
+                        <td className="py-3 px-4 text-blue-600 dark:text-sky-400 font-bold">
+                          {m.wallet?.startsWith('0x')
+                            ? `${m.wallet.slice(0, 6)}...${m.wallet.slice(-4)}`
+                            : m.wallet || 'Base L2 Node'}
+                        </td>
+                        <td className="py-3 px-4 text-slate-800 dark:text-slate-200 font-medium">
+                          <div className="flex items-center gap-2">
+                            <span>{cleanDomain}</span>
+                            {categoryBadge}
                           </div>
                         </td>
-                      )}
-                    </tr>
-                  );
-                })}
+                        <td className="py-3 px-4 text-emerald-600 dark:text-emerald-400 font-bold">
+                          {m.price}
+                        </td>
+                        <td className="py-3 px-4 text-slate-500 uppercase">
+                          {m.network || 'base'}
+                        </td>
+                        <td className="py-3 px-4 text-slate-500">v{m.version}</td>
+                        <td className="py-3 px-4 text-right">
+                          <span
+                            className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                              m.status === 'online' && m.verified
+                                ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800'
+                                : m.status === 'online'
+                                  ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800'
+                                  : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                            }`}
+                          >
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full ${
+                                m.status === 'online' && m.verified
+                                  ? 'bg-emerald-500 animate-pulse'
+                                  : m.status === 'online'
+                                    ? 'bg-amber-500'
+                                    : 'bg-slate-400'
+                              }`}
+                            />
+                            {m.status === 'online' ? (m.verified ? 'LIVE' : 'UNVERIFIED') : 'IDLE'}
+                          </span>
+                        </td>
+                        {isFounder && (
+                          <td className="py-3 px-4 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              {/* 1. Gift 10 $APAY Welcome Grant Button */}
+                              {(() => {
+                                const isGifted = Boolean(
+                                  giftedMerchants[m.id] ||
+                                    (m.wallet && giftedMerchants[m.wallet.toLowerCase()]),
+                                );
+                                const giftInfo =
+                                  giftedMerchants[m.id] ||
+                                  (m.wallet ? giftedMerchants[m.wallet.toLowerCase()] : null);
+                                const isGifting = activeFounderAction === `gift-${m.id}`;
+                                const disableGift = isGifting || isGifted || isDemoOrEcosystem;
+
+                                const giftTooltip = isGifted
+                                  ? `10 $APAY Welcome Grant Sent! (Tx: ${giftInfo?.txHash ? `${giftInfo.txHash.slice(0, 10)}...` : 'Confirmed'})`
+                                  : isFounderWallet
+                                    ? 'Founder Vault (Self-transfer not needed)'
+                                    : isStakingWallet
+                                      ? 'Staking Vault Contract (Direct grant disabled)'
+                                      : isDemoDomain
+                                        ? 'Demo Showcase Service (Reserved for live external merchants)'
+                                        : 'Gift 10 $APAY On-Chain Welcome Grant to Merchant';
+
+                                return (
+                                  <button
+                                    type="button"
+                                    onClick={() => !disableGift && handleGiftTokens(m)}
+                                    disabled={disableGift}
+                                    className={`relative p-1.5 rounded-lg transition-all ${
+                                      isGifted
+                                        ? 'bg-amber-500/10 text-amber-500 border border-amber-500/30 cursor-default opacity-90'
+                                        : isGifting
+                                          ? 'bg-amber-500/20 text-amber-400 animate-pulse cursor-wait'
+                                          : isDemoOrEcosystem
+                                            ? 'bg-slate-100 dark:bg-slate-800/40 text-slate-400 dark:text-slate-600 cursor-not-allowed opacity-40'
+                                            : 'hover:bg-amber-500/20 text-slate-400 hover:text-amber-400 hover:scale-110 cursor-pointer active:scale-95'
+                                    }`}
+                                    title={giftTooltip}
+                                  >
+                                    {isGifting ? (
+                                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-amber-400" />
+                                    ) : isGifted ? (
+                                      <span className="flex items-center justify-center">
+                                        <Gift className="w-3.5 h-3.5 text-amber-500" />
+                                        <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-500 rounded-full border border-slate-900" />
+                                      </span>
+                                    ) : (
+                                      <Gift className="w-3.5 h-3.5" />
+                                    )}
+                                  </button>
+                                );
+                              })()}
+
+                              {/* 2. Test Paywall & Micro-Payment Button */}
+                              {(() => {
+                                const isTested = Boolean(
+                                  testedMerchants[m.id] ||
+                                    (m.wallet && testedMerchants[m.wallet.toLowerCase()]),
+                                );
+                                const testInfo =
+                                  testedMerchants[m.id] ||
+                                  (m.wallet ? testedMerchants[m.wallet.toLowerCase()] : null);
+                                const isTesting = activeFounderAction === `test-${m.id}`;
+                                const payPrice = parseApayPrice(m.price);
+
+                                return (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleTestPaywallPayment(m)}
+                                    disabled={isTesting || isTested}
+                                    className={`relative p-1.5 rounded-lg transition-all ${
+                                      isTested
+                                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 cursor-default opacity-90'
+                                        : isTesting
+                                          ? 'bg-blue-500/20 text-blue-400 animate-pulse cursor-wait'
+                                          : 'hover:bg-blue-500/20 text-slate-400 hover:text-blue-400 hover:scale-110 cursor-pointer active:scale-95'
+                                    }`}
+                                    title={
+                                      isTested
+                                        ? `Paywall Tested & Paid ${testInfo?.price || `${payPrice} $APAY`}! (Tx: ${testInfo?.txHash ? `${testInfo.txHash.slice(0, 10)}...` : 'Confirmed'})`
+                                        : `Test Paywall & Send Payment (${payPrice} $APAY)`
+                                    }
+                                  >
+                                    {isTesting ? (
+                                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-blue-400" />
+                                    ) : isTested ? (
+                                      <span className="flex items-center justify-center">
+                                        <Zap className="w-3.5 h-3.5 text-emerald-400 fill-emerald-400/40" />
+                                        <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-500 rounded-full border border-slate-900" />
+                                      </span>
+                                    ) : (
+                                      <Zap className="w-3.5 h-3.5" />
+                                    )}
+                                  </button>
+                                );
+                              })()}
+
+                              {/* 3. Delete from registry */}
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteMerchant(cleanDomain, m.wallet)}
+                                disabled={deletingMerchant === cleanDomain}
+                                className={`p-1.5 rounded-lg transition-colors ${
+                                  deletingMerchant === cleanDomain
+                                    ? 'bg-red-500/20 text-red-400 cursor-wait'
+                                    : 'hover:bg-red-500/10 text-slate-400 hover:text-red-500 cursor-pointer'
+                                }`}
+                                title={
+                                  deletingMerchant === cleanDomain
+                                    ? 'Deleting merchant from registry...'
+                                    : 'Delete merchant from registry'
+                                }
+                              >
+                                {deletingMerchant === cleanDomain ? (
+                                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-red-400" />
+                                ) : (
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                )}
+                              </button>
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
           </div>

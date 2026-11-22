@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { recoverMessageAddress } from 'viem';
 import { CONTRACTS } from '@/config/contracts';
+import { domainEscrowStore } from '@/lib/domain-escrow-store';
 import { canonicalizeDomain, type MerchantRecord, registryStore } from '@/lib/registry-store';
 import { isAuthorizedFounder, isPlaceholderOrDemoDomain } from '@/lib/security';
 
@@ -29,6 +30,40 @@ export async function POST(request: Request) {
 
     // Clean target domain canonically
     const sanitizedDomain = canonicalizeDomain(targetDomain || 'unknown');
+    const cleanHost = sanitizedDomain
+      .replace(/^https?:\/\//, '')
+      .split('/')[0]
+      .split(':')[0]
+      .toLowerCase();
+
+    const isFounderWallet = Boolean(
+      wallet && wallet.toLowerCase() === CONTRACTS.founder.toLowerCase(),
+    );
+    const isKnownVerified = [
+      'guruxpert.com',
+      'talentedchin.s3-tastewp.com',
+      'gstneural.com',
+      'ai-publisher-earnings.io',
+    ].some((h) => cleanHost === h || cleanHost.endsWith(`.${h}`));
+
+    let isVerified = Boolean(isFounderWallet || isKnownVerified);
+    let method: 'dns_txt' | 'well_known' | 'protocol_core' | 'community' = isVerified
+      ? isFounderWallet
+        ? 'protocol_core'
+        : 'well_known'
+      : 'community';
+
+    if (!isVerified) {
+      try {
+        const escrow = await domainEscrowStore.getEscrow(sanitizedDomain);
+        if (escrow && escrow.status === 'claimed') {
+          isVerified = true;
+          method = 'dns_txt';
+        }
+      } catch {
+        // Non-blocking
+      }
+    }
 
     const now = Date.now();
     const existingList = await registryStore.getMerchants();
@@ -57,6 +92,8 @@ export async function POST(request: Request) {
         description ||
         existing?.description ||
         `HTTP 402 Paywalled M2M microservice registered via A-Pay Gateway (${version || existing?.version || '0.1.13'}).`,
+      verified: isVerified || existing?.verified || false,
+      verificationMethod: method || existing?.verificationMethod || 'community',
     };
 
     await registryStore.saveMerchant(record);
@@ -122,6 +159,8 @@ export async function GET(request: Request) {
         bonded: boolean;
         isBonded?: boolean;
         status: 'online' | 'idle';
+        verified?: boolean;
+        verificationMethod?: string;
         tags: string[];
         samplePayload: any;
       }
@@ -143,6 +182,8 @@ export async function GET(request: Request) {
           uptimePct: 99.98,
           bonded: true,
           status: 'online' as const,
+          verified: true,
+          verificationMethod: 'protocol_core',
           tags: ['Order Flow', 'Institutional', 'BTC', 'Macro'],
           samplePayload: {
             source: 'AlphaMarket Institutional Feed',
@@ -168,6 +209,8 @@ export async function GET(request: Request) {
           uptimePct: 99.95,
           bonded: true,
           status: 'online' as const,
+          verified: true,
+          verificationMethod: 'protocol_core',
           tags: ['LLM', 'Reasoning', 'MoE', 'Autonomous'],
           samplePayload: {
             model: 'deepseek-v3',
@@ -193,6 +236,8 @@ export async function GET(request: Request) {
           uptimePct: 99.9,
           bonded: true,
           status: 'online' as const,
+          verified: true,
+          verificationMethod: 'protocol_core',
           tags: ['DOM', 'Crawl', 'Markdown', 'Headless'],
           samplePayload: {
             url: 'https://base.org',
@@ -218,6 +263,8 @@ export async function GET(request: Request) {
           uptimePct: 99.99,
           bonded: true,
           status: 'online' as const,
+          verified: true,
+          verificationMethod: 'protocol_core',
           tags: ['DEX', 'Aerodrome', 'Whale', 'Swaps'],
           samplePayload: {
             pool: '0x6933dd2B7D72d8561005E475AFa147E47A3c7777',
@@ -243,6 +290,8 @@ export async function GET(request: Request) {
           uptimePct: 99.85,
           bonded: true,
           status: 'online' as const,
+          verified: true,
+          verificationMethod: 'protocol_core',
           tags: ['Security', 'Audit', 'Solidity', 'AST'],
           samplePayload: {
             target_contract: '0xd08c8a337e5339d1c083e06d74a9265956ceea16',
@@ -267,6 +316,8 @@ export async function GET(request: Request) {
           uptimePct: 99.92,
           bonded: false,
           status: 'online' as const,
+          verified: true,
+          verificationMethod: 'protocol_core',
           tags: ['Weather', 'Satellite', 'Radar', 'IoT'],
           samplePayload: {
             station: 'BaseMesh Radar #14',
@@ -285,32 +336,60 @@ export async function GET(request: Request) {
             (m.status === 'online' ||
               (!m.targetDomain.includes('e2e-') && !m.targetDomain.includes('127.0.0.1'))),
         )
-        .map((m) => ({
-          id: m.id,
-          name: m.name || `${m.targetDomain.replace(/^https?:\/\//, '').split('/')[0]} M2M API`,
-          provider: m.wallet ? `${m.wallet.slice(0, 6)}...${m.wallet.slice(-4)}` : 'Gateway Node',
-          targetDomain: m.targetDomain,
-          wallet: m.wallet,
-          price: m.price,
-          network: m.network || 'base',
-          version: m.version,
-          category: m.category || 'DEVTOOLS',
-          description:
-            m.description ||
-            `HTTP 402 Paywalled M2M microservice registered via A-Pay Gateway (${m.version}).`,
-          latencyMs: 42,
-          uptimePct: 99.9,
-          bonded: true,
-          isBonded: true,
-          status: m.status,
-          tags: ['M2M', 'Live Merchant', 'EIP-712'],
-          samplePayload: {
-            endpoint: m.targetDomain,
-            status: 'verified_claim',
-            payer_credit_remaining: '$0.4990',
-            data: 'Decrypted authenticated response content.',
-          },
-        }));
+        .map((m) => {
+          const cleanDomain = canonicalizeDomain(m.targetDomain);
+          const cleanHost = cleanDomain
+            .replace(/^https?:\/\//, '')
+            .split('/')[0]
+            .split(':')[0]
+            .toLowerCase();
+
+          const isFounderWallet = Boolean(
+            m.wallet && m.wallet.toLowerCase() === CONTRACTS.founder.toLowerCase(),
+          );
+          const isKnownVerified = [
+            'guruxpert.com',
+            'talentedchin.s3-tastewp.com',
+            'gstneural.com',
+            'ai-publisher-earnings.io',
+          ].some((h) => cleanHost === h || cleanHost.endsWith(`.${h}`));
+
+          const isVerified = Boolean(m.verified || isFounderWallet || isKnownVerified);
+          const method =
+            m.verificationMethod ||
+            (isVerified ? (isFounderWallet ? 'protocol_core' : 'well_known') : 'community');
+
+          return {
+            id: m.id,
+            name: m.name || `${cleanHost} M2M API`,
+            provider: m.wallet ? `${m.wallet.slice(0, 6)}...${m.wallet.slice(-4)}` : 'Gateway Node',
+            targetDomain: m.targetDomain,
+            wallet: m.wallet,
+            price: m.price,
+            network: m.network || 'base',
+            version: m.version,
+            category: m.category || 'DEVTOOLS',
+            description:
+              m.description ||
+              `HTTP 402 Paywalled M2M microservice registered via A-Pay Gateway (${m.version}).`,
+            latencyMs: 42,
+            uptimePct: 99.9,
+            bonded: isVerified,
+            isBonded: isVerified,
+            status: m.status,
+            verified: isVerified,
+            verificationMethod: method,
+            tags: isVerified
+              ? ['Verified Merchant', 'EIP-712', 'M2M']
+              : ['Community Node', 'Unverified', 'M2M'],
+            samplePayload: {
+              endpoint: m.targetDomain,
+              status: isVerified ? 'verified_claim' : 'unverified_node',
+              payer_credit_remaining: '$0.4990',
+              data: 'Decrypted authenticated response content.',
+            },
+          };
+        });
 
       // Combined unique by canonical targetDomain (excluding tombstoned / deleted services)
       // Live registered merchant services from developers take precedence at top of directory
