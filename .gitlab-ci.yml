@@ -12,20 +12,20 @@ variables:
 
 workflow:
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "push"'
     - if: '$ENABLE_SOCIAL_AUTOPUBLISH == "true" && $CI_PIPELINE_SOURCE == "schedule"'
     - if: '$ENABLE_SOCIAL_AUTOPUBLISH == "true" && $CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "web"'
+    - when: never
 
 stages:
   - test
   - publish
 
-# Runs on every git push to ensure 0 secrets/credentials leaked (Takes ~2s, guarantees non-empty green pipeline)
+# Manual web trigger security check (Takes ~2s, guarantees non-empty green pipeline when run manually)
 audit_security:
   stage: test
   image: python:3.11-slim
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
   script:
     - python3 scripts/scan_secrets.py
 

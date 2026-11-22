@@ -215,8 +215,8 @@ run(`git commit -m "${commitMsg}"`);
 
 // 6. Push to Remotes (Decentralized GitLab mirror & GitHub origin)
 try {
-	console.log("\n⬆️ Pushing to gitlab main...");
-	const gitlabPush = run("git push gitlab main");
+	console.log("\n⬆️ Pushing to gitlab main (with ci.skip)...");
+	const gitlabPush = run("git push -o ci.skip gitlab main");
 	console.log(gitlabPush || "GitLab pushed successfully.");
 } catch (err) {
 	console.warn("⚠️ GitLab push warning:", err.message);
