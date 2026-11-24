@@ -103,10 +103,14 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
       { url: '/favicon.ico', sizes: '32x32' },
-      { url: '/brand/apay-mark-transparent.svg', type: 'image/svg+xml' },
+      { url: '/brand/apay-icon-dark-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/brand/apay-icon-dark-128.png', sizes: '128x128', type: 'image/png' },
+      { url: '/brand/apay-icon-dark-512.png', sizes: '512x512', type: 'image/png' },
     ],
     apple: '/brand/apay-icon-dark-128.png',
+    shortcut: '/favicon.ico',
   },
   other: {
     'canonical-domain': 'https://apayprotocol.org',
@@ -130,6 +134,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/brand/apay-icon-dark-32.png" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" sizes="128x128" href="/brand/apay-icon-dark-128.png" />
         <script src="https://telegram.org/js/telegram-web-app.js" async />
         <link rel="help" type="text/markdown" href="/llms.txt" title="LLM Context & Guidelines" />
         {gaId && (

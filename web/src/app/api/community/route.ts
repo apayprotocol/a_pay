@@ -61,6 +61,7 @@ export async function GET(request: Request) {
     const category = searchParams.get('category') || undefined;
     const search = searchParams.get('search') || undefined;
     const network = searchParams.get('network') || undefined;
+    const includeTest = searchParams.get('includeTest') === 'true';
     const limitParam = searchParams.get('limit');
     const limit = limitParam ? Number.parseInt(limitParam, 10) : undefined;
 
@@ -69,6 +70,7 @@ export async function GET(request: Request) {
       search,
       network,
       limit,
+      includeTest,
     });
 
     return NextResponse.json(
@@ -119,7 +121,22 @@ export async function POST(request: Request) {
       });
     }
 
-    // 2. Action: Reply to thread
+    // 2. Action: Delete thread
+    if (action === 'delete_thread') {
+      const threadId = body.threadId;
+      const userAddress =
+        body.userAddress || body.wallet || body.authorWallet || body.requesterWallet;
+      if (!threadId) {
+        return NextResponse.json(
+          { error: 'Missing required threadId for delete action.' },
+          { status: 400 },
+        );
+      }
+      const success = await communityStore.deleteThread(threadId, userAddress);
+      return NextResponse.json({ success });
+    }
+
+    // 3. Action: Reply to thread
     if (action === 'add_reply') {
       const threadId = body.threadId;
       const content = body.content;

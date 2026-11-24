@@ -265,6 +265,23 @@ Human visitors and Googlebot pass through 100% free with zero impact on SEO!`,
 // In-memory registry for fast reads
 const localMemoryThreads = new Map<string, CommunityThread>();
 
+function isAutomatedTestThread(thread: CommunityThread): boolean {
+  if (!thread) return false;
+  if (thread.authorWallet?.toLowerCase().startsWith('0x000000000000000000000000000000000000e2e')) {
+    return true;
+  }
+  const title = (thread.title || '').toLowerCase();
+  if (
+    title.includes('e2e automated test') ||
+    title.includes('developer bug report with 3 screenshot') ||
+    title.includes('zz-pentest') ||
+    title.includes('test exceeding screenshot limit')
+  ) {
+    return true;
+  }
+  return false;
+}
+
 function hydrateLocalDisk(): void {
   try {
     if (localMemoryThreads.size === 0) {
@@ -273,7 +290,9 @@ function hydrateLocalDisk(): void {
         const data = JSON.parse(raw);
         if (Array.isArray(data) && data.length > 0) {
           for (const thread of data) {
-            localMemoryThreads.set(thread.id, thread);
+            if (!isAutomatedTestThread(thread)) {
+              localMemoryThreads.set(thread.id, thread);
+            }
           }
         }
       }
@@ -296,7 +315,7 @@ function hydrateLocalDisk(): void {
 
 function persistLocalDisk(): void {
   try {
-    const list = Array.from(localMemoryThreads.values());
+    const list = Array.from(localMemoryThreads.values()).filter((t) => !isAutomatedTestThread(t));
     fs.writeFileSync(COMMUNITY_CACHE_FILE, JSON.stringify(list, null, 2), 'utf8');
   } catch {
     // Non-blocking disk write
@@ -332,7 +351,9 @@ class DistributedCommunityStore {
             const parsed = typeof body.result === 'string' ? JSON.parse(body.result) : body.result;
             if (Array.isArray(parsed) && parsed.length > 0) {
               for (const t of parsed) {
-                localMemoryThreads.set(t.id, t);
+                if (!isAutomatedTestThread(t)) {
+                  localMemoryThreads.set(t.id, t);
+                }
               }
             }
           }
@@ -348,12 +369,16 @@ class DistributedCommunityStore {
     search?: string;
     network?: string;
     limit?: number;
+    includeTest?: boolean;
   }): Promise<CommunityThread[]> {
     hydrateLocalDisk();
     await this.loadFromRedis();
     let threads: CommunityThread[] = [];
 
-    threads = Array.from(localMemoryThreads.values());
+    // Filter out automated test artifacts from public forum display unless explicitly included
+    threads = Array.from(localMemoryThreads.values()).filter(
+      (t) => options?.includeTest || !isAutomatedTestThread(t),
+    );
 
     // Category filter
     if (options?.category && options.category !== 'All') {
@@ -521,10 +546,34 @@ class DistributedCommunityStore {
     return { liked, newCount: thread.likes };
   }
 
+  public async deleteThread(threadId: string, requesterWallet?: string): Promise<boolean> {
+    hydrateLocalDisk();
+    await this.loadFromRedis();
+    const thread = localMemoryThreads.get(threadId);
+    if (!thread) return false;
+
+    // Check authorization: author or founder or test wallet
+    if (requesterWallet) {
+      const isAuth =
+        requesterWallet.toLowerCase() === thread.authorWallet.toLowerCase() ||
+        requesterWallet.toLowerCase() === FOUNDER_WALLET ||
+        thread.authorWallet.startsWith('0x000000000000000000000000000000000000e2e');
+      if (!isAuth) return false;
+    }
+
+    localMemoryThreads.delete(threadId);
+    persistLocalDisk();
+    await this.syncToRedis();
+    return true;
+  }
+
   private async syncToRedis(): Promise<void> {
     if (this.redisUrl && this.redisToken) {
       try {
-        const payload = JSON.stringify(Array.from(localMemoryThreads.values()));
+        const cleanList = Array.from(localMemoryThreads.values()).filter(
+          (t) => !isAutomatedTestThread(t),
+        );
+        const payload = JSON.stringify(cleanList);
         await fetch(this.redisUrl, {
           method: 'POST',
           headers: {

@@ -615,6 +615,7 @@ async function main() {
 	console.log("\n💬 9. Community Support & Dev Forum API (/api/community):");
 
 	let testThreadId = null;
+	let screenshotThreadId = null;
 
 	await runStep("GET /api/community returns seeded threads array", async () => {
 		const res = await fetch(`${BASE_URL}/api/community`);
@@ -738,6 +739,7 @@ async function main() {
 			const data = await res.json();
 			assert(data.success === true, "Expected success === true");
 			assert(data.thread && data.thread.id, "Expected returned thread with id");
+			screenshotThreadId = data.thread.id;
 			assert(Array.isArray(data.thread.images), "Expected images array");
 			assert(
 				data.thread.images.length === 3,
@@ -794,6 +796,48 @@ async function main() {
 			assert(
 				data.error && data.error.includes("not a valid format"),
 				"Expected invalid format error message",
+			);
+		},
+	);
+
+	await runStep(
+		"POST /api/community deletes automated E2E test threads to keep forum clean",
+		async () => {
+			assert(testThreadId, "testThreadId must be defined");
+			assert(screenshotThreadId, "screenshotThreadId must be defined");
+
+			// Delete thread 1
+			const res1 = await fetch(`${BASE_URL}/api/community`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					action: "delete_thread",
+					threadId: testThreadId,
+					requesterWallet: "0x000000000000000000000000000000000000e2e1",
+				}),
+			});
+			assert(res1.status === 200, `Expected status 200, got ${res1.status}`);
+			const data1 = await res1.json();
+			assert(
+				data1.success === true,
+				"Expected success === true for thread 1 delete",
+			);
+
+			// Delete thread 2
+			const res2 = await fetch(`${BASE_URL}/api/community`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					action: "delete_thread",
+					threadId: screenshotThreadId,
+					requesterWallet: "0x000000000000000000000000000000000000e2e3",
+				}),
+			});
+			assert(res2.status === 200, `Expected status 200, got ${res2.status}`);
+			const data2 = await res2.json();
+			assert(
+				data2.success === true,
+				"Expected success === true for thread 2 delete",
 			);
 		},
 	);
