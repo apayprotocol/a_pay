@@ -135,12 +135,12 @@ export default function TelegramGatewayPage() {
               </a>
 
               <a
-                href="https://t.me/APay_Protocol_Bot"
+                href="https://web.telegram.org/k/#@APay_Protocol_Bot"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium text-xs flex items-center justify-center gap-1.5 transition-colors"
               >
-                <span>Web Browser Link (t.me)</span>
+                <span>Telegram Web (web.telegram.org)</span>
                 <ExternalLink className="w-3 h-3 text-slate-400" />
               </a>
             </div>
@@ -192,12 +192,12 @@ export default function TelegramGatewayPage() {
               </a>
 
               <a
-                href="https://t.me/apay_protocol"
+                href="https://web.telegram.org/k/#@apay_protocol"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium text-xs flex items-center justify-center gap-1.5 transition-colors"
               >
-                <span>Web Browser Link (t.me)</span>
+                <span>Telegram Web (web.telegram.org)</span>
                 <ExternalLink className="w-3 h-3 text-slate-400" />
               </a>
             </div>

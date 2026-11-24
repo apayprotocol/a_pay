@@ -20,7 +20,8 @@ const AlienBotCanvas = dynamic(
 
 const BOT_USERNAME = 'APay_Protocol_Bot';
 const TELEGRAM_APP_URL = `tg://resolve?domain=${BOT_USERNAME}`;
-const TELEGRAM_WEB_URL = `https://t.me/${BOT_USERNAME}`;
+// Use official web.telegram.org instead of t.me to eliminate Indian telecom / ISP DNS blocking & SSL errors
+const TELEGRAM_WEB_URL = `https://web.telegram.org/k/#@${BOT_USERNAME}`;
 
 export function AlienBotFlyer() {
   const pathname = usePathname();

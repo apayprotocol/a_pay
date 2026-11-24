@@ -460,9 +460,7 @@ export function LandingPage({
                 </a>
 
                 <a
-                  href="https://t.me/apay_protocol"
-                  target="_blank"
-                  rel="noreferrer"
+                  href="/telegram"
                   className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-950/40 border border-transparent hover:border-sky-500/20 transition-all shrink-0 whitespace-nowrap"
                 >
                   <span>💬 Telegram</span>
@@ -692,9 +690,7 @@ export function LandingPage({
                   </a>
 
                   <a
-                    href="https://t.me/apay_protocol"
-                    target="_blank"
-                    rel="noreferrer"
+                    href="/telegram"
                     className="flex items-center justify-between p-2.5 rounded-xl bg-sky-500/10 border border-sky-500/25 text-sky-600 dark:text-sky-400 col-span-2 hover:bg-sky-500/15 transition-all"
                   >
                     <div className="flex items-center gap-2">
@@ -1807,9 +1803,7 @@ export function LandingPage({
               </a>
               <span className="hidden sm:inline text-slate-400">•</span>
               <a
-                href="https://t.me/apay_protocol"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/telegram"
                 className="text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1 font-medium transition-colors"
                 title="Official Telegram Channel: @apay_protocol"
               >

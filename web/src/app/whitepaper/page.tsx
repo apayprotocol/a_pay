@@ -87,9 +87,7 @@ export default function WhitepaperPage() {
             <ExternalLink className="w-3 h-3 text-slate-400" />
           </a>
           <a
-            href="https://t.me/apay_protocol"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/telegram"
             className="text-xs font-medium text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/40 border border-sky-500/20 px-3 py-1.5 rounded-lg hover:bg-sky-500/15 transition-all flex items-center gap-1.5"
           >
             <span>Telegram</span>
