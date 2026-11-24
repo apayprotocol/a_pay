@@ -39,6 +39,7 @@ export function FloatingQrScanner({
   const contracts = getNetworkContracts(activeNetwork);
 
   const [isMounted, setIsMounted] = useState(false);
+  const [hasCustomPosition, setHasCustomPosition] = useState(false);
   const [position, setPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -71,23 +72,13 @@ export function FloatingQrScanner({
   const hasMovedRef = useRef(false);
   const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Safe Mount & Calculate Centered Position on First Load / Refresh
+  // Safe Mount & Reset Custom Position on Resize/Rotate to Guarantee Automatic Bottom Centering
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    // Default starting position: Bottom Center — easy to spot, docked right above bottom edge
-    const flyerSize = 64;
-    const centerX = Math.max(16, Math.round((window.innerWidth - flyerSize) / 2));
-    const bottomY = Math.max(68, Math.round(window.innerHeight - 98));
-
-    setPosition({ x: centerX, y: bottomY });
     setIsMounted(true);
 
     const handleResize = () => {
-      setPosition((prev) => ({
-        x: Math.max(12, Math.min(window.innerWidth - 76, prev.x)),
-        y: Math.max(68, Math.min(window.innerHeight - 90, prev.y)),
-      }));
+      // Automatically snap back to CSS bottom center on screen resize or orientation change
+      setHasCustomPosition(false);
     };
 
     window.addEventListener('resize', handleResize);
@@ -144,7 +135,14 @@ export function FloatingQrScanner({
     isPointerDownRef.current = true;
     hasMovedRef.current = false;
     pointerStartRef.current = { x: e.clientX, y: e.clientY };
-    initialPosRef.current = { ...position };
+
+    // If starting from default CSS bottom center, capture current rect coordinates
+    if (!hasCustomPosition && dragRef.current) {
+      const rect = dragRef.current.getBoundingClientRect();
+      initialPosRef.current = { x: rect.left, y: rect.top };
+    } else {
+      initialPosRef.current = { ...position };
+    }
 
     // Capture pointer
     try {
@@ -162,9 +160,10 @@ export function FloatingQrScanner({
     const deltaY = e.clientY - pointerStartRef.current.y;
     const dist = Math.hypot(deltaX, deltaY);
 
-    if (dist > 5) {
+    if (dist > 6) {
       hasMovedRef.current = true;
       setIsDragging(true);
+      setHasCustomPosition(true);
       resetIdleTimer();
 
       const newX = Math.max(12, Math.min(window.innerWidth - 76, initialPosRef.current.x + deltaX));
@@ -292,6 +291,7 @@ export function FloatingQrScanner({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
+        onDoubleClick={() => setHasCustomPosition(false)}
         onMouseEnter={() => {
           setIsHovered(true);
           resetIdleTimer();
@@ -300,15 +300,26 @@ export function FloatingQrScanner({
           setIsHovered(false);
           resetIdleTimer();
         }}
-        style={{
-          transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
-        }}
-        className={`fixed top-0 left-0 z-[45] touch-none select-none flex flex-col items-center cursor-grab active:cursor-grabbing transition-opacity duration-500 ${
-          isDragging ? 'scale-110' : ''
-        } ${isIdle && !isHovered && !isDragging ? 'opacity-35 hover:opacity-100' : 'opacity-100'}`}
+        style={
+          hasCustomPosition
+            ? {
+                transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
+                top: 0,
+                left: 0,
+              }
+            : {
+                bottom: 'max(1.25rem, env(safe-area-inset-bottom, 1.25rem))',
+              }
+        }
+        className={`fixed z-[45] touch-none select-none flex flex-col items-center cursor-grab active:cursor-grabbing transition-opacity duration-500 ${
+          hasCustomPosition ? '' : 'bottom-5 sm:bottom-6 left-1/2 -translate-x-1/2'
+        } ${isDragging ? 'scale-110' : ''} ${
+          isIdle && !isHovered && !isDragging ? 'opacity-35 hover:opacity-100' : 'opacity-100'
+        }`}
         role="button"
         tabIndex={0}
         aria-label="Drag to move QR scanner flyer, click to scan payment QR"
+        title="Scan Payment QR Code (Double-click to reset center)"
       >
         {/* Sleek Floating Hover Speech / Label Badge */}
         <div
