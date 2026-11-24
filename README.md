@@ -8,6 +8,7 @@
 [![TypeScript / Node](https://img.shields.io/badge/TypeScript-5.0+-3178C6.svg?logo=typescript&logoColor=white)](https://www.npmjs.com/package/create-apay-app)
 [![MCP Protocol 2025](https://img.shields.io/badge/MCP-Standard_2025--12--11-6B46C1.svg)](https://modelcontextprotocol.io)
 [![Smithery Verified](https://smithery.ai/badge/apayprotocol/apay)](https://smithery.ai/servers/apayprotocol/apay)
+[![apayprotocol/a_pay MCP server](https://glama.ai/mcp/servers/apayprotocol/a_pay/badges/score.svg)](https://glama.ai/mcp/servers/apayprotocol/a_pay)
 [![WordPress.org Plugin](https://img.shields.io/badge/WordPress-Official_Plugin-21759B.svg?logo=wordpress&logoColor=white)](https://wordpress.org/plugins/apay-web3-ai-paywall/)
 [![GitLab Mirror](https://img.shields.io/badge/GitLab-Public_Mirror-FC6D26.svg?logo=gitlab&logoColor=white)](https://gitlab.com/apayprotocol/a_pay)
 [![Discord Community](https://img.shields.io/badge/Discord-Join_Community-5865F2.svg?logo=discord&logoColor=white)](https://discord.gg/cW2WRSfb35)
