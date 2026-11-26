@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [ -z "${WP_ORG_PASSWORD:-}" ] && [ -f ".env" ]; then
+    WP_ORG_PASSWORD=$(grep -m1 '^WP_ORG_PASSWORD=' .env | cut -d'=' -f2- | sed -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'$//" || true)
+fi
+
 VERSION=$(grep -m1 '^Stable tag:' packages/wordpress-plugin/readme.txt | awk -F':' '{print $2}' | tr -d '[:space:]')
 if [ -z "$VERSION" ]; then
     echo "❌ Could not detect Stable tag from packages/wordpress-plugin/readme.txt"
@@ -44,7 +48,7 @@ echo "=================================================="
 
 if [ -n "${WP_ORG_PASSWORD:-}" ]; then
     echo "🔑 Committing with WP_ORG_PASSWORD..."
-    nix-shell -p subversion --run "cd $SVN_DIR && svn ci -m '${COMMIT_MSG}' --username apay98 --password \"$WP_ORG_PASSWORD\" --non-interactive"
+    nix-shell -p subversion --run "cd $SVN_DIR && svn ci -m '${COMMIT_MSG}' --username apay98 --password \"$WP_ORG_PASSWORD\" --no-auth-cache --non-interactive"
     echo "🎉 WordPress plugin v${VERSION} successfully published to WordPress.org!"
 else
     echo "🔑 Attempting commit with cached SVN credentials (~/.subversion/auth)..."
