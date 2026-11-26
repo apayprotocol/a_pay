@@ -3,7 +3,7 @@
  * Plugin Name:       A-Pay Web3 AI Paywall
  * Plugin URI:        https://apayprotocol.org
  * Description:       Universal HTTP 402 Web3 AI paywall for WordPress & WooCommerce on Base L2. Monetize GPTBot, ClaudeBot, and AI crawlers with micropayments while humans browse 100% free.
- * Version:           0.1.9
+ * Version:           0.1.10
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            A-Pay Protocol Core Team
@@ -18,11 +18,13 @@ if (!defined('ABSPATH')) {
 }
 
 class APayWordPressPaywall {
-    const VERSION = '0.1.9';
+    const VERSION = '0.1.10';
     const ROUTER_MAINNET = '0x71434344beEF9C44fF3BC95572bEB7bFB8847ec6';
     const ROUTER_SEPOLIA = '0x71434344beEF9C44fF3BC95572bEB7bFB8847ec6';
     const ESCROW_MAINNET = '0xd08c8a337e5339d1c083e06d74a9265956ceea16';
     const ESCROW_SEPOLIA = '0x3E35a9E802627a3D9A86D6554e72b1C446E34aAF';
+
+    private $shortcode_script_added = false;
 
     public function __construct() {
         add_action('init', array($this, 'intercept_request'), 1);
@@ -61,27 +63,28 @@ class APayWordPressPaywall {
         // Auto-responder for Domain Verification & Escrow Claim
         if (isset($_SERVER['REQUEST_URI'])) {
             $req_uri = sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI']));
-            $req_path = parse_url($req_uri, PHP_URL_PATH);
+            $req_path = wp_parse_url($req_uri, PHP_URL_PATH);
             if ($req_path === '/.well-known/apay-claim.txt' || $req_path === '/.apay/status') {
                 header('Content-Type: text/plain; charset=utf-8');
                 header('X-APay-Protocol: A-Pay/' . self::VERSION);
                 header('Access-Control-Allow-Origin: *');
+                header('Access-Control-Allow-Headers: Authorization, Content-Type, X-APay-Test');
 
-                $host_val = isset($_SERVER['HTTP_HOST']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_HOST'])) : (parse_url(get_site_url(), PHP_URL_HOST) ?: 'website');
-                $wallet_val = sanitize_text_field(get_option('apay_receiver_wallet', ''));
-                $token_val = sanitize_text_field(get_option('apay_verification_token', ''));
+                $host_val = isset($_SERVER['HTTP_HOST']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_HOST'])) : (wp_parse_url(get_site_url(), PHP_URL_HOST) ?: 'website');
+                $wallet_val = sanitize_text_field((string) get_option('apay_receiver_wallet', ''));
+                $token_val = sanitize_text_field((string) get_option('apay_verification_token', ''));
 
-                echo "domain=" . esc_attr($host_val) . "\n";
-                echo "protocol=A-Pay/" . esc_attr(self::VERSION) . "\n";
+                echo 'domain=' . esc_html($host_val) . "\n";
+                echo 'protocol=A-Pay/' . esc_html(self::VERSION) . "\n";
                 echo "status=active\n";
                 if (!empty($wallet_val)) {
-                    echo "apay-claim=" . esc_attr($wallet_val) . "\n";
-                    echo "wallet=" . esc_attr($wallet_val) . "\n";
+                    echo 'apay-claim=' . esc_html($wallet_val) . "\n";
+                    echo 'wallet=' . esc_html($wallet_val) . "\n";
                 } else {
                     echo "escrow=active\n";
                 }
                 if (!empty($token_val)) {
-                    echo "apay-verification=" . esc_attr($token_val) . "\n";
+                    echo 'apay-verification=' . esc_html($token_val) . "\n";
                 }
                 exit;
             }
@@ -98,7 +101,8 @@ class APayWordPressPaywall {
         }
 
         $human_free = get_option('apay_human_free_access', '1') === '1';
-        $is_explicit_test = isset($_SERVER['HTTP_X_APAY_TEST']) && sanitize_text_field(wp_unslash($_SERVER['HTTP_X_APAY_TEST'])) === '1';
+        $test_header = isset($_SERVER['HTTP_X_APAY_TEST']) ? strtolower(sanitize_text_field(wp_unslash($_SERVER['HTTP_X_APAY_TEST']))) : '';
+        $is_explicit_test = in_array($test_header, array('1', 'true', 'probe'), true);
 
         // Catalog of automated AI scrapers and LLM training bots
         $ai_bots = array(
@@ -109,7 +113,7 @@ class APayWordPressPaywall {
         );
 
         $custom_bots = get_option('apay_custom_bots', '');
-        if (!empty($custom_bots)) {
+        if (is_string($custom_bots) && !empty($custom_bots)) {
             $extra = array_map('trim', explode(',', strtolower($custom_bots)));
             $ai_bots = array_unique(array_merge($ai_bots, $extra));
         }
@@ -127,22 +131,22 @@ class APayWordPressPaywall {
             return;
         }
 
-        $network = sanitize_text_field(get_option('apay_network', 'base'));
+        $network = sanitize_text_field((string) get_option('apay_network', 'base'));
         $chain_id = $network === 'base' ? 8453 : 84532;
         $router = $network === 'base' ? self::ROUTER_MAINNET : self::ROUTER_SEPOLIA;
         $escrow_vault = $network === 'base' ? self::ESCROW_MAINNET : self::ESCROW_SEPOLIA;
 
-        $wallet_saved = sanitize_text_field(get_option('apay_receiver_wallet', ''));
+        $wallet_saved = sanitize_text_field((string) get_option('apay_receiver_wallet', ''));
         $is_domain_escrow = empty($wallet_saved);
         $receiver = $is_domain_escrow ? $escrow_vault : $wallet_saved;
 
-        $site_domain = isset($_SERVER['HTTP_HOST']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_HOST'])) : (parse_url(get_site_url(), PHP_URL_HOST) ?: 'website');
-        $currency = strtoupper(sanitize_text_field(get_option('apay_currency', 'DUAL')));
+        $site_domain = isset($_SERVER['HTTP_HOST']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_HOST'])) : (wp_parse_url(get_site_url(), PHP_URL_HOST) ?: 'website');
+        $currency = strtoupper(sanitize_text_field((string) get_option('apay_currency', 'DUAL')));
         $price_usdc = floatval(get_option('apay_price_usdc', '0.001'));
         $price_apay = floatval(get_option('apay_price_apay', '4.0'));
 
-        $amount_base_usdc = (string)round($price_usdc * 1000000);
-        $amount_base_apay = (string)round($price_apay * 1e18);
+        $amount_base_usdc = sprintf('%.0f', round($price_usdc * 1000000));
+        $amount_base_apay = sprintf('%.0f', round($price_apay * 1e18));
         $amount_base_units = $currency === 'APAY' ? $amount_base_apay : $amount_base_usdc;
 
         // Retrieve and sanitize Authorization header
@@ -176,6 +180,8 @@ class APayWordPressPaywall {
             header('X-APay-Router: ' . $router);
             header('X-APay-Network: ' . $network);
             header('Access-Control-Allow-Origin: *');
+            header('Access-Control-Allow-Headers: Authorization, Content-Type, X-APay-Test');
+            header('Access-Control-Expose-Headers: X-APay-Protocol, X-APay-Receiver, X-APay-Amount, X-APay-Nonce, X-APay-Currency, X-APay-Router, X-APay-Network, X-APay-Amount-USDC, X-APay-Amount-APAY, X-APay-Domain-Escrow, X-APay-Claim-Portal');
 
             if ($is_domain_escrow) {
                 header('X-APay-Domain-Escrow: ' . $site_domain);
@@ -256,7 +262,7 @@ class APayWordPressPaywall {
                 );
             }
 
-            echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+            echo wp_json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON API response payload.
             exit;
         }
 
@@ -270,7 +276,7 @@ class APayWordPressPaywall {
                 header('HTTP/1.1 400 Bad Request');
             }
             header('Content-Type: application/json; charset=utf-8');
-            echo json_encode(array('error' => 'Malformed APay Authorization header'));
+            echo wp_json_encode(array('error' => 'Malformed APay Authorization header')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON API error payload.
             exit;
         }
 
@@ -287,7 +293,7 @@ class APayWordPressPaywall {
                 header('HTTP/1.1 400 Bad Request');
             }
             header('Content-Type: application/json; charset=utf-8');
-            echo json_encode(array('error' => 'Invalid payer EVM address format'));
+            echo wp_json_encode(array('error' => 'Invalid payer EVM address format')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON API error payload.
             exit;
         }
 
@@ -299,7 +305,7 @@ class APayWordPressPaywall {
                 header('HTTP/1.1 400 Bad Request');
             }
             header('Content-Type: application/json; charset=utf-8');
-            echo json_encode(array('error' => 'Invalid signature format'));
+            echo wp_json_encode(array('error' => 'Invalid signature format')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON API error payload.
             exit;
         }
 
@@ -311,26 +317,26 @@ class APayWordPressPaywall {
                 header('HTTP/1.1 400 Bad Request');
             }
             header('Content-Type: application/json; charset=utf-8');
-            echo json_encode(array('error' => 'Invalid challenge nonce format'));
+            echo wp_json_encode(array('error' => 'Invalid challenge nonce format')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON API error payload.
             exit;
         }
 
         $issued_key = 'apay_issued_nonce_' . $nonce;
         $is_valid_challenge = get_transient($issued_key);
-        if (!$is_valid_challenge && !$is_explicit_test) {
+        if (!$is_valid_challenge) {
             if (function_exists('status_header')) {
                 status_header(401);
             } else {
                 header('HTTP/1.1 401 Unauthorized');
             }
             header('Content-Type: application/json; charset=utf-8');
-            echo json_encode(array('error' => 'Invalid or expired payment challenge nonce'));
+            echo wp_json_encode(array('error' => 'Invalid or expired payment challenge nonce')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON API error payload.
             exit;
         }
         delete_transient($issued_key);
 
         // Anti-replay defense: ensure nonce has not already been consumed
-        $consumed_key = 'apay_consumed_' . substr(md5($nonce), 0, 20);
+        $consumed_key = 'apay_consumed_' . substr(hash('sha256', $nonce), 0, 20);
         if (get_transient($consumed_key)) {
             if (function_exists('status_header')) {
                 status_header(401);
@@ -338,7 +344,7 @@ class APayWordPressPaywall {
                 header('HTTP/1.1 401 Unauthorized');
             }
             header('Content-Type: application/json; charset=utf-8');
-            echo json_encode(array('error' => 'Payment nonce already consumed (replay attack detected)'));
+            echo wp_json_encode(array('error' => 'Payment nonce already consumed (replay attack detected)')); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON API error payload.
             exit;
         }
         set_transient($consumed_key, $payer, 86400);
@@ -351,7 +357,7 @@ class APayWordPressPaywall {
                 header('HTTP/1.1 402 Payment Required');
             }
             header('Content-Type: application/json; charset=utf-8');
-            echo json_encode(array(
+            echo wp_json_encode(array( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON API error payload.
                 'error' => 'Insufficient payment amount authorized',
                 'required' => $amount_base_units,
                 'provided' => $amount
@@ -387,8 +393,8 @@ class APayWordPressPaywall {
      * Non-blocking sync with A-Pay Protocol Global Registry upon saving wallet
      */
     public function sync_registry_on_save($old_value = '', $value = '') {
-        $wallet = sanitize_text_field($value);
-        $network = sanitize_text_field(get_option('apay_network', 'base'));
+        $wallet = sanitize_text_field((string) $value);
+        $network = sanitize_text_field((string) get_option('apay_network', 'base'));
         $escrow_vault = $network === 'base' ? self::ESCROW_MAINNET : self::ESCROW_SEPOLIA;
 
         $is_escrow = false;
@@ -401,7 +407,7 @@ class APayWordPressPaywall {
         $site_name = get_bloginfo('name') ?: 'WordPress AI Paywall';
         $price_usdc = floatval(get_option('apay_price_usdc', '0.001'));
         $price_apay = floatval(get_option('apay_price_apay', '4.0'));
-        $currency = strtoupper(sanitize_text_field(get_option('apay_currency', 'DUAL')));
+        $currency = strtoupper(sanitize_text_field((string) get_option('apay_currency', 'DUAL')));
         $price_label = $currency === 'DUAL' ? ($price_apay . ' $APAY / $' . $price_usdc . ' USDC') : ($price_usdc . ' USDC');
         $desc = $is_escrow
             ? 'WordPress Web3 AI Paywall protected via Zero-Config Auto Domain Escrow on Base L2.'
@@ -412,7 +418,7 @@ class APayWordPressPaywall {
                 'timeout' => 4,
                 'blocking' => false,
                 'headers' => array('Content-Type' => 'application/json'),
-                'body' => json_encode(array(
+                'body' => wp_json_encode(array(
                     'wallet' => $wallet,
                     'targetDomain' => $site_url,
                     'price' => $price_label,
@@ -484,85 +490,100 @@ class APayWordPressPaywall {
             'amount'      => '10.0',
             'amount_apay' => '',
             'title'       => 'Product Purchase',
-            'currency'    => get_option('apay_currency', 'DUAL'),
-            'network'     => get_option('apay_network', 'base'),
+            'currency'    => (string) get_option('apay_currency', 'DUAL'),
+            'network'     => (string) get_option('apay_network', 'base'),
             'button_text' => '',
             'theme'       => 'auto',
         ), $atts, 'apay_button');
 
-        $network = $atts['network'] === 'base' ? 'base' : 'base-sepolia';
+        $network = strtolower(sanitize_text_field((string) $atts['network'])) === 'base' ? 'base' : 'base-sepolia';
         $escrow_vault = $network === 'base' ? self::ESCROW_MAINNET : self::ESCROW_SEPOLIA;
-        $wallet_saved = sanitize_text_field(get_option('apay_receiver_wallet', ''));
+        $wallet_saved = sanitize_text_field((string) get_option('apay_receiver_wallet', ''));
         $receiver = !empty($wallet_saved) ? $wallet_saved : $escrow_vault;
 
         $amount = floatval($atts['amount']);
         if ($amount <= 0) {
             $amount = 10.0;
         }
-        $currency = strtoupper(sanitize_text_field($atts['currency']));
+        $currency = strtoupper(sanitize_text_field((string) $atts['currency']));
         if (!in_array($currency, array('DUAL', 'USDC', 'APAY', 'ETH'), true)) {
             $currency = 'DUAL';
         }
 
         if (!empty($atts['button_text'])) {
-            $btn_text = sanitize_text_field($atts['button_text']);
+            $btn_text = sanitize_text_field((string) $atts['button_text']);
         } elseif ($currency === 'APAY') {
+            /* translators: %s: Payment amount in APAY tokens */
             $btn_text = sprintf(__('⚡ Pay with A-Pay (%s $APAY)', 'apay-web3-ai-paywall'), $amount);
         } elseif ($currency === 'ETH') {
+            /* translators: %s: Payment amount in ETH */
             $btn_text = sprintf(__('⚡ Pay with A-Pay (%s ETH)', 'apay-web3-ai-paywall'), $amount);
         } else {
+            /* translators: %s: Payment amount in USDC */
             $btn_text = sprintf(__('⚡ Pay with A-Pay ($%s USDC)', 'apay-web3-ai-paywall'), number_format($amount, 2));
         }
 
-        $title_escaped = esc_js(sanitize_text_field($atts['title']));
-        $receiver_escaped = esc_js($receiver);
-        $network_escaped = esc_js($network);
-        $currency_escaped = esc_js($currency);
-        $theme_escaped = esc_js(sanitize_text_field($atts['theme']));
-        $amount_escaped = esc_js($amount);
-        $amount_apay_escaped = !empty($atts['amount_apay']) ? esc_js(floatval($atts['amount_apay'])) : 'null';
+        $title_clean = sanitize_text_field((string) $atts['title']);
+        $theme_clean = sanitize_text_field((string) $atts['theme']);
+        $amount_apay_clean = (!empty($atts['amount_apay']) && floatval($atts['amount_apay']) > 0) ? (string) floatval($atts['amount_apay']) : '';
 
         wp_enqueue_script('apay-checkout-widget', 'https://apayprotocol.org/v1.js', array(), self::VERSION, true);
+
+        if (!$this->shortcode_script_added) {
+            $this->shortcode_script_added = true;
+            $shortcode_js = <<<'JS'
+(function() {
+    if (window.__apayShortcodeInit) return;
+    window.__apayShortcodeInit = true;
+    document.addEventListener('click', function(e) {
+        var btn = e.target && e.target.closest ? e.target.closest('.apay-checkout-btn[data-apay-amount]') : null;
+        if (!btn) return;
+        e.preventDefault();
+        if (typeof window.APay === 'undefined' || !window.APay.checkout) return;
+        var opts = {
+            amount: parseFloat(btn.getAttribute('data-apay-amount') || '0'),
+            currency: btn.getAttribute('data-apay-currency') || 'DUAL',
+            title: btn.getAttribute('data-apay-title') || 'Product Purchase',
+            receiver: btn.getAttribute('data-apay-receiver') || '',
+            network: btn.getAttribute('data-apay-network') || 'base',
+            theme: btn.getAttribute('data-apay-theme') || 'auto',
+            onSuccess: function(receipt) {
+                var tx = receipt && receipt.txHash ? receipt.txHash : '';
+                window.alert('Payment Confirmed on Base L2! Tx Hash: ' + tx);
+            }
+        };
+        var apayAmt = btn.getAttribute('data-apay-amount-apay');
+        if (apayAmt) {
+            opts.amountApay = parseFloat(apayAmt);
+        }
+        window.APay.checkout(opts);
+    });
+})();
+JS;
+            wp_add_inline_script('apay-checkout-widget', $shortcode_js);
+        }
 
         $button_id = 'apay_btn_' . wp_rand(1000, 99999);
 
         ob_start();
         ?>
         <div class="apay-button-wrapper" style="display:inline-block; margin: 8px 0;">
-            <button type="button" id="<?php echo esc_attr($button_id); ?>" class="button apay-checkout-btn" style="background: linear-gradient(135deg, #0052FF 0%, #2563EB 100%); color: #ffffff; border: none; border-radius: 8px; padding: 12px 22px; font-size: 15px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(0, 82, 255, 0.3); transition: all 0.2s ease; min-height: 44px;">
+            <button
+                type="button"
+                id="<?php echo esc_attr($button_id); ?>"
+                class="button apay-checkout-btn"
+                data-apay-amount="<?php echo esc_attr((string) $amount); ?>"
+                data-apay-currency="<?php echo esc_attr($currency); ?>"
+                data-apay-title="<?php echo esc_attr($title_clean); ?>"
+                data-apay-receiver="<?php echo esc_attr($receiver); ?>"
+                data-apay-network="<?php echo esc_attr($network); ?>"
+                data-apay-theme="<?php echo esc_attr($theme_clean); ?>"
+                <?php if ($amount_apay_clean !== '') : ?>
+                    data-apay-amount-apay="<?php echo esc_attr($amount_apay_clean); ?>"
+                <?php endif; ?>
+                style="background: linear-gradient(135deg, #0052FF 0%, #2563EB 100%); color: #ffffff; border: none; border-radius: 8px; padding: 12px 22px; font-size: 15px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(0, 82, 255, 0.3); transition: all 0.2s ease; min-height: 44px;">
                 <?php echo esc_html($btn_text); ?>
             </button>
-            <script type="text/javascript">
-            document.getElementById('<?php echo esc_js($button_id); ?>').addEventListener('click', function(e) {
-                e.preventDefault();
-                function triggerApay() {
-                    var opts = {
-                        amount: <?php echo $amount_escaped; ?>,
-                        currency: '<?php echo $currency_escaped; ?>',
-                        title: '<?php echo $title_escaped; ?>',
-                        receiver: '<?php echo $receiver_escaped; ?>',
-                        network: '<?php echo $network_escaped; ?>',
-                        theme: '<?php echo $theme_escaped; ?>',
-                        onSuccess: function(receipt) {
-                            alert('Payment Confirmed on Base L2! Tx Hash: ' + (receipt.txHash || ''));
-                        }
-                    };
-                    if (<?php echo $amount_apay_escaped; ?> !== null) {
-                        opts.amountApay = <?php echo $amount_apay_escaped; ?>;
-                    }
-                    window.APay.checkout(opts);
-                }
-
-                if (typeof window.APay !== 'undefined' && window.APay.checkout) {
-                    triggerApay();
-                } else {
-                    var s = document.createElement('script');
-                    s.src = 'https://apayprotocol.org/v1.js';
-                    s.onload = function() { triggerApay(); };
-                    document.head.appendChild(s);
-                }
-            });
-            </script>
         </div>
         <?php
         return ob_get_clean();
@@ -572,25 +593,36 @@ class APayWordPressPaywall {
      * AJAX Endpoint: Finalize WooCommerce order upon on-chain Web3 settlement
      */
     public function ajax_wc_complete_order() {
-        if (!isset($_POST['order_id']) || !isset($_POST['order_key'])) {
+        check_ajax_referer('apay_wc_complete_order');
+
+        if (!isset($_POST['order_id'], $_POST['order_key'], $_POST['tx_hash'])) {
             wp_send_json_error(array('message' => 'Missing parameters'));
         }
 
-        $order_id = intval($_POST['order_id']);
+        $order_id = absint(wp_unslash($_POST['order_id']));
         $order_key = sanitize_text_field(wp_unslash($_POST['order_key']));
-        $tx_hash = isset($_POST['tx_hash']) ? sanitize_text_field(wp_unslash($_POST['tx_hash'])) : '';
+        $tx_hash = sanitize_text_field(wp_unslash($_POST['tx_hash']));
         $payer = isset($_POST['payer']) ? sanitize_text_field(wp_unslash($_POST['payer'])) : '';
+
+        if (!$order_id || empty($order_key) || !preg_match('/^0x[a-fA-F0-9]{64}$/', $tx_hash)) {
+            wp_send_json_error(array('message' => 'Invalid payment parameters'));
+        }
+
+        if (!empty($payer) && !preg_match('/^0x[a-fA-F0-9]{40}$/', $payer)) {
+            wp_send_json_error(array('message' => 'Invalid payer EVM address format'));
+        }
 
         if (!function_exists('wc_get_order')) {
             wp_send_json_error(array('message' => 'WooCommerce not active'));
         }
 
         $order = wc_get_order($order_id);
-        if (!$order || $order->get_order_key() !== $order_key) {
+        if (!$order || !hash_equals((string) $order->get_order_key(), $order_key)) {
             wp_send_json_error(array('message' => 'Invalid order credentials'));
         }
 
         if ($order->has_status(array('pending', 'failed', 'on-hold'))) {
+            /* translators: 1: Settlement transaction hash, 2: Customer payer wallet address */
             $note = sprintf(
                 __('A-Pay Web3 Payment Confirmed on Base L2! Tx Hash: %1$s | Payer: %2$s', 'apay-web3-ai-paywall'),
                 $tx_hash,
@@ -599,10 +631,10 @@ class APayWordPressPaywall {
             $order->add_order_note($note);
             $order->update_meta_data('_apay_tx_hash', $tx_hash);
             $order->update_meta_data('_apay_payer', $payer);
-            $order->update_meta_data('_apay_network', sanitize_text_field(get_option('apay_network', 'base')));
+            $order->update_meta_data('_apay_network', sanitize_text_field((string) get_option('apay_network', 'base')));
             $order->payment_complete($tx_hash);
             $order->save();
-            if (function_exists('WC') && WC()->cart) {
+            if (function_exists('WC') && WC() && WC()->cart) {
                 WC()->cart->empty_cart();
             }
         }
@@ -765,128 +797,164 @@ class APayWordPressPaywall {
                     <div id="<?php echo esc_attr($msg_id); ?>" style="margin-top: 8px; font-size: 11px; line-height: 1.4; display: none;"></div>
                 </div>
 
-                <script type="text/javascript">
-                (function() {
-                    var btn = document.getElementById('<?php echo esc_js($btn_id); ?>');
-                    if (!btn) return;
+                <?php
+                $refund_config = array(
+                    'btnId'        => $btn_id,
+                    'msgId'        => $msg_id,
+                    'amountId'     => $amount_id,
+                    'currId'       => $curr_id,
+                    'chainIdHex'   => $chain_id_hex,
+                    'networkName'  => $network_name,
+                    'usdcContract' => $usdc_contract,
+                    'payer'        => $payer,
+                    'orderId'      => (string) $order->get_id(),
+                    'ajaxNonce'    => $ajax_nonce,
+                    'ajaxUrl'      => admin_url('admin-ajax.php'),
+                    'explorerUrl'  => $explorer_url,
+                );
+                $refund_js = <<<'JS'
+(function() {
+    var cfg = window.apayAdminRefundConfig;
+    if (!cfg) return;
+    var btn = document.getElementById(cfg.btnId);
+    if (!btn) return;
 
-                    btn.addEventListener('click', async function(e) {
-                        e.preventDefault();
-                        var msg = document.getElementById('<?php echo esc_js($msg_id); ?>');
-                        msg.style.display = 'block';
-                        msg.style.color = '#0284c7';
-                        msg.innerHTML = 'Connecting to Web3 wallet...';
+    btn.addEventListener('click', async function(e) {
+        e.preventDefault();
+        var msg = document.getElementById(cfg.msgId);
+        if (!msg) return;
+        msg.style.display = 'block';
+        msg.style.color = '#0284c7';
+        msg.textContent = 'Connecting to Web3 wallet...';
 
-                        if (typeof window.ethereum === 'undefined') {
-                            msg.style.color = '#dc2626';
-                            msg.innerHTML = '❌ No Web3 wallet extension found. Please open in MetaMask, Coinbase Wallet, or Brave browser.';
-                            return;
-                        }
+        if (typeof window.ethereum === 'undefined') {
+            msg.style.color = '#dc2626';
+            msg.textContent = '❌ No Web3 wallet extension found. Please open in MetaMask, Coinbase Wallet, or Brave browser.';
+            return;
+        }
 
-                        try {
-                            btn.disabled = true;
-                            var accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                            if (!accounts || !accounts[0]) {
-                                throw new Error('No wallet account authorized.');
-                            }
+        try {
+            btn.disabled = true;
+            var accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            if (!accounts || !accounts[0]) {
+                throw new Error('No wallet account authorized.');
+            }
 
-                            var targetChainHex = '<?php echo esc_js($chain_id_hex); ?>';
-                            var currentChain = await window.ethereum.request({ method: 'eth_chainId' });
-                            if (currentChain !== targetChainHex) {
-                                msg.innerHTML = 'Switching wallet to <?php echo esc_js($network_name); ?>...';
-                                try {
-                                    await window.ethereum.request({
-                                        method: 'wallet_switchEthereumChain',
-                                        params: [{ chainId: targetChainHex }]
-                                    });
-                                } catch (switchErr) {
-                                    throw new Error('Please switch your wallet to <?php echo esc_js($network_name); ?>.');
-                                }
-                            }
-
-                            var amtInput = document.getElementById('<?php echo esc_js($amount_id); ?>');
-                            var amountVal = parseFloat(amtInput ? amtInput.value : '0');
-                            if (isNaN(amountVal) || amountVal <= 0) {
-                                throw new Error('Please enter a valid refund amount.');
-                            }
-
-                            var currSelect = document.getElementById('<?php echo esc_js($curr_id); ?>');
-                            var curr = currSelect ? currSelect.value : 'USDC';
-                            var payerAddr = '<?php echo esc_js($payer); ?>';
-                            var txHash = '';
-
-                            msg.innerHTML = 'Please confirm refund in your wallet...';
-
-                            if (curr === 'USDC') {
-                                var cleanTo = payerAddr.toLowerCase().replace(/^0x/, '').padStart(64, '0');
-                                var units = BigInt(Math.round(amountVal * 1e6));
-                                var cleanAmount = units.toString(16).padStart(64, '0');
-                                var calldata = '0xa9059cbb' + cleanTo + cleanAmount;
-
-                                txHash = await window.ethereum.request({
-                                    method: 'eth_sendTransaction',
-                                    params: [{
-                                        from: accounts[0],
-                                        to: '<?php echo esc_js($usdc_contract); ?>',
-                                        data: calldata,
-                                        value: '0x0'
-                                    }]
-                                });
-                            } else {
-                                var ethRate = 2500;
-                                try {
-                                    var pRes = await fetch('https://api.coinbase.com/v2/prices/ETH-USD/spot', { signal: AbortSignal.timeout(3000) });
-                                    if (pRes.ok) {
-                                        var pJson = await pRes.json();
-                                        var pVal = parseFloat(pJson?.data?.amount);
-                                        if (!isNaN(pVal) && pVal > 0) ethRate = pVal;
-                                    }
-                                } catch(e) {}
-                                var ethAmount = amountVal / ethRate;
-                                var weiAmount = BigInt(Math.round(ethAmount * 1e18));
-                                var weiHex = '0x' + weiAmount.toString(16);
-
-                                txHash = await window.ethereum.request({
-                                    method: 'eth_sendTransaction',
-                                    params: [{
-                                        from: accounts[0],
-                                        to: payerAddr,
-                                        value: weiHex
-                                    }]
-                                });
-                            }
-
-                            msg.innerHTML = '✓ Refund broadcast on Base L2! Recording in WooCommerce...';
-
-                            var fd = new FormData();
-                            fd.append('action', 'apay_wc_process_admin_refund');
-                            fd.append('order_id', '<?php echo esc_js($order->get_id()); ?>');
-                            fd.append('amount', amountVal);
-                            fd.append('tx_hash', txHash);
-                            fd.append('currency', curr);
-                            fd.append('payer', payerAddr);
-                            fd.append('_ajax_nonce', '<?php echo esc_js($ajax_nonce); ?>');
-
-                            var res = await fetch('<?php echo esc_url(admin_url('admin-ajax.php')); ?>', {
-                                method: 'POST',
-                                body: fd
-                            });
-                            var data = await res.json();
-                            if (data.success) {
-                                msg.style.color = '#15803d';
-                                msg.innerHTML = '✓ Refund of $' + amountVal.toFixed(2) + ' confirmed on Base L2!<br/><a href="<?php echo esc_js($explorer_url); ?>/tx/' + txHash + '" target="_blank" rel="noopener noreferrer" style="color: #0284c7; text-decoration: underline; font-weight: bold;">View on BaseScan ↗</a>';
-                                setTimeout(function() { window.location.reload(); }, 2000);
-                            } else {
-                                throw new Error(data.data?.message || 'Failed to record refund in WooCommerce');
-                            }
-                        } catch (err) {
-                            btn.disabled = false;
-                            msg.style.color = '#dc2626';
-                            msg.innerHTML = '❌ ' + (err.message || 'Refund rejected or failed');
-                        }
+            var currentChain = await window.ethereum.request({ method: 'eth_chainId' });
+            if (currentChain !== cfg.chainIdHex) {
+                msg.textContent = 'Switching wallet to ' + cfg.networkName + '...';
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: cfg.chainIdHex }]
                     });
-                })();
-                </script>
+                } catch (switchErr) {
+                    throw new Error('Please switch your wallet to ' + cfg.networkName + '.');
+                }
+            }
+
+            var amtInput = document.getElementById(cfg.amountId);
+            var amountVal = parseFloat(amtInput ? amtInput.value : '0');
+            if (isNaN(amountVal) || amountVal <= 0) {
+                throw new Error('Please enter a valid refund amount.');
+            }
+
+            var currSelect = document.getElementById(cfg.currId);
+            var curr = currSelect ? currSelect.value : 'USDC';
+            var payerAddr = cfg.payer;
+            var txHash = '';
+
+            msg.textContent = 'Please confirm refund in your wallet...';
+
+            if (curr === 'USDC') {
+                var cleanTo = payerAddr.toLowerCase().replace(/^0x/, '').padStart(64, '0');
+                var units = BigInt(Math.round(amountVal * 1e6));
+                var cleanAmount = units.toString(16).padStart(64, '0');
+                var calldata = '0xa9059cbb' + cleanTo + cleanAmount;
+
+                txHash = await window.ethereum.request({
+                    method: 'eth_sendTransaction',
+                    params: [{
+                        from: accounts[0],
+                        to: cfg.usdcContract,
+                        data: calldata,
+                        value: '0x0'
+                    }]
+                });
+            } else {
+                var ethRate = 2500;
+                try {
+                    var pRes = await fetch('https://api.coinbase.com/v2/prices/ETH-USD/spot', { signal: AbortSignal.timeout(3000) });
+                    if (pRes.ok) {
+                        var pJson = await pRes.json();
+                        var pVal = parseFloat(pJson && pJson.data ? pJson.data.amount : '0');
+                        if (!isNaN(pVal) && pVal > 0) ethRate = pVal;
+                    }
+                } catch (priceErr) {}
+                var ethAmount = amountVal / ethRate;
+                var weiAmount = BigInt(Math.round(ethAmount * 1e18));
+                var weiHex = '0x' + weiAmount.toString(16);
+
+                txHash = await window.ethereum.request({
+                    method: 'eth_sendTransaction',
+                    params: [{
+                        from: accounts[0],
+                        to: payerAddr,
+                        value: weiHex
+                    }]
+                });
+            }
+
+            if (!/^0x[a-fA-F0-9]{64}$/.test(String(txHash || ''))) {
+                throw new Error('Invalid transaction hash returned by wallet.');
+            }
+
+            msg.textContent = '✓ Refund broadcast on Base L2! Recording in WooCommerce...';
+
+            var fd = new FormData();
+            fd.append('action', 'apay_wc_process_admin_refund');
+            fd.append('order_id', cfg.orderId);
+            fd.append('amount', amountVal);
+            fd.append('tx_hash', txHash);
+            fd.append('currency', curr);
+            fd.append('payer', payerAddr);
+            fd.append('_ajax_nonce', cfg.ajaxNonce);
+
+            var res = await fetch(cfg.ajaxUrl, {
+                method: 'POST',
+                body: fd
+            });
+            var data = await res.json();
+            if (data && data.success) {
+                msg.style.color = '#15803d';
+                msg.textContent = '✓ Refund of $' + amountVal.toFixed(2) + ' confirmed on Base L2! ';
+                var link = document.createElement('a');
+                link.href = cfg.explorerUrl + '/tx/' + txHash;
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                link.style.color = '#0284c7';
+                link.style.textDecoration = 'underline';
+                link.style.fontWeight = 'bold';
+                link.textContent = 'View on BaseScan ↗';
+                msg.appendChild(document.createElement('br'));
+                msg.appendChild(link);
+                setTimeout(function() { window.location.reload(); }, 2000);
+            } else {
+                var errMsg = (data && data.data && data.data.message) ? data.data.message : 'Failed to record refund in WooCommerce';
+                throw new Error(errMsg);
+            }
+        } catch (err) {
+            btn.disabled = false;
+            msg.style.color = '#dc2626';
+            msg.textContent = '❌ ' + (err && err.message ? err.message : 'Refund rejected or failed');
+        }
+    });
+})();
+JS;
+                wp_register_script('apay-admin-refund', '', array(), self::VERSION, true);
+                wp_enqueue_script('apay-admin-refund');
+                wp_add_inline_script('apay-admin-refund', 'window.apayAdminRefundConfig = ' . wp_json_encode($refund_config) . ";\n" . $refund_js);
+                ?>
             <?php else : ?>
                 <p style="font-size: 11px; color: #94a3b8; margin: 6px 0 0 0;">
                     <?php echo esc_html__('No customer payer wallet recorded for this order.', 'apay-web3-ai-paywall'); ?>
@@ -906,8 +974,12 @@ class APayWordPressPaywall {
             wp_send_json_error(array('message' => 'Unauthorized permissions'));
         }
 
-        $order_id = isset($_POST['order_id']) ? intval($_POST['order_id']) : 0;
-        $amount = isset($_POST['amount']) ? floatval($_POST['amount']) : 0;
+        if (!function_exists('wc_get_order') || !function_exists('wc_create_refund')) {
+            wp_send_json_error(array('message' => 'WooCommerce not active'));
+        }
+
+        $order_id = isset($_POST['order_id']) ? absint(wp_unslash($_POST['order_id'])) : 0;
+        $amount = isset($_POST['amount']) ? floatval(wp_unslash($_POST['amount'])) : 0;
         $tx_hash = isset($_POST['tx_hash']) ? sanitize_text_field(wp_unslash($_POST['tx_hash'])) : '';
         $currency = isset($_POST['currency']) ? sanitize_text_field(wp_unslash($_POST['currency'])) : 'USDC';
         $payer = isset($_POST['payer']) ? sanitize_text_field(wp_unslash($_POST['payer'])) : '';
@@ -932,6 +1004,7 @@ class APayWordPressPaywall {
         $network = $order->get_meta('_apay_network') ?: get_option('apay_network', 'base');
         $explorer_url = $network === 'base' ? 'https://basescan.org' : 'https://sepolia.basescan.org';
 
+        /* translators: 1: Formatted refund amount, 2: Refund currency, 3: Customer wallet address, 4: Refund transaction hash */
         $refund_note = sprintf(
             __('⚡ A-Pay Web3 Refund Confirmed on Base L2! Amount: $%1$s (%2$s) | Payer: %3$s | Tx Hash: %4$s', 'apay-web3-ai-paywall'),
             number_format($amount, 2),
@@ -940,9 +1013,12 @@ class APayWordPressPaywall {
             $tx_hash
         );
 
+        /* translators: %s: Refund transaction hash */
+        $refund_reason = sprintf(__('A-Pay Web3 On-Chain Refund (%s)', 'apay-web3-ai-paywall'), $tx_hash);
+
         $refund = wc_create_refund(array(
             'amount'         => $amount,
-            'reason'         => sprintf(__('A-Pay Web3 On-Chain Refund (%s)', 'apay-web3-ai-paywall'), $tx_hash),
+            'reason'         => $refund_reason,
             'order_id'       => $order_id,
             'refund_payment' => false,
             'restock_items'  => true,
@@ -964,8 +1040,11 @@ class APayWordPressPaywall {
     }
 
     public function render_admin_page() {
-        $saved_wallet = sanitize_text_field(get_option('apay_receiver_wallet', ''));
-        $site_domain = isset($_SERVER['HTTP_HOST']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_HOST'])) : (parse_url(get_site_url(), PHP_URL_HOST) ?: 'your-website.com');
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+        $saved_wallet = sanitize_text_field((string) get_option('apay_receiver_wallet', ''));
+        $site_domain = isset($_SERVER['HTTP_HOST']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_HOST'])) : (wp_parse_url(get_site_url(), PHP_URL_HOST) ?: 'your-website.com');
         $is_escrow = empty($saved_wallet);
         ?>
         <div class="wrap">
@@ -975,23 +1054,34 @@ class APayWordPressPaywall {
             <?php if ($is_escrow) : ?>
                 <div class="notice notice-info inline" style="margin: 18px 0; padding: 14px 18px; border-left: 4px solid #0052FF; background: #0b1528; color: #E2E8F0; border-radius: 6px;">
                     <h3 style="color: #60A5FA; margin: 0 0 8px 0; font-size: 15px; display: flex; align-items: center; gap: 8px;">
-                        <span>⚡ Zero-Config Auto Domain Escrow Active</span>
-                        <span style="font-size: 11px; background: #1E3A8A; color: #BFDBFE; padding: 2px 8px; border-radius: 9999px; font-weight: 600;">Autonomous Protection</span>
+                        <span><?php echo esc_html__('⚡ Zero-Config Auto Domain Escrow Active', 'apay-web3-ai-paywall'); ?></span>
+                        <span style="font-size: 11px; background: #1E3A8A; color: #BFDBFE; padding: 2px 8px; border-radius: 9999px; font-weight: 600;"><?php echo esc_html__('Autonomous Protection', 'apay-web3-ai-paywall'); ?></span>
                     </h3>
                     <p style="margin: 0 0 10px 0; font-size: 13px; line-height: 1.6; color: #CBD5E1;">
-                        Your website is <strong>fully protected right now</strong>! Because no payout wallet is configured yet, all AI crawler micropayments are automatically collected and secured under your domain (<strong><?php echo esc_html($site_domain); ?></strong>) in the A-Pay On-Chain Escrow Vault.
+                        <?php
+                        echo wp_kses(
+                            sprintf(
+                                /* translators: %s: Current website hostname wrapped in strong tags */
+                                esc_html__('Your website is fully protected right now! Because no payout wallet is configured yet, all AI crawler micropayments are automatically collected and secured under your domain (%s) in the A-Pay On-Chain Escrow Vault.', 'apay-web3-ai-paywall'),
+                                '<strong>' . esc_html($site_domain) . '</strong>'
+                            ),
+                            array('strong' => array())
+                        );
+                        ?>
                     </p>
                     <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                        <a href="https://apayprotocol.org/?tab=paywalls&claim_domain=<?php echo rawurlencode($site_domain); ?>" target="_blank" rel="noopener noreferrer" class="button button-primary" style="background: #0052FF; border-color: #0052FF;">
-                            🔗 View & Claim Accumulated Earnings on apayprotocol.org
+                        <a href="<?php echo esc_url('https://apayprotocol.org/?tab=paywalls&claim_domain=' . rawurlencode($site_domain)); ?>" target="_blank" rel="noopener noreferrer" class="button button-primary" style="background: #0052FF; border-color: #0052FF;">
+                            <?php echo esc_html__('🔗 View & Claim Accumulated Earnings on apayprotocol.org', 'apay-web3-ai-paywall'); ?>
                         </a>
-                        <span style="font-size: 12px; color: #94A3B8;">Or paste your Base L2 EVM wallet address below to receive micropayments directly.</span>
+                        <span style="font-size: 12px; color: #94A3B8;"><?php echo esc_html__('Or paste your Base L2 EVM wallet address below to receive micropayments directly.', 'apay-web3-ai-paywall'); ?></span>
                     </div>
                 </div>
             <?php else : ?>
                 <div class="notice notice-success inline" style="margin: 15px 0; padding: 12px 16px; border-left: 4px solid #10B981; background: #062817; color: #E2E8F0; border-radius: 6px;">
                     <p style="margin: 0; font-size: 13px; color: #A7F3D0;">
-                        <strong style="color: #34D399;">✓ Direct Settlement Active:</strong> AI micropayments will be deposited directly to your verified payout wallet (<code><?php echo esc_html($saved_wallet); ?></code>).
+                        <strong style="color: #34D399;"><?php echo esc_html__('✓ Direct Settlement Active:', 'apay-web3-ai-paywall'); ?></strong>
+                        <?php echo esc_html__('AI micropayments will be deposited directly to your verified payout wallet', 'apay-web3-ai-paywall'); ?>
+                        (<code><?php echo esc_html($saved_wallet); ?></code>).
                     </p>
                 </div>
             <?php endif; ?>
@@ -1172,8 +1262,8 @@ class APayWordPressPaywall {
      * Lifecycle: Synchronize idle status upon plugin deactivation
      */
     public static function on_deactivate() {
-        $network = sanitize_text_field(get_option('apay_network', 'base'));
-        $wallet = sanitize_text_field(get_option('apay_receiver_wallet', ''));
+        $network = sanitize_text_field((string) get_option('apay_network', 'base'));
+        $wallet = sanitize_text_field((string) get_option('apay_receiver_wallet', ''));
         if (empty($wallet)) {
             $wallet = $network === 'base' ? self::ESCROW_MAINNET : self::ESCROW_SEPOLIA;
         }
@@ -1184,7 +1274,7 @@ class APayWordPressPaywall {
                 'timeout' => 4,
                 'blocking' => false,
                 'headers' => array('Content-Type' => 'application/json'),
-                'body' => json_encode(array(
+                'body' => wp_json_encode(array(
                     'wallet' => $wallet,
                     'targetDomain' => $site_url,
                     'status' => 'idle',
@@ -1268,94 +1358,119 @@ function apay_init_woocommerce_gateway() {
             }
 
             $total = floatval($order->get_total());
-            $network = sanitize_text_field(get_option('apay_network', 'base'));
+            $network = sanitize_text_field((string) get_option('apay_network', 'base')) === 'base' ? 'base' : 'base-sepolia';
             $escrow_vault = $network === 'base' ? APayWordPressPaywall::ESCROW_MAINNET : APayWordPressPaywall::ESCROW_SEPOLIA;
-            $wallet_saved = sanitize_text_field(get_option('apay_receiver_wallet', ''));
+            $wallet_saved = sanitize_text_field((string) get_option('apay_receiver_wallet', ''));
             $receiver = !empty($wallet_saved) ? $wallet_saved : $escrow_vault;
-            $currency = sanitize_text_field(get_option('apay_currency', 'DUAL'));
-            $order_key = $order->get_order_key();
-            $order_number = $order->get_order_number();
+            $currency = strtoupper(sanitize_text_field((string) get_option('apay_currency', 'DUAL')));
+            $order_key = (string) $order->get_order_key();
+            $order_number = (string) $order->get_order_number();
             $ajax_url = admin_url('admin-ajax.php');
+            $ajax_nonce = wp_create_nonce('apay_wc_complete_order');
 
             wp_enqueue_script('apay-checkout-widget', 'https://apayprotocol.org/v1.js', array(), APayWordPressPaywall::VERSION, true);
 
+            $receipt_config = array(
+                'amount'         => $total,
+                'orderId'        => 'WC-' . $order_number,
+                'orderNumericId' => (string) $order_id,
+                'orderKey'       => $order_key,
+                'currency'       => $currency,
+                'title'          => 'Order #' . $order_number,
+                'receiver'       => $receiver,
+                'network'        => $network,
+                'ajaxUrl'        => $ajax_url,
+                'ajaxNonce'      => $ajax_nonce,
+            );
+            $receipt_js = <<<'JS'
+(function() {
+    var cfg = window.apayWcReceiptConfig;
+    if (!cfg) return;
+
+    function doCheckout(retries) {
+        if (typeof window.APay === 'undefined' || !window.APay.checkout) {
+            if ((retries || 0) < 10) {
+                setTimeout(function() { doCheckout((retries || 0) + 1); }, 300);
+            }
+            return;
+        }
+        window.APay.checkout({
+            amount: cfg.amount,
+            orderId: cfg.orderId,
+            currency: cfg.currency,
+            title: cfg.title,
+            receiver: cfg.receiver,
+            network: cfg.network,
+            onSuccess: function(receipt) {
+                var statusDiv = document.getElementById('apay-wc-status');
+                if (statusDiv) {
+                    statusDiv.style.display = 'block';
+                    statusDiv.textContent = '✓ Payment Confirmed on Base L2! Finalizing order...';
+                }
+
+                var formData = new FormData();
+                formData.append('action', 'apay_wc_complete_order');
+                formData.append('_ajax_nonce', cfg.ajaxNonce);
+                formData.append('order_id', cfg.orderNumericId);
+                formData.append('order_key', cfg.orderKey);
+                formData.append('tx_hash', (receipt && receipt.txHash) ? receipt.txHash : '');
+                formData.append('payer', (receipt && receipt.payer) ? receipt.payer : '');
+
+                fetch(cfg.ajaxUrl, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (data && data.success && data.data && data.data.redirect_url) {
+                        window.location.href = data.data.redirect_url;
+                    } else {
+                        window.location.reload();
+                    }
+                })
+                .catch(function() {
+                    window.location.reload();
+                });
+            }
+        });
+    }
+
+    var btn = document.getElementById('apay-launch-checkout-btn');
+    if (btn) {
+        btn.addEventListener('click', doCheckout);
+        setTimeout(doCheckout, 600);
+    }
+})();
+JS;
+            wp_add_inline_script('apay-checkout-widget', 'window.apayWcReceiptConfig = ' . wp_json_encode($receipt_config) . ";\n" . $receipt_js);
             ?>
             <div id="apay-wc-checkout-box" style="background: #0b1528; color: #f8fafc; padding: 26px 20px; border-radius: 14px; border: 1px solid #1e3a8a; margin: 20px 0; text-align: center; box-shadow: 0 8px 30px rgba(0, 82, 255, 0.15);">
                 <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #0052FF, #2563EB); display: inline-flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 12px; box-shadow: 0 4px 16px rgba(37,99,235,0.4);">⚡</div>
                 <h3 style="color: #60a5fa; margin: 0 0 8px 0; font-size: 20px; font-weight: 800;"><?php echo esc_html__('Complete Payment with A-Pay', 'apay-web3-ai-paywall'); ?></h3>
                 <p style="font-size: 15px; color: #cbd5e1; margin: 0 0 16px 0;">
-                    <?php printf(esc_html__('Order #%1$s Total: %2$s', 'apay-web3-ai-paywall'), esc_html($order_number), '<strong style="color: #38bdf8; font-size: 18px;">$' . esc_html(number_format($total, 2)) . ' USDC</strong>'); ?>
+                    <?php
+                    echo wp_kses(
+                        sprintf(
+                            /* translators: 1: WooCommerce order number, 2: Formatted order total HTML */
+                            esc_html__('Order #%1$s Total: %2$s', 'apay-web3-ai-paywall'),
+                            esc_html($order_number),
+                            '<strong style="color: #38bdf8; font-size: 18px;">$' . esc_html(number_format($total, 2)) . ' USDC</strong>'
+                        ),
+                        array('strong' => array('style' => array()))
+                    );
+                    ?>
                 </p>
                 <p style="font-size: 13px; color: #94a3b8; margin: 0 auto 22px auto; max-width: 480px; line-height: 1.5;">
                     <?php echo esc_html__('Settle instantly on Base Layer 2 with 0% chargebacks. Supports 1-click Web3 wallets (MetaMask, Coinbase Wallet) & mobile camera QR scan.', 'apay-web3-ai-paywall'); ?>
                 </p>
                 <button type="button" id="apay-launch-checkout-btn" class="button alt" style="background: linear-gradient(135deg, #0052FF 0%, #2563EB 100%); color: #ffffff; padding: 14px 32px; border-radius: 10px; font-weight: 800; font-size: 16px; cursor: pointer; border: none; box-shadow: 0 6px 20px rgba(0,82,255,0.45); min-height: 48px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
-                    ⚡ <?php printf(esc_html__('Launch A-Pay Web3 Modal ($%s)', 'apay-web3-ai-paywall'), number_format($total, 2)); ?>
+                    ⚡ <?php
+                    /* translators: %s: Formatted order total */
+                    printf(esc_html__('Launch A-Pay Web3 Modal ($%s)', 'apay-web3-ai-paywall'), esc_html(number_format($total, 2)));
+                    ?>
                 </button>
                 <div id="apay-wc-status" style="margin-top: 18px; font-size: 14px; color: #38bdf8; font-weight: 600; display: none;"></div>
             </div>
-
-            <script type="text/javascript">
-            (function() {
-                function launchCheckout() {
-                    if (typeof window.APay === 'undefined' || !window.APay.checkout) {
-                        var s = document.createElement('script');
-                        s.src = 'https://apayprotocol.org/v1.js';
-                        s.onload = function() { doCheckout(); };
-                        document.head.appendChild(s);
-                    } else {
-                        doCheckout();
-                    }
-                }
-
-                function doCheckout() {
-                    window.APay.checkout({
-                        amount: <?php echo esc_js($total); ?>,
-                        orderId: 'WC-<?php echo esc_js($order_number); ?>',
-                        currency: '<?php echo esc_js($currency); ?>',
-                        title: 'Order #<?php echo esc_js($order_number); ?>',
-                        receiver: '<?php echo esc_js($receiver); ?>',
-                        network: '<?php echo esc_js($network); ?>',
-                        onSuccess: function(receipt) {
-                            var statusDiv = document.getElementById('apay-wc-status');
-                            if (statusDiv) {
-                                statusDiv.style.display = 'block';
-                                statusDiv.innerHTML = '✓ Payment Confirmed on Base L2! Finalizing order...';
-                            }
-
-                            var formData = new FormData();
-                            formData.append('action', 'apay_wc_complete_order');
-                            formData.append('order_id', '<?php echo esc_js($order_id); ?>');
-                            formData.append('order_key', '<?php echo esc_js($order_key); ?>');
-                            formData.append('tx_hash', receipt.txHash || '');
-                            formData.append('payer', receipt.payer || '');
-
-                            fetch('<?php echo esc_url($ajax_url); ?>', {
-                                method: 'POST',
-                                body: formData
-                            })
-                            .then(function(res) { return res.json(); })
-                            .then(function(data) {
-                                if (data.success && data.data && data.data.redirect_url) {
-                                    window.location.href = data.data.redirect_url;
-                                } else {
-                                    window.location.reload();
-                                }
-                            })
-                            .catch(function() {
-                                window.location.reload();
-                            });
-                        }
-                    });
-                }
-
-                var btn = document.getElementById('apay-launch-checkout-btn');
-                if (btn) {
-                    btn.addEventListener('click', launchCheckout);
-                    setTimeout(launchCheckout, 600);
-                }
-            })();
-            </script>
             <?php
         }
 
@@ -1373,6 +1488,7 @@ function apay_init_woocommerce_gateway() {
                 return true;
             }
 
+            /* translators: %s: Formatted refund amount */
             $note = sprintf(
                 __('ℹ️ A-Pay Manual Refund Logged: $%s. For automated on-chain cryptocurrency transfer to customer wallet, use the 1-Click A-Pay Web3 Refund box on the order screen.', 'apay-web3-ai-paywall'),
                 number_format(floatval($amount), 2)

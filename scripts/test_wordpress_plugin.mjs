@@ -47,12 +47,12 @@ test("Requires at least, Tested up to, and Stable tag headers", () => {
 		"Missing Requires at least",
 	);
 	assert(
-		readmeContent.includes("Tested up to: 7.1"),
-		"Tested up to must be 7.1",
+		readmeContent.includes("Tested up to: 7.2"),
+		"Tested up to must be 7.2",
 	);
 	assert(
-		readmeContent.includes("Stable tag: 0.1.9"),
-		"Stable tag must be 0.1.9",
+		readmeContent.includes("Stable tag: 0.1.10"),
+		"Stable tag must be 0.1.10",
 	);
 	assert(
 		readmeContent.includes("License: GPLv2 or later"),
@@ -347,6 +347,76 @@ test("WooCommerce 1-Click Web3 Refund Engine and HPOS compatibility registered",
 	assert(
 		phpContent.includes("declare_compatibility"),
 		"Missing HPOS custom_order_tables compatibility declaration",
+	);
+});
+
+console.log(
+	"\n🛡️ Section 4b: WordPress 7.2, PHP 8.6 & Plugin Check (PCP) Compliance",
+);
+
+test("Plugin version matches Stable tag 0.1.10", () => {
+	assert(
+		phpContent.includes("Version:           0.1.10"),
+		"Plugin header Version must be 0.1.10",
+	);
+	assert(
+		phpContent.includes("const VERSION = '0.1.10';"),
+		"Class VERSION constant must be 0.1.10",
+	);
+});
+
+test("Zero raw <script> tags (strict wp_enqueue_script + wp_add_inline_script compliance)", () => {
+	assert(
+		!/<script\b/i.test(phpContent),
+		"Found raw <script> tag in PHP output (use wp_enqueue_script + wp_add_inline_script)",
+	);
+	assert(
+		!phpContent.includes("document.createElement('script')"),
+		"Found dynamic script tag loader (use wp_enqueue_script)",
+	);
+	assert(
+		phpContent.includes("wp_add_inline_script("),
+		"Must attach inline scripts via wp_add_inline_script()",
+	);
+});
+
+test("Uses WordPress core JSON & URL helpers (wp_json_encode / wp_parse_url)", () => {
+	assert(
+		!/\bjson_encode\s*\(/.test(phpContent),
+		"Found raw json_encode() instead of wp_json_encode()",
+	);
+	assert(
+		!/(?<!wp_)parse_url\s*\(/.test(phpContent),
+		"Found raw parse_url() instead of wp_parse_url()",
+	);
+});
+
+test("WooCommerce order completion AJAX enforces nonce & EVM format validation", () => {
+	assert(
+		phpContent.includes("check_ajax_referer('apay_wc_complete_order')"),
+		"Missing check_ajax_referer in ajax_wc_complete_order",
+	);
+	assert(
+		phpContent.includes("hash_equals("),
+		"Should verify order key using hash_equals()",
+	);
+});
+
+test("X-APay-Test header never bypasses server-issued voucher nonce verification", () => {
+	assert(
+		!phpContent.includes("!$is_valid_challenge && !$is_explicit_test"),
+		"Security regression: X-APay-Test must never bypass nonce check",
+	);
+	assert(
+		phpContent.includes("if (!$is_valid_challenge)"),
+		"Missing strict server-issued nonce enforcement",
+	);
+});
+
+test("Zero PHP 8.6 deprecated function usage (mb_ereg, mb_split, is_integer, is_double, is_long)", () => {
+	assert(
+		!/\b(mb_ereg|mb_split|is_integer|is_double|is_long)\s*\(/.test(phpContent),
+		"Found PHP 8.6 deprecated function call",
 	);
 });
 

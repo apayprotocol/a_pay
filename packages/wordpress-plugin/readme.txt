@@ -2,9 +2,9 @@
 Contributors: apay98
 Tags: ai-paywall, web3, monetization, gptbot, micropayments
 Requires at least: 5.8
-Tested up to: 7.1
+Tested up to: 7.2
 Requires PHP: 7.4
-Stable tag: 0.1.9
+Stable tag: 0.1.10
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -67,6 +67,13 @@ Yes! You can use the [apay_button amount="10" title="My eBook"] shortcode on any
 2. Live HTTP 402 Machine-to-Machine payment challenge received by automated AI bots.
 
 == Changelog ==
+
+= 0.1.10 =
+* Confirmed compatibility with WordPress 7.2 and PHP 8.6.
+* Replaced all inline script tags with WordPress-native wp_enqueue_script and wp_add_inline_script loading for full Plugin Check compliance.
+* Hardened WooCommerce AJAX order completion with WordPress nonce verification and strict EVM tx hash / address validation.
+* Fixed X-APay-Test probe behavior so probe headers never bypass server-issued payment voucher nonce verification.
+* Switched JSON and URL helpers to wp_json_encode and wp_parse_url, fixed 18-decimal $APAY integer formatting, and added CORS expose headers.
 
 = 0.1.9 =
 * Added Zero-Config Auto Domain Escrow for unconfigured domains (auto-claimable via /.well-known/apay-claim.txt).
